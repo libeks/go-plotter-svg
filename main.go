@@ -24,23 +24,40 @@ func genSVG(fname string) {
 	canvas := svg.New(f)
 	sizePx := 10000
 	canvas.StartviewUnit(width, height, "in", 0, 0, sizePx, sizePx)
-	padding := 500
+	padding := 1000
 
 	box := Box{padding, padding, sizePx - padding, sizePx - padding}
 
 	container := NewPlotContainer()
 
-	brushColumns := &StripImage{
-		box:       box,
-		nVertical: 1,
-		nLines:    30,
+	horizontalColumns := &StripImage{
+		box:     box,
+		nGroups: 1,
+		nLines:  30,
 		Direction: Direction{
-			StrokeDirection: RightToLeft,
-			OrderDirection:  BottomToTop,
-			Connection:      SameDirection,
+			CardinalDirection: Horizontal,
+			StrokeDirection:   AwayToHome,
+			OrderDirection:    AwayToHome,
+			Connection:        SameDirection,
 		},
 	}
-	container = container.WithLayers(brushColumns.GetLayers()...)
+	// fmt.Sprintf("hor %s\n", horizontalColumns)
+	verticalColumns := &StripImage{
+		box:     box,
+		nGroups: 1,
+		nLines:  30,
+		Direction: Direction{
+			CardinalDirection: Vertical,
+			StrokeDirection:   AwayToHome,
+			OrderDirection:    AwayToHome,
+			Connection:        AlternatingDirection,
+		},
+	}
+	// nLayers := 0
+	layers := horizontalColumns.GetLayers(0)
+	layers = append(layers, verticalColumns.GetLayers(len(layers))...)
+	container = container.WithLayers(layers...)
+	// container = container.WithLayers(verticalColumns.GetLayers()...)
 	container = container.WithLines(box.Lines()...)
 	canvas.Def()
 	defs := container.GetDefs(canvas)

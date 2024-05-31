@@ -39,61 +39,87 @@ func brushStyle(canvas *svg.SVG, i int) string {
 }
 
 type StripImage struct {
-	box       Box
-	nVertical int
-	nLines    int
+	box     Box // bounding box of strokes
+	nGroups int // number of groups/layers to draw, spaced evenly in the box according to Direction parameters
+	nLines  int // number of lines to draw in a group
 	Direction
 }
 
 func (s StripImage) String() string {
-	return fmt.Sprintf("StripImage %s %d verticals,  %d lines", s.box, s.nVertical, s.nLines)
+	return fmt.Sprintf("StripImage %s %d groups,  %d lines", s.box, s.nGroups, s.nLines)
 }
 
-func (s StripImage) GetLayers() []Layer {
-	xWidth := (s.box.xEnd - s.box.x) / s.nVertical
+func (s StripImage) GetLayers(firstLayerID int) []Layer {
+	var barSize int
+	if s.Direction.CardinalDirection == Horizontal {
+		barSize = (s.box.xEnd - s.box.x) / s.nGroups
+	} else {
+		barSize = (s.box.yEnd - s.box.y) / s.nGroups
+	}
 	padding := (s.box.yEnd - s.box.y) / s.nLines
-	layers := make([]Layer, s.nVertical)
-	for i := range s.nVertical {
+	layers := make([]Layer, s.nGroups)
+	for i := range s.nGroups {
+		var box Box
+		if s.Direction.CardinalDirection == Horizontal {
+			box = Box{x: s.box.x + barSize*i, y: s.box.y, xEnd: s.box.x + barSize*(i+1), yEnd: s.box.yEnd}
+		} else {
+			box = Box{x: s.box.x, y: s.box.y + barSize*i, xEnd: s.box.xEnd, yEnd: s.box.y + barSize*(i+1)}
+		}
 
-		h := HorizontalStrip{
-			box:       Box{x: s.box.x + xWidth*i, y: s.box.y, xEnd: s.box.x + xWidth*(i+1), yEnd: s.box.yEnd},
+		h := StrokeStrip{
+			box:       box,
 			padding:   padding,
-			layerName: fmt.Sprintf("%d - Brush", i+1),
+			layerName: fmt.Sprintf("%d - Brush", i+firstLayerID+1),
 			Direction: s.Direction,
 		}
 		layers[i] = Layer{
-			name:  fmt.Sprintf("%d - Brush", i+1),
-			i:     i,
+			name:  fmt.Sprintf("%d - Brush", i+firstLayerID+1),
+			i:     i + firstLayerID,
 			lines: h.Lines(),
 		}
 	}
 	return layers
 }
 
-type HorizontalStrip struct {
+type StrokeStrip struct {
 	box       Box
 	padding   int
 	layerName string
 	Direction
 }
 
-func (h HorizontalStrip) String() string {
-	return fmt.Sprintf("HorizontalStrip %s padding %d, name '%s'", h.box, h.padding, h.layerName)
+func (h StrokeStrip) String() string {
+	return fmt.Sprintf("StrokeStrip %s padding %d, name '%s'", h.box, h.padding, h.layerName)
 }
 
-func (h HorizontalStrip) Lines() []Line {
-	nLines := (h.box.yEnd-h.box.y)/h.padding + 1
+func (h StrokeStrip) Lines() []Line {
+	var nLines int
+	if h.Direction.CardinalDirection == Horizontal {
+		nLines = (h.box.yEnd-h.box.y)/h.padding + 1
+	} else {
+		nLines = (h.box.xEnd-h.box.x)/h.padding + 1
+	}
 	lines := make([]Line, nLines)
 
 	for i := range nLines {
 		j := i
-		if h.Direction.OrderDirection == BottomToTop {
+		if h.Direction.OrderDirection == AwayToHome {
 			j = nLines - i - 1
 		}
-		if h.Direction.StrokeDirection == LeftToRight {
-			lines[i] = Line{h.box.x, h.box.y + j*h.padding, h.box.xEnd, h.box.y + j*h.padding}
+		reverse := (h.Direction.StrokeDirection == AwayToHome)
+		if h.Direction.Connection == AlternatingDirection && (i%2 == 1) {
+			reverse = !reverse
+		}
+		var line Line
+		if h.Direction.CardinalDirection == Horizontal {
+			line = Line{h.box.x, h.box.y + j*h.padding, h.box.xEnd, h.box.y + j*h.padding}
 		} else {
-			lines[i] = Line{h.box.xEnd, h.box.y + j*h.padding, h.box.x, h.box.y + j*h.padding}
+			line = Line{h.box.x + j*h.padding, h.box.y, h.box.x + j*h.padding, h.box.yEnd}
+		}
+		if reverse {
+			lines[i] = line.Reverse()
+		} else {
+			lines[i] = line
 		}
 		fmt.Printf("Just added line %s\n", lines[i])
 	}

@@ -17,6 +17,10 @@ func (l Line) String() string {
 	return fmt.Sprintf("Line (%d, %d) -> (%d,%d)", l.x1, l.y1, l.x2, l.y2)
 }
 
+func (l Line) Reverse() Line {
+	return Line{l.x2, l.y2, l.x1, l.y1}
+}
+
 type Layer struct {
 	name  string // name, should start with "(i+1) .*"
 	i     int    // render order

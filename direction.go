@@ -1,24 +1,28 @@
 package main
 
 var (
-	RightToLeft StrokeDirection = "rightToLeft"
-	LeftToRight StrokeDirection = "leftToRight"
+	Vertical   CardinalDirection = "vertical"
+	Horizontal CardinalDirection = "horizontal"
 
-	TopToBottom OrderDirection = "topToBottom"
-	BottomToTop OrderDirection = "bottomToTop"
+	HomeToAway OrderDirection = "homeToAway"
+	AwayToHome OrderDirection = "awayToHome"
 
-	SameDirection     Connection = "sameDirection"
-	OppositeDirection Connection = "oppositeDirection"
-	ZigZag            Connection = "zigZag"
+	SameDirection        Connection = "sameDirection"
+	AlternatingDirection Connection = "alternatingDirection"
+	// ConnectedZigZag      Connection = "connectedZigZag" //unimplemented
 )
 
 type Direction struct {
-	StrokeDirection
-	OrderDirection
-	Connection
+	CardinalDirection                // which direction do all strokes point to (vertical, horizontal)
+	StrokeDirection   OrderDirection // which direction should the first stroke be (home->away, away->home)
+	OrderDirection                   // which direction should consecutive strokes go in (home->away, away->home)
+	Connection                       // are strokes connected, do they alternate or all go in the same direction (sameDirection, oppositeDirection, connectedZigZag)
+
 }
 
-type StrokeDirection string
+type CardinalDirection string
+
+// type StrokeDirection string
 
 type OrderDirection string
 

@@ -9,44 +9,81 @@
 <stop offset="0%" stop-color="black" stop-opacity="1.00"/>
 <stop offset="100%" stop-color="grey" stop-opacity="1.00"/>
 </linearGradient>
+<linearGradient id="brush1" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" stop-color="red" stop-opacity="1.00"/>
+<stop offset="100%" stop-color="grey" stop-opacity="1.00"/>
+</linearGradient>
 </defs>
 <g inkscape:groupmode="layer" inkscape:label="0 - Pencil" >
-<line x1="500" y1="500" x2="500" y2="9500" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
-<line x1="500" y1="9500" x2="9500" y2="9500" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
-<line x1="9500" y1="9500" x2="9500" y2="500" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
-<line x1="9500" y1="500" x2="500" y2="500" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
+<line x1="1000" y1="1000" x2="1000" y2="9000" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
+<line x1="1000" y1="9000" x2="9000" y2="9000" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
+<line x1="9000" y1="9000" x2="9000" y2="1000" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
+<line x1="9000" y1="1000" x2="1000" y2="1000" style="fill:none;stroke:black;stroke-width:2;stroke-opacity:1" />
 </g>
 <g inkscape:groupmode="layer" inkscape:label="1 - Brush" >
-<line x1="9500" y1="9500" x2="500" y2="9501" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="9200" x2="500" y2="9201" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="8900" x2="500" y2="8901" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="8600" x2="500" y2="8601" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="8300" x2="500" y2="8301" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="8000" x2="500" y2="8001" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="7700" x2="500" y2="7701" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="7400" x2="500" y2="7401" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="7100" x2="500" y2="7101" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="6800" x2="500" y2="6801" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="6500" x2="500" y2="6501" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="6200" x2="500" y2="6201" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="5900" x2="500" y2="5901" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="5600" x2="500" y2="5601" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="5300" x2="500" y2="5301" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="5000" x2="500" y2="5001" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="4700" x2="500" y2="4701" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="4400" x2="500" y2="4401" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="4100" x2="500" y2="4101" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="3800" x2="500" y2="3801" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="3500" x2="500" y2="3501" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="3200" x2="500" y2="3201" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="2900" x2="500" y2="2901" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="2600" x2="500" y2="2601" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="2300" x2="500" y2="2301" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="2000" x2="500" y2="2001" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="1700" x2="500" y2="1701" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="1400" x2="500" y2="1401" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="1100" x2="500" y2="1101" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="800" x2="500" y2="801" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
-<line x1="9500" y1="500" x2="500" y2="501" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="8980" x2="1000" y2="8981" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="8714" x2="1000" y2="8715" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="8448" x2="1000" y2="8449" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="8182" x2="1000" y2="8183" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="7916" x2="1000" y2="7917" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="7650" x2="1000" y2="7651" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="7384" x2="1000" y2="7385" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="7118" x2="1000" y2="7119" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="6852" x2="1000" y2="6853" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="6586" x2="1000" y2="6587" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="6320" x2="1000" y2="6321" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="6054" x2="1000" y2="6055" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="5788" x2="1000" y2="5789" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="5522" x2="1000" y2="5523" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="5256" x2="1000" y2="5257" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="4990" x2="1000" y2="4991" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="4724" x2="1000" y2="4725" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="4458" x2="1000" y2="4459" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="4192" x2="1000" y2="4193" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="3926" x2="1000" y2="3927" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="3660" x2="1000" y2="3661" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="3394" x2="1000" y2="3395" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="3128" x2="1000" y2="3129" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="2862" x2="1000" y2="2863" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="2596" x2="1000" y2="2597" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="2330" x2="1000" y2="2331" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="2064" x2="1000" y2="2065" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="1798" x2="1000" y2="1799" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="1532" x2="1000" y2="1533" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="1266" x2="1000" y2="1267" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+<line x1="9000" y1="1000" x2="1000" y2="1001" style="fill:none;stroke:url(#brush0);stroke-width:100;stroke-opacity:0.5" />
+</g>
+<g inkscape:groupmode="layer" inkscape:label="2 - Brush" >
+<line x1="8980" y1="9000" x2="8981" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="8714" y1="1000" x2="8715" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="8448" y1="9000" x2="8449" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="8182" y1="1000" x2="8183" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="7916" y1="9000" x2="7917" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="7650" y1="1000" x2="7651" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="7384" y1="9000" x2="7385" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="7118" y1="1000" x2="7119" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="6852" y1="9000" x2="6853" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="6586" y1="1000" x2="6587" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="6320" y1="9000" x2="6321" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="6054" y1="1000" x2="6055" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="5788" y1="9000" x2="5789" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="5522" y1="1000" x2="5523" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="5256" y1="9000" x2="5257" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="4990" y1="1000" x2="4991" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="4724" y1="9000" x2="4725" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="4458" y1="1000" x2="4459" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="4192" y1="9000" x2="4193" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="3926" y1="1000" x2="3927" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="3660" y1="9000" x2="3661" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="3394" y1="1000" x2="3395" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="3128" y1="9000" x2="3129" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="2862" y1="1000" x2="2863" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="2596" y1="9000" x2="2597" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="2330" y1="1000" x2="2331" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="2064" y1="9000" x2="2065" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="1798" y1="1000" x2="1799" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="1532" y1="9000" x2="1533" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="1266" y1="1000" x2="1267" y2="9000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
+<line x1="1000" y1="9000" x2="1001" y2="1000" style="fill:none;stroke:url(#brush1);stroke-width:100;stroke-opacity:0.5" />
 </g>
 </svg>
