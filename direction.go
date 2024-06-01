@@ -22,8 +22,6 @@ type Direction struct {
 
 type CardinalDirection string
 
-// type StrokeDirection string
-
 type OrderDirection string
 
 type Connection string

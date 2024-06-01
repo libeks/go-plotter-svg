@@ -64,7 +64,12 @@ func (f CurlyFill) GetPath() string {
 	commands := []string{}
 	// find the starting point - extreme point of box in direction perpendicular to
 	w := f.spacing
+	boxWidth := float64(f.box.xEnd - f.box.x)
+	boxHeight := float64(f.box.yEnd - f.box.y)
 
+	if f.angle <= 0 || f.angle >= math.Pi/2 {
+		panic(fmt.Errorf("Angle %.3f is not strictly in the first quadrant, not yet supported", f.angle))
+	}
 	sina := math.Sin(f.angle)
 	cosa := math.Cos(f.angle)
 	tana := math.Tan(f.angle)
@@ -76,10 +81,21 @@ func (f CurlyFill) GetPath() string {
 	x := 0.0
 	y := h
 	commands = append(commands, fmt.Sprintf("M %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
-	for i := range 10 {
+	i := 0
+	for {
 		ii := float64(i)
-		cx := ((4*ii+2)*h - w) / tana
+		cx := ((4*ii+2)*h - w) / tana // iterate over 2,6,10, ...
 		cy := w
+
+		if cx > boxWidth-w {
+			cx = boxWidth - w
+			dy := (boxWidth - w) * tana
+			cy = ((4*ii + 2) * h) - dy
+			fmt.Printf("dy %.3f\n", dy)
+		}
+		if cy > boxHeight-w {
+			break
+		}
 
 		x = cx - w*sina
 		y = cy - w*cosa
@@ -90,7 +106,16 @@ func (f CurlyFill) GetPath() string {
 		commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 1 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
 
 		cx = w
-		cy = (4*(ii+1))*h - w*tana
+		cy = (4*(ii+1))*h - w*tana // iterate over 4,8,12,...
+		if cy > boxHeight-w {
+			cy = boxHeight - w
+			cx = ((4*(ii+1))*h - boxHeight + w) / tana
+			fmt.Printf("cx %.3f\n", cx)
+			// cx = (4*(ii+1))*h - dx
+		}
+		if cx > boxWidth-w {
+			break
+		}
 
 		x = cx - w*sina
 		y = cy - w*cosa
@@ -99,7 +124,12 @@ func (f CurlyFill) GetPath() string {
 		x2 = cx + w*sina
 		y2 = cy + w*cosa
 		commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 0 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
+		i += 1
+		// if i > 15 {
+		// 	break
+		// }
 	}
+	fmt.Printf("Did %d iterations\n", i)
 
 	return strings.Join(commands, "\n\t")
 }

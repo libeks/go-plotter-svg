@@ -45,10 +45,11 @@ func genSVG(fname string) {
 }
 
 func getCurlyBrush(box Box) ([]Layer, []Line) {
+	brushWidth := 20
 	path := CurlyFill{
-		box:     box.WithPadding(500),
-		angle:   math.Pi / 3,
-		spacing: 200,
+		box:     box.WithPadding(brushWidth),
+		angle:   math.Pi / 4,
+		spacing: float64(brushWidth),
 	}
 	layers := []Layer{
 		{

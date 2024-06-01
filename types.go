@@ -77,21 +77,21 @@ func (c PlotContainer) Render(canvas *svg.SVG, defs []string) {
 		}
 		for _, line := range layer.lines {
 
-			// add +1 to endpoint x,y coord to ensure line gradient can render
-			// vertical/horizontal lines cannot be rendered with a gradient in SVG
+			// // add +1 to endpoint x,y coord to ensure line gradient can render
+			// // vertical/horizontal lines cannot be rendered with a gradient in SVG
 			dx := 0
 			dy := 0
-			if line.x1 == line.x2 {
-				dx = 1
-			}
-			if line.y1 == line.y2 {
-				dy = 1
-			}
+			// if line.x1 == line.x2 {
+			// 	dx = 1
+			// }
+			// if line.y1 == line.y2 {
+			// 	dy = 1
+			// }
 			canvas.Line(line.x1, line.y1, line.x2+dx, line.y2+dy, defs[layerID]) // add +1 to endpoint x coord to ensure line gradient can render
 			fmt.Printf("Just wrote line %s\n", line)
 		}
 		for _, path := range layer.paths {
-			canvas.Path(path.s, `stroke="black"`, `fill="none"`, `stroke-width="10"`)
+			canvas.Path(path.s, `stroke="black"`, `fill="none"`, `stroke-width="3"`)
 		}
 		canvas.Gend()
 	}
