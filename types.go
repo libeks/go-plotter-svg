@@ -6,6 +6,14 @@ import (
 	svg "github.com/ajstarks/svgo"
 )
 
+type Path struct {
+	s string
+}
+
+func (p Path) String() string {
+	return fmt.Sprintf("Path (%s)", p.s)
+}
+
 type Line struct {
 	x1 int
 	y1 int
@@ -25,6 +33,11 @@ type Layer struct {
 	name  string // name, should start with "(i+1) .*"
 	i     int    // render order
 	lines []Line
+	paths []Path
+}
+
+func (l Layer) String() string {
+	return fmt.Sprintf("Layer %s %d %v %v", l.name, l.i, l.lines, l.paths)
 }
 
 func NewPlotContainer() PlotContainer {
@@ -59,6 +72,9 @@ func (c PlotContainer) Render(canvas *svg.SVG, defs []string) {
 
 	for layerID, layer := range c.layers {
 		canvas.Group(`inkscape:groupmode="layer"`, fmt.Sprintf(`inkscape:label="%s"`, layer.name))
+		if len(layer.lines) > 0 && len(layer.paths) > 0 {
+			panic(fmt.Errorf("Layer %s has both lines and paths", layer))
+		}
 		for _, line := range layer.lines {
 
 			// add +1 to endpoint x,y coord to ensure line gradient can render
@@ -73,6 +89,9 @@ func (c PlotContainer) Render(canvas *svg.SVG, defs []string) {
 			}
 			canvas.Line(line.x1, line.y1, line.x2+dx, line.y2+dy, defs[layerID]) // add +1 to endpoint x coord to ensure line gradient can render
 			fmt.Printf("Just wrote line %s\n", line)
+		}
+		for _, path := range layer.paths {
+			canvas.Path(path.s, `stroke="black"`, `fill="none"`, `stroke-width="10"`)
 		}
 		canvas.Gend()
 	}

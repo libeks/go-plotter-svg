@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 
 	svg "github.com/ajstarks/svgo"
@@ -26,10 +27,41 @@ func genSVG(fname string) {
 	canvas.StartviewUnit(width, height, "in", 0, 0, sizePx, sizePx)
 	padding := 1000
 
-	box := Box{padding, padding, sizePx - padding, sizePx - padding}
+	box := Box{0, 0, sizePx, sizePx}.WithPadding(padding)
+	// box := Box{padding, padding, sizePx - padding, sizePx - padding}
 
 	container := NewPlotContainer()
+	// layers, lines := getBrushBackForth(box)
+	layers, lines := getCurlyBrush(box)
 
+	container = container.WithLayers(layers...)
+	container = container.WithLines(lines...)
+	canvas.Def()
+	defs := container.GetDefs(canvas)
+	canvas.DefEnd()
+
+	container.Render(canvas, defs)
+	canvas.End()
+}
+
+func getCurlyBrush(box Box) ([]Layer, []Line) {
+	path := CurlyFill{
+		box:     box.WithPadding(500),
+		angle:   math.Pi / 3,
+		spacing: 200,
+	}
+	layers := []Layer{
+		{
+			name:  "1 - Brush",
+			i:     1,
+			paths: []Path{{path.GetPath()}},
+		},
+	}
+	lines := box.Lines()
+	return layers, lines
+}
+
+func getBrushBackForth(box Box) ([]Layer, []Line) {
 	horizontalColumns := &StripImage{
 		box:     box,
 		nGroups: 1,
@@ -41,7 +73,6 @@ func genSVG(fname string) {
 			Connection:        SameDirection,
 		},
 	}
-	// fmt.Sprintf("hor %s\n", horizontalColumns)
 	verticalColumns := &StripImage{
 		box:     box,
 		nGroups: 1,
@@ -53,18 +84,10 @@ func genSVG(fname string) {
 			Connection:        AlternatingDirection,
 		},
 	}
-	// nLayers := 0
 	layers := horizontalColumns.GetLayers(0)
 	layers = append(layers, verticalColumns.GetLayers(len(layers))...)
-	container = container.WithLayers(layers...)
-	// container = container.WithLayers(verticalColumns.GetLayers()...)
-	container = container.WithLines(box.Lines()...)
-	canvas.Def()
-	defs := container.GetDefs(canvas)
-	canvas.DefEnd()
-
-	container.Render(canvas, defs)
-	canvas.End()
+	lines := box.Lines()
+	return layers, lines
 }
 
 type PlotImage interface {
@@ -90,5 +113,14 @@ func (b Box) Lines() []Line {
 		{b.x, b.yEnd, b.xEnd, b.yEnd},
 		{b.xEnd, b.yEnd, b.xEnd, b.y},
 		{b.xEnd, b.y, b.x, b.y},
+	}
+}
+
+func (b Box) WithPadding(pad int) Box {
+	return Box{
+		b.x + pad,
+		b.y + pad,
+		b.xEnd - pad,
+		b.yEnd - pad,
 	}
 }

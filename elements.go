@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math"
+	"strings"
 
 	svg "github.com/ajstarks/svgo"
 )
@@ -36,6 +38,70 @@ func brushStyle(canvas *svg.SVG, i int) string {
 	canvas.LinearGradient(gradientID, 0, 0, 100, 0, []svg.Offcolor{startColor, endColor})
 	brushStyle := fmt.Sprintf("fill:none;stroke:url(#%s);stroke-width:100;stroke-opacity:0.5", gradientID)
 	return brushStyle
+}
+
+// type Path struct {
+// 	elements string
+// }
+
+// func (p Path) toSVG() string {
+
+// }
+
+// func
+
+type CurlyFill struct {
+	box     Box     // bounding box for strokes. The stroke should never be outside of this box
+	angle   float64 // in radians, counter-clockwise from +x direction
+	spacing float64 // distance between lines
+}
+
+func (f CurlyFill) String() string {
+	return fmt.Sprintf("CurlyFill %s angle: %.3f, spacing: %.3f", f.box, f.angle, f.spacing)
+}
+
+func (f CurlyFill) GetPath() string {
+	commands := []string{}
+	// find the starting point - extreme point of box in direction perpendicular to
+	w := f.spacing
+
+	sina := math.Sin(f.angle)
+	cosa := math.Cos(f.angle)
+	tana := math.Tan(f.angle)
+	fmt.Printf("sin %.3f cos %.3f tan %.3f\n", sina, cosa, tana)
+	h := w / cosa
+	fmt.Printf("h %.3f\n", h)
+
+	// start at (0,h)
+	x := 0.0
+	y := h
+	commands = append(commands, fmt.Sprintf("M %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+	for i := range 10 {
+		ii := float64(i)
+		cx := ((4*ii+2)*h - w) / tana
+		cy := w
+
+		x = cx - w*sina
+		y = cy - w*cosa
+		commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+
+		x2 := cx + w*sina
+		y2 := cy + w*cosa
+		commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 1 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
+
+		cx = w
+		cy = (4*(ii+1))*h - w*tana
+
+		x = cx - w*sina
+		y = cy - w*cosa
+		commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+
+		x2 = cx + w*sina
+		y2 = cy + w*cosa
+		commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 0 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
+	}
+
+	return strings.Join(commands, "\n\t")
 }
 
 type StripImage struct {
