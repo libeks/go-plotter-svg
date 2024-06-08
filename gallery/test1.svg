@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12in" height="9in" viewBox="0 0 10000 10000" version="1.1" id="svg6" sodipodi:docname="test_inkscape.svg" inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"><g inkscape:groupmode="layer" inkscape:label="0 - frame" id="g5" transform="translate(0.0 0.0)"><path d="M 1000.000 1000.000 L 1000.000 9000.000 L 9000.000 9000.000 L 9000.000 1000.000 L 1000.000 1000.000" stroke="black" fill="none" stroke-width="3"/></g>
+    <g inkscape:groupmode="layer" inkscape:label="1 - Curly1" id="g5" transform="translate(-2.0 30.0)"><path d="M 1400.000 1965.685 L 1848.528 1517.157 A 400.000 400.000 0 0 1 2414.214 2082.843 L 1517.157 2979.899 A 400.000 400.000 0 0 0 2082.843 3545.584 L 4111.270 1517.157 A 400.000 400.000 0 0 1 4676.955 2082.843 L 1517.157 5242.641 A 400.000 400.000 0 0 0 2082.843 5808.326 L 6374.012 1517.157 A 400.000 400.000 0 0 1 6939.697 2082.843 L 1517.157 7505.382 A 400.000 400.000 0 0 0 2082.843 8071.068 L 7917.157 2236.753 A 400.000 400.000 0 0 1 8482.843 2802.439 L 3368.124 7917.157 A 400.000 400.000 0 0 0 3933.810 8482.843 L 7917.157 4499.495 A 400.000 400.000 0 0 1 8482.843 5065.180 L 5630.866 7917.157 A 400.000 400.000 0 0 0 6196.551 8482.843 L 7917.157 6762.237 A 400.000 400.000 0 0 1 8482.843 7327.922 L 7893.607 7917.157 A 400.000 400.000 0 0 0 8459.293 8482.843" stroke="red" fill="none" stroke-width="10.0"/></g>
+    <g inkscape:groupmode="layer" inkscape:label="2 - Curly2" id="g5" transform="translate(2.0 -30.0)"><path d="M 1300.000 1900.000 L 1559.808 1450.000 A 300.000 300.000 0 0 1 2079.423 1750.000 L 1340.192 3030.385 A 300.000 300.000 0 0 0 1859.808 3330.385 L 2945.448 1450.000 A 300.000 300.000 0 0 1 3465.064 1750.000 L 1340.192 5430.385 A 300.000 300.000 0 0 0 1859.808 5730.385 L 4331.089 1450.000 A 300.000 300.000 0 0 1 4850.704 1750.000 L 1340.192 7830.385 A 300.000 300.000 0 0 0 1859.808 8130.385 L 5716.730 1450.000 A 300.000 300.000 0 0 1 6236.345 1750.000 L 2483.568 8250.000 A 300.000 300.000 0 0 0 3003.183 8550.000 L 7102.370 1450.000 A 300.000 300.000 0 0 1 7621.985 1750.000 L 3869.209 8250.000 A 300.000 300.000 0 0 0 4388.824 8550.000 L 8140.192 2052.439 A 300.000 300.000 0 0 1 8659.808 2352.439 L 5254.849 8250.000 A 300.000 300.000 0 0 0 5774.465 8550.000 L 8140.192 4452.439 A 300.000 300.000 0 0 1 8659.808 4752.439 L 6640.490 8250.000 A 300.000 300.000 0 0 0 7160.105 8550.000 L 8140.192 6852.439 A 300.000 300.000 0 0 1 8659.808 7152.439 L 8026.131 8250.000 A 300.000 300.000 0 0 0 8545.746 8550.000" stroke="blue" fill="none" stroke-width="10.0"/></g>
+    <g inkscape:groupmode="layer" inkscape:label="3 - GUIDELINES-pen" id="g5" transform="translate(0.0 0.0)"><line x1="1300.0" x2="1300.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1400.0" x2="1400.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1500.0" x2="1500.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1600.0" x2="1600.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1700.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1300.0" x2="1300.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1400.0" x2="1400.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1500.0" x2="1500.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1600.0" x2="1600.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1700.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1200.0" x2="1300.0" y1="300.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1200.0" x2="1300.0" y1="400.0" y2="400.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1200.0" x2="1300.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1200.0" x2="1300.0" y1="600.0" y2="600.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1200.0" x2="1300.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1800.0" y1="300.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1800.0" y1="400.0" y2="400.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1800.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1800.0" y1="600.0" y2="600.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1700.0" x2="1800.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2300.0" x2="2300.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2400.0" x2="2400.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2500.0" x2="2500.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2600.0" x2="2600.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2700.0" y1="200.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2300.0" x2="2300.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2400.0" x2="2400.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2500.0" x2="2500.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2600.0" x2="2600.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2700.0" y1="700.0" y2="800.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2200.0" x2="2300.0" y1="300.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2200.0" x2="2300.0" y1="400.0" y2="400.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2200.0" x2="2300.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2200.0" x2="2300.0" y1="600.0" y2="600.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2200.0" x2="2300.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2800.0" y1="300.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2800.0" y1="400.0" y2="400.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2800.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2800.0" y1="600.0" y2="600.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2700.0" x2="2800.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+    </g>
+    <g inkscape:groupmode="layer" inkscape:label="4 - GUIDELINES-Layer 1" id="g5" transform="translate(-2.0 30.0)"><line x1="1500.0" x2="1500.0" y1="300.0" y2="700.0" stroke="red" fill="none" stroke-width="10.0"/>
+        <line x1="1300.0" x2="1700.0" y1="500.0" y2="500.0" stroke="red" fill="none" stroke-width="10.0"/>
+    </g>
+    <g inkscape:groupmode="layer" inkscape:label="5 - GUIDELINES-Layer 2" id="g5" transform="translate(2.0 -30.0)"><line x1="2500.0" x2="2500.0" y1="300.0" y2="700.0" stroke="blue" fill="none" stroke-width="10.0"/>
+        <line x1="2300.0" x2="2700.0" y1="500.0" y2="500.0" stroke="blue" fill="none" stroke-width="10.0"/>
+    </g>
+</svg>

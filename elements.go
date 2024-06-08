@@ -40,16 +40,6 @@ func brushStyle(canvas *svg.SVG, i int) string {
 	return brushStyle
 }
 
-// type Path struct {
-// 	elements string
-// }
-
-// func (p Path) toSVG() string {
-
-// }
-
-// func
-
 type CurlyFill struct {
 	box     Box     // bounding box for strokes. The stroke should never be outside of this box
 	angle   float64 // in radians, counter-clockwise from +x direction
@@ -68,14 +58,14 @@ func (f CurlyFill) GetPath() string {
 	boxHeight := float64(f.box.yEnd - f.box.y)
 
 	if f.angle <= 0 || f.angle >= math.Pi/2 {
-		panic(fmt.Errorf("Angle %.3f is not strictly in the first quadrant, not yet supported", f.angle))
+		panic(fmt.Errorf("angle %.3f is not strictly in the first quadrant, not yet supported", f.angle))
 	}
 	sina := math.Sin(f.angle)
 	cosa := math.Cos(f.angle)
 	tana := math.Tan(f.angle)
-	fmt.Printf("sin %.3f cos %.3f tan %.3f\n", sina, cosa, tana)
+	// fmt.Printf("sin %.3f cos %.3f tan %.3f\n", sina, cosa, tana)
 	h := w / cosa
-	fmt.Printf("h %.3f\n", h)
+	// fmt.Printf("h %.3f\n", h)
 
 	// start at (0,h)
 	x := 0.0
@@ -91,7 +81,7 @@ func (f CurlyFill) GetPath() string {
 			cx = boxWidth - w
 			dy := (boxWidth - w) * tana
 			cy = ((4*ii + 2) * h) - dy
-			fmt.Printf("dy %.3f\n", dy)
+			// fmt.Printf("dy %.3f\n", dy)
 		}
 		if cy > boxHeight-w {
 			break
@@ -110,7 +100,7 @@ func (f CurlyFill) GetPath() string {
 		if cy > boxHeight-w {
 			cy = boxHeight - w
 			cx = ((4*(ii+1))*h - boxHeight + w) / tana
-			fmt.Printf("cx %.3f\n", cx)
+			// fmt.Printf("cx %.3f\n", cx)
 			// cx = (4*(ii+1))*h - dx
 		}
 		if cx > boxWidth-w {
@@ -129,9 +119,10 @@ func (f CurlyFill) GetPath() string {
 		// 	break
 		// }
 	}
-	fmt.Printf("Did %d iterations\n", i)
+	// fmt.Printf("Did %d iterations\n", i)
+	// fmt.Printf("path %s", commands)
 
-	return strings.Join(commands, "\n\t")
+	return strings.Join(commands, " ")
 }
 
 type StripImage struct {
@@ -145,57 +136,91 @@ func (s StripImage) String() string {
 	return fmt.Sprintf("StripImage %s %d groups,  %d lines", s.box, s.nGroups, s.nLines)
 }
 
-func (s StripImage) GetLayers(firstLayerID int) []Layer {
-	var barSize int
+func (s StripImage) GetLineLikes() [][]LineLike {
+	var barSize float64
 	if s.Direction.CardinalDirection == Horizontal {
-		barSize = (s.box.xEnd - s.box.x) / s.nGroups
+		barSize = (s.box.xEnd - s.box.x) / float64(s.nGroups)
 	} else {
-		barSize = (s.box.yEnd - s.box.y) / s.nGroups
+		barSize = (s.box.yEnd - s.box.y) / float64(s.nGroups)
 	}
-	padding := (s.box.yEnd - s.box.y) / s.nLines
-	layers := make([]Layer, s.nGroups)
+	padding := (s.box.yEnd - s.box.y) / float64(s.nLines)
+	linelikes := [][]LineLike{}
+	// layers := make([]Layer, s.nGroups)
 	for i := range s.nGroups {
 		var box Box
 		if s.Direction.CardinalDirection == Horizontal {
-			box = Box{x: s.box.x + barSize*i, y: s.box.y, xEnd: s.box.x + barSize*(i+1), yEnd: s.box.yEnd}
+			box = Box{x: s.box.x + barSize*float64(i), y: s.box.y, xEnd: s.box.x + barSize*float64(i+1), yEnd: s.box.yEnd}
 		} else {
-			box = Box{x: s.box.x, y: s.box.y + barSize*i, xEnd: s.box.xEnd, yEnd: s.box.y + barSize*(i+1)}
+			box = Box{x: s.box.x, y: s.box.y + barSize*float64(i), xEnd: s.box.xEnd, yEnd: s.box.y + barSize*float64(i+1)}
 		}
 
 		h := StrokeStrip{
-			box:       box,
-			padding:   padding,
-			layerName: fmt.Sprintf("%d - Brush", i+firstLayerID+1),
+			box:     box,
+			padding: padding,
+			// layerName: fmt.Sprintf("%d - Brush", i+firstLayerID+1),
 			Direction: s.Direction,
 		}
-		layers[i] = Layer{
-			name:  fmt.Sprintf("%d - Brush", i+firstLayerID+1),
-			i:     i + firstLayerID,
-			lines: h.Lines(),
-		}
+		// layers[i] = Layer{
+		// 	name:  fmt.Sprintf("%d - Brush", i+firstLayerID+1),
+		// 	i:     i + firstLayerID,
+		// 	lines: h.Lines(),
+		// }
+		linelikes = append(linelikes, h.Lines())
 	}
-	return layers
+	return linelikes
 }
 
+// func (s StripImage) GetLayers(firstLayerID int) []Layer {
+// 	var barSize int
+// 	if s.Direction.CardinalDirection == Horizontal {
+// 		barSize = (s.box.xEnd - s.box.x) / s.nGroups
+// 	} else {
+// 		barSize = (s.box.yEnd - s.box.y) / s.nGroups
+// 	}
+// 	padding := (s.box.yEnd - s.box.y) / s.nLines
+// 	layers := make([]Layer, s.nGroups)
+// 	for i := range s.nGroups {
+// 		var box Box
+// 		if s.Direction.CardinalDirection == Horizontal {
+// 			box = Box{x: s.box.x + barSize*i, y: s.box.y, xEnd: s.box.x + barSize*(i+1), yEnd: s.box.yEnd}
+// 		} else {
+// 			box = Box{x: s.box.x, y: s.box.y + barSize*i, xEnd: s.box.xEnd, yEnd: s.box.y + barSize*(i+1)}
+// 		}
+
+// 		h := StrokeStrip{
+// 			box:       box,
+// 			padding:   padding,
+// 			layerName: fmt.Sprintf("%d - Brush", i+firstLayerID+1),
+// 			Direction: s.Direction,
+// 		}
+// 		layers[i] = Layer{
+// 			name:  fmt.Sprintf("%d - Brush", i+firstLayerID+1),
+// 			i:     i + firstLayerID,
+// 			lines: h.Lines(),
+// 		}
+// 	}
+// 	return layers
+// }
+
 type StrokeStrip struct {
-	box       Box
-	padding   int
-	layerName string
+	box     Box
+	padding float64
+	// layerName string
 	Direction
 }
 
 func (h StrokeStrip) String() string {
-	return fmt.Sprintf("StrokeStrip %s padding %d, name '%s'", h.box, h.padding, h.layerName)
+	return fmt.Sprintf("StrokeStrip %s padding %d", h.box, h.padding)
 }
 
-func (h StrokeStrip) Lines() []Line {
+func (h StrokeStrip) Lines() []LineLike {
 	var nLines int
 	if h.Direction.CardinalDirection == Horizontal {
-		nLines = (h.box.yEnd-h.box.y)/h.padding + 1
+		nLines = int((h.box.yEnd-h.box.y)/h.padding) + 1
 	} else {
-		nLines = (h.box.xEnd-h.box.x)/h.padding + 1
+		nLines = int((h.box.xEnd-h.box.x)/h.padding) + 1
 	}
-	lines := make([]Line, nLines)
+	lines := make([]LineLike, nLines)
 
 	for i := range nLines {
 		j := i
@@ -208,9 +233,9 @@ func (h StrokeStrip) Lines() []Line {
 		}
 		var line Line
 		if h.Direction.CardinalDirection == Horizontal {
-			line = Line{h.box.x, h.box.y + j*h.padding, h.box.xEnd, h.box.y + j*h.padding}
+			line = Line{h.box.x, h.box.y + float64(j)*h.padding, h.box.xEnd, h.box.y + float64(j)*h.padding}
 		} else {
-			line = Line{h.box.x + j*h.padding, h.box.y, h.box.x + j*h.padding, h.box.yEnd}
+			line = Line{h.box.x + float64(j)*h.padding, h.box.y, h.box.x + float64(j)*h.padding, h.box.yEnd}
 		}
 		if reverse {
 			lines[i] = line.Reverse()

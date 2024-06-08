@@ -3,66 +3,44 @@ package main
 import (
 	"fmt"
 	"math"
-	"os"
 
 	svg "github.com/ajstarks/svgo"
 )
 
 func main() {
-	fname := "gallery/test.svg"
-	genSVG(fname)
+	fname := "gallery/test1.svg"
+	sizePx := 10000.0
+	padding := 1000.0
+
+	outerBox := Box{0, 0, sizePx, sizePx}
+	innerBox := outerBox.WithPadding(padding)
+	scene := Scene{}.WithGuides()
+	boxes := []LineLike{}
+	// boxes = append(boxes, outerBox.Lines()...)
+	boxes = append(boxes, innerBox.Lines()...)
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(boxes).WithOffset(0, 0))
+	curlyBrush := getCurlyBrush(innerBox, 400.0, math.Pi/4)
+	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curlyBrush).WithColor("red").WithWidth(10).WithOffset(-2, 40))
+	curlyBrush2 := getCurlyBrush(innerBox, 300.0, math.Pi/3)
+	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
+	SVG{fname: fname,
+		width:  "12in",
+		height: "9in",
+		Scene:  scene,
+	}.WriteSVG()
 }
 
-func genSVG(fname string) {
-	f, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	width := 12 // inches, == 1152.000px
-	height := 9 // inches, == 864.000px
-
-	canvas := svg.New(f)
-	sizePx := 10000
-	canvas.StartviewUnit(width, height, "in", 0, 0, sizePx, sizePx)
-	padding := 1000
-
-	box := Box{0, 0, sizePx, sizePx}.WithPadding(padding)
-	// box := Box{padding, padding, sizePx - padding, sizePx - padding}
-
-	container := NewPlotContainer()
-	// layers, lines := getBrushBackForth(box)
-	layers, lines := getCurlyBrush(box)
-
-	container = container.WithLayers(layers...)
-	container = container.WithLines(lines...)
-	canvas.Def()
-	defs := container.GetDefs(canvas)
-	canvas.DefEnd()
-
-	container.Render(canvas, defs)
-	canvas.End()
-}
-
-func getCurlyBrush(box Box) ([]Layer, []Line) {
-	brushWidth := 20
+func getCurlyBrush(box Box, width, angle float64) []LineLike {
+	brushWidth := width
 	path := CurlyFill{
 		box:     box.WithPadding(brushWidth),
-		angle:   math.Pi / 4,
+		angle:   angle,
 		spacing: float64(brushWidth),
 	}
-	layers := []Layer{
-		{
-			name:  "1 - Brush",
-			i:     1,
-			paths: []Path{{path.GetPath()}},
-		},
-	}
-	lines := box.Lines()
-	return layers, lines
+	return []LineLike{Path{path.GetPath()}}
 }
 
-func getBrushBackForth(box Box) ([]Layer, []Line) {
+func getBrushBackForthScene(box Box) Scene {
 	horizontalColumns := &StripImage{
 		box:     box,
 		nGroups: 1,
@@ -85,43 +63,20 @@ func getBrushBackForth(box Box) ([]Layer, []Line) {
 			Connection:        AlternatingDirection,
 		},
 	}
-	layers := horizontalColumns.GetLayers(0)
-	layers = append(layers, verticalColumns.GetLayers(len(layers))...)
-	lines := box.Lines()
-	return layers, lines
+	scene := Scene{}
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	for i, linelikes := range horizontalColumns.GetLineLikes() {
+		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Horizontal %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
+	}
+
+	for i, linelikes := range verticalColumns.GetLineLikes() {
+		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Vertical %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
+	}
+	return scene
 }
 
 type PlotImage interface {
 	Render(*svg.SVG)         // render non-guideline layers (layesr 1+)
 	DrawGuideLines(*svg.SVG) // draw guidelines (layer 0)
 	GetDefs(*svg.SVG)
-}
-
-type Box struct {
-	x    int
-	y    int
-	xEnd int
-	yEnd int
-}
-
-func (b Box) String() string {
-	return fmt.Sprintf("Box (%d, %d) -> (%d, %d)", b.x, b.y, b.xEnd, b.yEnd)
-}
-
-func (b Box) Lines() []Line {
-	return []Line{
-		{b.x, b.y, b.x, b.yEnd},
-		{b.x, b.yEnd, b.xEnd, b.yEnd},
-		{b.xEnd, b.yEnd, b.xEnd, b.y},
-		{b.xEnd, b.y, b.x, b.y},
-	}
-}
-
-func (b Box) WithPadding(pad int) Box {
-	return Box{
-		b.x + pad,
-		b.y + pad,
-		b.xEnd - pad,
-		b.yEnd - pad,
-	}
 }
