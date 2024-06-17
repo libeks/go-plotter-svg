@@ -129,34 +129,67 @@ func testLine() {
 }
 
 func getLineFieldInObjects(box Box) Scene {
-	scene := Scene{}
+	scene := Scene{}.WithGuides()
 
 	// poly := Circle{
 	// 	Point{5000, 5000},
 	// 	2000,
 	// }
-	poly2 := Polygon{[]Point{
-		{3000, 3000},
-		{7000, 3000},
-		{7000, 7000},
-		{3000, 7000},
-	}}
-	radial := CircularLineField(20, Point{3000 - 20, 5000})
-	// radial2 := CircularLineField(10, Point{5000, 5000})
-	segments := limitLinesToShape(radial, poly2)
-	// segments2 := limitLinesToShape(radial2, poly)
-	lines1 := []LineLike{}
-	// lines2 := []LineLike{}
-	for _, seg := range segments {
-		lines1 = append(lines1, seg)
+	poly1 := Polygon{
+		[]Point{
+			{3000, 3000},
+			{4900, 3000},
+			{4900, 7000},
+			{3000, 7000},
+		},
 	}
-	// for _, seg := range segments2 {
-	// 	lines2 = append(lines2, seg)
-	// }
+	poly2 := Polygon{
+		[]Point{
+			{5100, 3000},
+			{7000, 3000},
+			{7000, 7000},
+			{5100, 7000},
+		},
+	}
+	poly3 := Polygon{
+		[]Point{
+			{3000, 3000},
+			{7000, 3000},
+			{7000, 4900},
+			{3000, 4900},
+		},
+	}
+	poly4 := Polygon{
+		[]Point{
+			{3000, 5100},
+			{7000, 5100},
+			{7000, 7000},
+			{3000, 7000},
+		},
+	}
+	radial := CircularLineField(100, Point{5000, 5000})
+	// radial2 := CircularLineField(10, Point{5000, 5000})
+	// segments :=
+	// segments2 := limitLinesToShape(radial2, poly)
+	lines1 := segmentsToLineLikes(limitLinesToShape(radial, poly1))
+	lines2 := segmentsToLineLikes(limitLinesToShape(radial, poly2))
+	lines3 := segmentsToLineLikes(limitLinesToShape(radial, poly3))
+	lines4 := segmentsToLineLikes(limitLinesToShape(radial, poly4))
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
-	scene = scene.AddLayer(NewLayer("content").WithLineLike(lines1).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(lines1).WithOffset(0, 0).WithColor("red"))
+	scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0).WithColor("blue"))
+	scene = scene.AddLayer(NewLayer("content3").WithLineLike(lines3).WithOffset(0, 0).WithColor("yellow"))
+	scene = scene.AddLayer(NewLayer("content4").WithLineLike(lines4).WithOffset(0, 0).WithColor("green"))
 	// scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0))
 	return scene
+}
+
+func segmentsToLineLikes(segments []LineSegment) []LineLike {
+	linelikes := make([]LineLike, len(segments))
+	for i, seg := range segments {
+		linelikes[i] = seg
+	}
+	return linelikes
 }
 
 type PlotImage interface {
