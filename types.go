@@ -129,6 +129,16 @@ func (v Vector) Len() float64 {
 	return math.Sqrt(v.Dot(v))
 }
 
+func (v Vector) Point() Point {
+	return Point{v.x, v.y}
+}
+
+// Perp returns a vector perpendicular to v of the same lenght,
+// rotated counter-clockwise by 90deg
+func (v Vector) Perp() Vector {
+	return Vector{-v.y, v.x}
+}
+
 type Point struct {
 	x float64
 	y float64

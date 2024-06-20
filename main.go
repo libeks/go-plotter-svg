@@ -18,7 +18,9 @@ func main() {
 	// scene := getCurlyScene(outerBox)
 	// scene := getLinesInsideScene(innerBox, 1000)
 	// scene := getLineFieldInObjects(innerBox)
-	scene := radialBoxScene(innerBox)
+	// scene := radialBoxScene(innerBox)
+	// scene := parallelBoxScene(innerBox)
+	scene := parallelSineFieldsScene(innerBox)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",
@@ -173,6 +175,92 @@ func radialBoxScene(box Box) Scene {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
+	return scene
+}
+
+func randInRange(min, max float64) float64 {
+	return (max-min)*rand.Float64() + min
+}
+
+func randomlyAllocateSegments(segments [][]LineLike, threshold float64) ([]LineLike, []LineLike) {
+	layer1 := []LineLike{}
+	layer2 := []LineLike{}
+	for _, segs := range segments {
+		if rand.Float64() > threshold {
+			layer1 = append(layer1, segs...)
+		} else {
+			layer2 = append(layer2, segs...)
+		}
+	}
+	return layer1, layer2
+}
+
+func parallelBoxScene(box Box) Scene {
+	minLineWidth := 20.0
+	maxLineWidth := 100.0
+	minAngle := 0.0
+	maxAngle := math.Pi
+	// angle := math.Pi / 3
+	scene := Scene{}.WithGuides()
+	segments := [][]LineLike{}
+	boxes := partitionIntoSquares(box, 10)
+	for _, minibox := range boxes {
+		spacing := randInRange(minLineWidth, maxLineWidth)
+		angle := randInRange(minAngle, maxAngle)
+		lines := LinearLineField(minibox, angle, spacing)
+		lineseg := limitLinesToShape(lines, minibox.WithPadding(50).AsPolygon())
+		segments = append(segments, segmentsToLineLikes(lineseg))
+	}
+	layer1, layer2 := randomlyAllocateSegments(segments, 0.5)
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
+	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
+	return scene
+}
+
+type SineDensity struct {
+	min    float64
+	max    float64
+	offset float64
+	cycles float64
+}
+
+func (d SineDensity) Density(a float64) float64 {
+	theta := d.cycles*a*math.Pi + d.offset
+	dRange := d.max - d.min
+	return d.min + dRange*(math.Sin(theta)+1)/2
+}
+
+func parallelSineFieldsScene(box Box) Scene {
+	scene := Scene{}.WithGuides()
+	layer1 := segmentsToLineLikes(
+		limitLinesToShape(
+			LinearDensityLineField(
+				box, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 5, offset: 0}.Density,
+			),
+			box.AsPolygon(),
+		),
+	)
+	layer2 := segmentsToLineLikes(
+		limitLinesToShape(
+			LinearDensityLineField(
+				box, 0.6, SineDensity{min: 20.0, max: 200, cycles: 3, offset: 0}.Density,
+			),
+			box.AsPolygon(),
+		),
+	)
+	layer3 := segmentsToLineLikes(
+		limitLinesToShape(
+			LinearDensityLineField(
+				box, 2.0, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0}.Density,
+			),
+			box.AsPolygon(),
+		),
+	)
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
+	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
+	scene = scene.AddLayer(NewLayer("content3").WithLineLike(layer3).WithOffset(0, 0).WithColor("green"))
 	return scene
 }
 
