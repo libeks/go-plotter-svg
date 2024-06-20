@@ -30,9 +30,6 @@ func (s Scene) Layers() []Layer {
 	// draw guides on the upper edge of the image
 	// assume that the 0th layer contains the guidelines
 	layers := s.layers
-	for i, layer := range layers {
-		fmt.Printf("Layer %d has %d objects\n", i, len(layer.linelikes))
-	}
 	lines := []LineLike{}
 	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
@@ -66,11 +63,6 @@ func (s Scene) Layers() []Layer {
 			LineSegment{500.0 + ii*1000, 300.0, 500 + ii*1000, 700},
 			LineSegment{300 + ii*1000, 500.0, 700 + ii*1000, 500},
 		}).WithColor(layers[i].color).WithWidth(layers[i].width).WithOffset(layers[i].offsetX, layers[i].offsetY))
-	}
-	for i, layer := range layers {
-		fmt.Printf("layer[%d]: %v\n", i, layers[i])
-		fmt.Printf("Layer %d has %d objects\n", i, len(layer.linelikes))
-
 	}
 	return layers
 }
@@ -231,20 +223,18 @@ func (l Line) IntersectTU(l2 Line) (*float64, *float64) {
 	}
 	t := (x1x3*y3y4 - y1y3*x3x4) / divisor
 	u := (x1x2*y1y3 - y1y2*x1x3) / -divisor // note the divisor is negative here. I initially missed that.
-	fmt.Printf("t:%.3f, u: %.3f\n", t, u)
+	// fmt.Printf("t:%.3f, u: %.3f\n", t, u)
 	return &t, &u
 }
 
 func (l Line) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 	l2 := ls2.Line()
 	t, u := l.IntersectTU(l2)
-	fmt.Printf("Intersecting %s with %s, got t: %+v, u: %+v\n", l, ls2, t, u)
+	// fmt.Printf("Intersecting %s with %s, got t: %+v, u: %+v\n", l, ls2, t, u)
 	if t == nil || u == nil {
 		return nil
 	}
 	uu := *u
-	tt := *t
-	fmt.Printf("t and u are %.3f and %.3f\n", tt, uu)
 	if uu <= 1.0 && uu >= 0.0 {
 		return t
 	}
@@ -459,5 +449,28 @@ func (b Box) WithPadding(pad float64) Box {
 		b.y + pad,
 		b.xEnd - pad,
 		b.yEnd - pad,
+	}
+}
+
+func (b Box) Center() Point {
+	return Point{b.x + (b.xEnd-b.x)/2, b.y + (b.yEnd-b.y)/2}
+}
+
+func (b Box) Width() float64 {
+	return b.xEnd - b.x
+}
+
+func (b Box) Height() float64 {
+	return b.yEnd - b.y
+}
+
+func (b Box) AsPolygon() Object {
+	return Polygon{
+		points: []Point{
+			{b.x, b.y},
+			{b.xEnd, b.y},
+			{b.xEnd, b.yEnd},
+			{b.x, b.yEnd},
+		},
 	}
 }

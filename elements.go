@@ -158,7 +158,7 @@ func (h StrokeStrip) Lines() []LineLike {
 		} else {
 			lines[i] = line
 		}
-		fmt.Printf("Just added line %s\n", lines[i])
+		// fmt.Printf("Just added line %s\n", lines[i])
 	}
 	return lines
 }

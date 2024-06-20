@@ -17,8 +17,8 @@ func main() {
 	innerBox := outerBox.WithPadding(padding)
 	// scene := getCurlyScene(outerBox)
 	// scene := getLinesInsideScene(innerBox, 1000)
-	// testLine()
-	scene := getLineFieldInObjects(innerBox)
+	// scene := getLineFieldInObjects(innerBox)
+	scene := radialBoxScene(innerBox)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",
@@ -28,10 +28,6 @@ func main() {
 
 func getCurlyScene(box Box) Scene {
 	scene := Scene{}.WithGuides()
-	// innerBox := box.WithPadding(padding)
-	// boxes := []LineLike{}
-	// boxes = append(boxes, outerBox.Lines()...)
-	// boxes = append(boxes, box.Lines()...)
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
 	curlyBrush := getCurlyBrush(box, 400.0, math.Pi/4)
 	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curlyBrush).WithColor("red").WithWidth(10).WithOffset(-2, 40))
@@ -118,7 +114,6 @@ func getLinesInsidePolygonScene(box Box, poly Object, n int) Scene {
 }
 
 func testLine() {
-
 	line := Line{Point{0, 0}, Vector{1, 1}}
 	circle := Circle{
 		Point{3, 2},
@@ -128,13 +123,70 @@ func testLine() {
 	fmt.Printf("segments: %v\n", segments)
 }
 
+func partitionIntoSquares(box Box, nHorizontal int) []Box {
+	width := box.Width()
+	squareSide := width / (float64(nHorizontal))
+	boxes := []Box{}
+	verticalIteractions := int(box.Height() / float64(squareSide))
+	for v := range verticalIteractions {
+		vv := float64(v)
+		for h := range nHorizontal {
+			hh := float64(h)
+			boxes = append(boxes, Box{
+				x:    hh*squareSide + box.x,
+				y:    vv*squareSide + box.y,
+				xEnd: (hh+1)*squareSide + box.x,
+				yEnd: (vv+1)*squareSide + box.y,
+			})
+		}
+	}
+	return boxes
+}
+
+func randRangeMinusPlusOne() float64 {
+	return 2 * (rand.Float64() - 0.5)
+}
+
+func radialBoxScene(box Box) Scene {
+	nSegments := 15
+	exclusionRadius := 100.0
+	wiggle := 200.0
+	scene := Scene{}.WithGuides()
+	segments := [][]LineLike{}
+	boxes := partitionIntoSquares(box, 10)
+	for _, minibox := range boxes {
+		boxcenter := minibox.Center()
+		xwiggle := randRangeMinusPlusOne() * wiggle
+		ywiggle := randRangeMinusPlusOne() * wiggle
+		center := Point{boxcenter.x + xwiggle, boxcenter.y + ywiggle}
+		segments = append(segments, radialBoxWithCircleExclusion(minibox.WithPadding(50).AsPolygon(), center, nSegments, exclusionRadius))
+	}
+	layer1 := []LineLike{}
+	layer2 := []LineLike{}
+	for _, segs := range segments {
+		if rand.Float64() > 0.5 {
+			layer1 = append(layer1, segs...)
+		} else {
+			layer2 = append(layer2, segs...)
+		}
+	}
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
+	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
+	return scene
+}
+
+func radialBoxWithCircleExclusion(container Object, center Point, nLines int, radius float64) []LineLike {
+	radial := CircularLineField(nLines, center)
+	compObject := NewComposite().With(container).Without(Circle{center, radius})
+	lines := limitLinesToShape(radial, compObject)
+	segments := segmentsToLineLikes(lines)
+	return segments
+}
+
 func getLineFieldInObjects(box Box) Scene {
 	scene := Scene{}.WithGuides()
 
-	// poly := Circle{
-	// 	Point{5000, 5000},
-	// 	2000,
-	// }
 	poly1 := Polygon{
 		[]Point{
 			{3000, 3000},
@@ -167,11 +219,10 @@ func getLineFieldInObjects(box Box) Scene {
 			{3000, 7000},
 		},
 	}
-	radial := CircularLineField(100, Point{5000, 5000})
-	// radial2 := CircularLineField(10, Point{5000, 5000})
-	// segments :=
-	// segments2 := limitLinesToShape(radial2, poly)
+	radial := CircularLineField(3, Point{5000, 5000})
+	fmt.Printf("radial : %s\n", radial)
 	lines1 := segmentsToLineLikes(limitLinesToShape(radial, poly1))
+	fmt.Printf("linelikes: %s\n", lines1)
 	lines2 := segmentsToLineLikes(limitLinesToShape(radial, poly2))
 	lines3 := segmentsToLineLikes(limitLinesToShape(radial, poly3))
 	lines4 := segmentsToLineLikes(limitLinesToShape(radial, poly4))
@@ -180,11 +231,11 @@ func getLineFieldInObjects(box Box) Scene {
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0).WithColor("blue"))
 	scene = scene.AddLayer(NewLayer("content3").WithLineLike(lines3).WithOffset(0, 0).WithColor("yellow"))
 	scene = scene.AddLayer(NewLayer("content4").WithLineLike(lines4).WithOffset(0, 0).WithColor("green"))
-	// scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0))
 	return scene
 }
 
 func segmentsToLineLikes(segments []LineSegment) []LineLike {
+
 	linelikes := make([]LineLike, len(segments))
 	for i, seg := range segments {
 		linelikes[i] = seg

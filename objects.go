@@ -6,17 +6,124 @@ import (
 	"slices"
 )
 
-type CompositeObject struct {
-	base        Object
-	newObject   Object
-	subtraction bool
-}
-
 type Object interface {
 	Inside(x, y float64) bool
-	IntersectLine(line Line) []LineSegment
-	IntersectLineSegment(ls LineSegment) []LineSegment
-	// Outline() LineLike
+	IntersectTs(line Line) []float64
+}
+
+func ClipLineToObject(line Line, obj Object) []LineSegment {
+	ts := obj.IntersectTs(line)
+	// fmt.Printf("Line intersecting object at %v\n", ts)
+	if len(ts) == 0 {
+		return nil
+	}
+	if len(ts) == 1 {
+		panic(fmt.Errorf("not sure what to do with only one intersection %v", ts))
+	}
+	slices.Sort(ts)
+	// fmt.Printf("ts: %v\n", ts)
+	segments := []LineSegment{}
+	for i, t1 := range ts {
+		if i == len(ts)-1 {
+			break
+		}
+		t2 := ts[(i + 1)]
+		midT := average(t1, t2)
+		midPoint := line.At(midT)
+		if obj.Inside(midPoint.x, midPoint.y) {
+			p1 := line.At(t1)
+			p2 := line.At(t2)
+			seg := LineSegment{p1.x, p1.y, p2.x, p2.y}
+			segments = append(segments, seg)
+			// fmt.Printf("adding segment %s at index %d\n", seg, i)
+		}
+	}
+	return segments
+}
+
+func ClipLineSegmentToObject(ls LineSegment, obj Object) []LineSegment {
+	line := ls.Line()
+	ts := append(obj.IntersectTs(line), 0.0, 1.0)
+	ts = filterToRange(ts, 0.0, 1.0)
+	slices.Sort(ts)
+	segments := []LineSegment{}
+	for i, t1 := range ts {
+		t2 := ts[(i+1)%len(ts)]
+		midT := average(t1, t2)
+		midPoint := line.At(midT)
+		if obj.Inside(midPoint.x, midPoint.y) {
+			p1 := line.At(t1)
+			p2 := line.At(t2)
+			segments = append(segments, LineSegment{
+				p1.x, p1.y,
+				p2.x, p2.y,
+			})
+		}
+	}
+	return segments
+}
+
+func filterToRange(vals []float64, min, max float64) []float64 {
+	rets := []float64{}
+	for _, val := range vals {
+		if val <= max && val >= min {
+			rets = append(rets, val)
+		}
+	}
+	return rets
+}
+
+func NewCompositeWithWithout(with []Object, without []Object) CompositeObject {
+	return CompositeObject{}.With(with...).Without(without...)
+}
+func NewComposite() CompositeObject {
+	return CompositeObject{}
+}
+
+type CompositeObject struct {
+	positive []Object
+	negative []Object
+}
+
+func (o CompositeObject) With(obj ...Object) CompositeObject {
+	return CompositeObject{
+		positive: append(o.positive, obj...),
+		negative: o.negative,
+	}
+}
+
+func (o CompositeObject) Without(obj ...Object) CompositeObject {
+	return CompositeObject{
+		positive: o.positive,
+		negative: append(o.negative, obj...),
+	}
+}
+
+func (o CompositeObject) Inside(x, y float64) bool {
+	inside := false
+	for _, pos := range o.positive {
+		if pos.Inside(x, y) {
+			inside = true
+			break
+		}
+	}
+	if !inside {
+		return false
+	}
+	for _, neg := range o.negative {
+		if neg.Inside(x, y) {
+			return false
+		}
+	}
+	return true
+}
+
+func (o CompositeObject) IntersectTs(line Line) []float64 {
+	ts := []float64{}
+	for _, obj := range append(o.positive, o.negative...) {
+		ts = append(ts, obj.IntersectTs(line)...)
+	}
+	return ts
 }
 
 func positiveATan(y, x float64) float64 {
@@ -73,58 +180,14 @@ func (p Polygon) EdgeLines() []LineSegment {
 	return segments
 }
 
-func (p Polygon) IntersectLine(line Line) []LineSegment {
+func (p Polygon) IntersectTs(line Line) []float64 {
 	ts := []float64{}
 	for _, segment := range p.EdgeLines() {
 		if t := line.IntersectLineSegmentT(segment); t != nil {
 			ts = append(ts, *t)
 		}
 	}
-	fmt.Printf("Line intersecting polygon at %v\n", ts)
-	if len(ts) == 0 {
-		return nil
-	}
-	if len(ts) == 1 {
-		panic(fmt.Errorf("not sure what to do with only one intersection %v", ts))
-	}
-	slices.Sort(ts)
-	segments := []LineSegment{}
-	for i, t1 := range ts {
-		t2 := ts[(i+1)%len(ts)]
-		midT := average(t1, t2)
-		midPoint := line.At(midT)
-		if p.Inside(midPoint.x, midPoint.y) {
-			p1 := line.At(t1)
-			p2 := line.At(t2)
-			segments = append(segments, LineSegment{p1.x, p1.y, p2.x, p2.y})
-		}
-	}
-	return segments
-}
-
-func (p Polygon) IntersectLineSegment(ls LineSegment) []LineSegment {
-
-	ts := []float64{0.0, 1.0} // the segment's endpoints should also be considered
-	for _, segment := range p.EdgeLines() {
-		if t := ls.IntersectLineSegmentT(segment); t != nil {
-			ts = append(ts, *t)
-		}
-	}
-	slices.Sort(ts)
-	line := ls.Line()
-	segments := []LineSegment{}
-	// todo, generalize this midpoint calculation, ensure that line segments are not broken up
-	for i, t1 := range ts {
-		t2 := ts[(i+1)%len(ts)]
-		midT := average(t1, t2)
-		midPoint := line.At(midT)
-		if p.Inside(midPoint.x, midPoint.y) {
-			p1 := line.At(t1)
-			p2 := line.At(t2)
-			segments = append(segments, LineSegment{p1.x, p1.y, p2.x, p2.y})
-		}
-	}
-	return segments
+	return ts
 }
 
 func average(a, b float64) float64 {
@@ -145,9 +208,9 @@ func (c Circle) Inside(x, y float64) bool {
 	return distance <= c.radius
 }
 
-func (c Circle) IntersectLine(line Line) []LineSegment {
+func (c Circle) IntersectTs(line Line) []float64 {
 	w := line.p.Subtract(c.center)
-	fmt.Printf("w is %s\n", w)
+	// fmt.Printf("w is %s\n", w)
 	A := line.v.x*line.v.x + line.v.y*line.v.y
 	B := 2 * (line.v.x*w.x + line.v.y*w.y)
 	C := w.x*w.x + w.y*w.y - c.radius*c.radius
@@ -155,45 +218,7 @@ func (c Circle) IntersectLine(line Line) []LineSegment {
 	if len(ts) < 2 {
 		return nil
 	}
-	p1 := line.At(ts[0])
-	p2 := line.At(ts[1])
-	for i, p := range []Point{p1, p2} {
-		if r := p.Subtract(c.center).Len(); r-c.radius > 0.1 {
-			panic(fmt.Errorf("t: %.1f point %s not on circle %s, r is %.1f, not %.1f", ts[i], p, c, r, c.radius))
-		}
-	}
-	return []LineSegment{
-		{
-			p1.x, p1.y,
-			p2.x, p2.y,
-		},
-	}
-}
-
-func (c Circle) IntersectLineSegment(ls LineSegment) []LineSegment {
-	line := ls.Line()
-	pc := line.p.Subtract(c.center)
-	A := line.v.x*line.v.x + line.v.y*line.v.y
-	B := 2 * (line.v.x*pc.x + line.v.y*pc.y)
-	C := pc.x*pc.x + pc.y*pc.y
-	ts := []float64{0.0, 1.0}
-	ts = append(ts, quadratic(A, B, C)...)
-	slices.Sort(ts)
-	segments := []LineSegment{}
-	for i, t1 := range ts {
-		t2 := ts[(i+1)%len(ts)]
-		midT := average(t1, t2)
-		midPoint := line.At(midT)
-		if c.Inside(midPoint.x, midPoint.y) {
-			p1 := line.At(t1)
-			p2 := line.At(t2)
-			segments = append(segments, LineSegment{
-				p1.x, p1.y,
-				p2.x, p2.y,
-			})
-		}
-	}
-	return segments
+	return ts
 }
 
 func quadratic(a, b, c float64) []float64 {
@@ -207,7 +232,6 @@ func quadratic(a, b, c float64) []float64 {
 		}
 	}
 	d := math.Sqrt(discriminant)
-	fmt.Printf("a: %.1f, b: %.1f, c: %.1f, d^2: %.1f, d: %.1f, x1: %.1f, x2: %.1f\n", a, b, c, discriminant, d, (-b-d)/(2*a), (-b+d)/(2*a))
 	return []float64{
 		(-b - d) / (2 * a),
 		(-b + d) / (2 * a),
