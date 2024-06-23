@@ -30,6 +30,36 @@ func CircularLineField(n int, center Point) []Line {
 	return lines
 }
 
+func limitCirclesToShape(circles []Circle, shape Object) []LineLike {
+	segments := []LineLike{}
+	for _, circle := range circles {
+		segs := ClipCircleToObject(circle, shape)
+		// segs := shape.IntersectLine(line)
+		// fmt.Printf("line %s intersects with %s at %v\n", line, shape, segs)
+		segments = append(segments, segs...)
+	}
+	return segments
+}
+
+func concentricCircles(box Box, center Point, spacing float64) []Circle {
+	// find out the maximum radius
+	maxDist := 0.0
+	for _, p := range box.Corners() {
+		v := p.Subtract(center)
+		dist := v.Len()
+		if dist > maxDist {
+			maxDist = dist
+		}
+	}
+	nCircles := maxDist / spacing
+	circles := []Circle{}
+	for i := range int(nCircles) + 1 {
+		ii := float64(i)
+		circles = append(circles, Circle{center: center, radius: spacing * ii})
+	}
+	return circles
+}
+
 // find out min and max line index. The 0th line goes through the origin (0,0)
 func getLineIndexRange(box Box, perpVect Vector) (float64, float64) {
 	iSlice := []float64{}

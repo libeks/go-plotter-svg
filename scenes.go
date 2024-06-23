@@ -15,6 +15,7 @@ var (
 	ParallelBoxScene       = func(box Box) Scene { return parallelBoxScene(box) }
 	ParallelSineFieldScene = func(box Box) Scene { return parallelSineFieldsScene(box) }
 	ParallelCoherentScene  = func(box Box) Scene { return parallelCoherentSineFieldsScene(box) }
+	CirclesInSquareScene   = func(box Box) Scene { return circlesInSquareScene(box) }
 )
 
 func getLineFieldInObjects(box Box) Scene {
@@ -97,6 +98,34 @@ func parallelCoherentSineFieldsScene(box Box) Scene {
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
 	scene = scene.AddLayer(NewLayer("content3").WithLineLike(layer3).WithOffset(0, 0).WithColor("green"))
+	return scene
+}
+
+// circlesInSquareScene are concentric circles in a square
+// due to overlap, there tends to be a darkening on the left with certain pens
+func circlesInSquareScene(box Box) Scene {
+	scene := Scene{}.WithGuides()
+	layer1 := limitCirclesToShape(
+		concentricCircles(
+			box, box.Center(), 100,
+		),
+		box.AsPolygon(),
+	)
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
+	return scene
+}
+
+func testDensityScene(box Box) Scene {
+	scene := Scene{}.WithGuides()
+	layer1 := limitCirclesToShape(
+		concentricCircles(
+			box, box.Center(), 100,
+		),
+		box.AsPolygon(),
+	)
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	return scene
 }
 
@@ -194,7 +223,7 @@ func getLinesInsidePolygonScene(box Box, poly Object, n int) Scene {
 		}
 		x := rand.Float64()*(box.xEnd-box.x) + box.x
 		y := rand.Float64()*(box.yEnd-box.y) + box.y
-		if poly.Inside(x, y) {
+		if poly.Inside(Point{x, y}) {
 			lines = append(lines, LineSegment{Point{x, y}, Point{x + 100, y}})
 		}
 	}

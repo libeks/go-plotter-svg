@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"math"
 	"slices"
+
+	"github.com/shabbyrobe/xmlwriter"
 )
 
 type Object interface {
-	Inside(x, y float64) bool
-	IntersectTs(line Line) []float64
+	Inside(p Point) bool
+	IntersectTs(line Line) []float64           // return the t-values of the line intersecting with this object
+	IntersectCircleTs(circle Circle) []float64 // return the angle-t values of the circle intersecting with this object
 }
 
 func ClipLineToObject(line Line, obj Object) []LineSegment {
@@ -30,7 +33,7 @@ func ClipLineToObject(line Line, obj Object) []LineSegment {
 		t2 := ts[(i + 1)]
 		midT := average(t1, t2)
 		midPoint := line.At(midT)
-		if obj.Inside(midPoint.x, midPoint.y) {
+		if obj.Inside(midPoint) {
 			p1 := line.At(t1)
 			p2 := line.At(t2)
 			seg := LineSegment{p1, p2}
@@ -51,11 +54,33 @@ func ClipLineSegmentToObject(ls LineSegment, obj Object) []LineSegment {
 		t2 := ts[(i+1)%len(ts)]
 		midT := average(t1, t2)
 		midPoint := line.At(midT)
-		if obj.Inside(midPoint.x, midPoint.y) {
+		if obj.Inside(midPoint) {
 			p1 := line.At(t1)
 			p2 := line.At(t2)
 			segments = append(segments, LineSegment{
 				p1, p2,
+			})
+		}
+	}
+	return segments
+}
+
+func ClipCircleToObject(c Circle, obj Object) []LineLike {
+	ts := obj.IntersectCircleTs(c)
+	if len(ts) == 0 {
+		return []LineLike{c}
+	}
+	slices.Sort(ts)
+	segments := []LineLike{}
+	for i, t1 := range ts {
+		t2 := ts[(i+1)%len(ts)]
+		midT := average(t1, t2)
+		midPoint := c.At(midT)
+		if obj.Inside(midPoint) {
+			segments = append(segments, CircleArc{
+				circle: c,
+				t1:     t1,
+				t2:     t2,
 			})
 		}
 	}
@@ -98,10 +123,10 @@ func (o CompositeObject) Without(obj ...Object) CompositeObject {
 	}
 }
 
-func (o CompositeObject) Inside(x, y float64) bool {
+func (o CompositeObject) Inside(p Point) bool {
 	inside := false
 	for _, pos := range o.positive {
-		if pos.Inside(x, y) {
+		if pos.Inside(p) {
 			inside = true
 			break
 		}
@@ -110,7 +135,7 @@ func (o CompositeObject) Inside(x, y float64) bool {
 		return false
 	}
 	for _, neg := range o.negative {
-		if neg.Inside(x, y) {
+		if neg.Inside(p) {
 			return false
 		}
 	}
@@ -121,6 +146,14 @@ func (o CompositeObject) IntersectTs(line Line) []float64 {
 	ts := []float64{}
 	for _, obj := range append(o.positive, o.negative...) {
 		ts = append(ts, obj.IntersectTs(line)...)
+	}
+	return ts
+}
+
+func (o CompositeObject) IntersectCircleTs(circle Circle) []float64 {
+	ts := []float64{}
+	for _, obj := range append(o.positive, o.negative...) {
+		ts = append(ts, obj.IntersectCircleTs(circle)...)
 	}
 	return ts
 }
@@ -149,18 +182,23 @@ func (p Polygon) String() string {
 	return fmt.Sprintf("Polygon (%v)", p.points)
 }
 
-func (p Polygon) Inside(x, y float64) bool {
+func (p Polygon) Inside(pt Point) bool {
+	// TODO: take point as input
 	// compute the winding angle from the point
 	totalAngle := 0.0
 	for i, p1 := range p.points {
 		j := (i + 1) % len(p.points)
 		p2 := p.points[j]
-		p2Angle := positiveATan(p2.y-y, p2.x-x)
-		p1Angle := positiveATan(p1.y-y, p1.x-x)
+
+		p2Angle := p2.Subtract(pt).Atan()
+		p1Angle := p1.Subtract(pt).Atan()
 		angle := angleDifference(p2Angle, p1Angle)
 		totalAngle += angle
 	}
 	if math.Abs(totalAngle-math.Pi) < 0.01 {
+		return true
+	}
+	if math.Abs(totalAngle+math.Pi) < 0.01 {
 		return true
 	}
 	if math.Abs(totalAngle) < 0.01 {
@@ -189,6 +227,16 @@ func (p Polygon) IntersectTs(line Line) []float64 {
 	return ts
 }
 
+// should return circle t-values
+func (p Polygon) IntersectCircleTs(circle Circle) []float64 {
+	ts := []float64{}
+	for _, segment := range p.EdgeLines() {
+		t := circle.IntersectLineSegmentT(segment)
+		ts = append(ts, t...)
+	}
+	return ts
+}
+
 func average(a, b float64) float64 {
 	return (a + b) / 2
 }
@@ -202,14 +250,18 @@ func (c Circle) String() string {
 	return fmt.Sprintf("Circle @%s, r:%.1f", c.center, c.radius)
 }
 
-func (c Circle) Inside(x, y float64) bool {
-	distance := Point{x, y}.Subtract(c.center).Len()
+func (c Circle) Inside(p Point) bool {
+	distance := p.Subtract(c.center).Len()
 	return distance <= c.radius
 }
 
+func (c Circle) At(t float64) Point {
+	return c.center.Add(Vector{c.radius, 0}.RotateCCW(t))
+}
+
+// return the line ts when intersecting with the circle
 func (c Circle) IntersectTs(line Line) []float64 {
 	w := line.p.Subtract(c.center)
-	// fmt.Printf("w is %s\n", w)
 	A := line.v.x*line.v.x + line.v.y*line.v.y
 	B := 2 * (line.v.x*w.x + line.v.y*w.y)
 	C := w.x*w.x + w.y*w.y - c.radius*c.radius
@@ -218,6 +270,138 @@ func (c Circle) IntersectTs(line Line) []float64 {
 		return nil
 	}
 	return ts
+}
+
+// should return c2 t-values
+// IntersectCircleTs returns the angles respective to c2 at which it intersects c1
+func (c1 Circle) IntersectCircleTs(c2 Circle) []float64 {
+	// distance between the two centers
+	dVect := c1.center.Subtract(c2.center)
+	d := dVect.Len()
+	r1 := c1.radius
+	r2 := c2.radius
+	// circles too far to intersect
+	if d > r1+r2 {
+		return nil
+	}
+	// circles are colinear, return no intersection, even if they are the same circle
+	if d == 0 {
+		return nil
+	}
+	// x is distance from c1 at which the chord lies
+	x := (d*d + r1*r1 - r2*r2) / (2 * d)
+	// y is the half-length of the chord
+	y := math.Sqrt(r1*r1 - x*x)
+	dUnit := dVect.Unit()
+	xVect := dUnit.Mult(x)
+	yVect := dUnit.Perp().Mult(y)
+	v1 := xVect.Add(yVect)
+	v2 := xVect.Add(yVect.Mult(-1))
+	p1 := c1.center.Add(v1)
+	p2 := c1.center.Add(v2)
+	w1 := p1.Subtract(c2.center)
+	w2 := p2.Subtract(c2.center)
+	if math.Abs(v1.Len()-r1) > 0.001 {
+		panic(fmt.Errorf("circle %s intersection vector has wrong length %.1f, want %.1f", c1, v1.Len(), r1))
+	}
+	if math.Abs(v2.Len()-r1) > 0.001 {
+		panic(fmt.Errorf("circle %s intersection vector has wrong length %.1f, want %.1f", c1, v1.Len(), r1))
+	}
+	if math.Abs(w1.Len()-r2) > 0.001 {
+		panic(fmt.Errorf("circle %s intersection vector has wrong length %.1f, want %.1f", c2, w1.Len(), r2))
+	}
+	if math.Abs(w2.Len()-r2) > 0.001 {
+		panic(fmt.Errorf("circle %s intersection vector has wrong length %.1f, want %.1f", c2, w1.Len(), r2))
+	}
+	t1 := w1.Atan()
+	t2 := w2.Atan()
+	return []float64{t1, t2}
+}
+
+func (c Circle) IntersectLineSegmentT(ls LineSegment) []float64 {
+	ts := []float64{}
+	line := ls.Line()
+	lineTs := c.IntersectTs(line)
+	if len(lineTs) == 0 {
+		return nil
+	}
+	for _, t := range lineTs {
+		if t >= 0 && t <= 1 {
+			// get angle of vector from the center to the point
+			v := line.At(t).Subtract(c.center)
+			ts = append(ts, v.Atan())
+		}
+	}
+	fmt.Printf("Returning circle ts %v\n", ts)
+	return ts
+}
+
+func (c Circle) XML(color, width string) xmlwriter.Elem {
+	// <circle r="45" cx="50" cy="50" fill="red" />
+	return xmlwriter.Elem{
+		Name: "circle", Attrs: []xmlwriter.Attr{
+			{
+				Name:  "r",
+				Value: fmt.Sprintf("%.1f", c.radius),
+			},
+			{
+				Name:  "cx",
+				Value: fmt.Sprintf("%.1f", c.center.x),
+			},
+			{
+				Name:  "cy",
+				Value: fmt.Sprintf("%.1f", c.center.y),
+			},
+			{
+				Name:  "fill",
+				Value: "none",
+			},
+			{
+				Name:  "stroke-width",
+				Value: width,
+			},
+			{
+				Name:  "stroke",
+				Value: color,
+			},
+		},
+	}
+}
+
+type CircleArc struct {
+	circle Circle
+	t1     float64
+	t2     float64
+}
+
+func (c CircleArc) XML(color, width string) xmlwriter.Elem {
+	fmt.Printf("writing arc %s\n", c)
+	p1 := c.circle.At(c.t1)
+	p2 := c.circle.At(c.t2)
+	return xmlwriter.Elem{
+		Name: "path", Attrs: []xmlwriter.Attr{
+			{
+				Name:  "d",
+				Value: fmt.Sprintf("M %.1f %.1f A %.1f %.1f 0 0 1 %.1f %.1f", p1.x, p1.y, c.circle.radius, c.circle.radius, p2.x, p2.y),
+			},
+			{
+				Name:  "stroke",
+				Value: color,
+			},
+			{
+				Name:  "fill",
+				Value: "none",
+			},
+			{
+				Name:  "stroke-width",
+				Value: width,
+			},
+		},
+	}
+}
+
+func (c CircleArc) String() string {
+	return fmt.Sprintf("CircleArc %s from %.1f to %.1f", c.circle, c.t1, c.t2)
 }
 
 func quadratic(a, b, c float64) []float64 {

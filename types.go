@@ -67,7 +67,7 @@ func (s Scene) Layers() []Layer {
 	return layers
 }
 
-// implemented by LineSegment, Path
+// implemented by LineSegment, Path, CircleArc, Circle
 type LineLike interface {
 	XML(color, width string) xmlwriter.Elem
 	String() string
@@ -131,6 +131,25 @@ func (v Vector) Len() float64 {
 
 func (v Vector) Point() Point {
 	return Point(v) // S1016 complains if I do explicit Point struct
+}
+
+// RotateCCW rotates the vector counter clockwise by t in radians
+func (v Vector) RotateCCW(t float64) Vector {
+	cos := math.Cos(t)
+	sin := math.Sin(t)
+	return Vector{
+		v.x*cos - v.y*sin,
+		v.x*sin + v.y*cos,
+	}
+}
+
+// returns the angle theta of the vector counter clockwise wrt. 0x axis
+func (v Vector) Atan() float64 {
+	return math.Atan2(v.y, v.x)
+}
+
+func (v Vector) Unit() Vector {
+	return v.Mult(1 / v.Len())
 }
 
 // Perp returns a vector perpendicular to v of the same lenght,
@@ -429,6 +448,13 @@ func (b Box) Lines() []LineLike {
 	}
 }
 
+func (b Box) Corners() []Point {
+	return []Point{
+		Point{b.x, b.y}, Point{b.x, b.yEnd},
+		Point{b.xEnd, b.yEnd}, Point{b.xEnd, b.y},
+	}
+}
+
 func (b Box) ClipLineToBox(l Line) *LineSegment {
 	ls := []LineSegment{
 		{Point{b.x, b.y}, Point{b.x, b.yEnd}},
@@ -476,11 +502,6 @@ func (b Box) Height() float64 {
 
 func (b Box) AsPolygon() Object {
 	return Polygon{
-		points: []Point{
-			{b.x, b.y},
-			{b.xEnd, b.y},
-			{b.xEnd, b.yEnd},
-			{b.x, b.yEnd},
-		},
+		points: b.Corners(),
 	}
 }

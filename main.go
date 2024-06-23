@@ -20,7 +20,8 @@ func main() {
 	// scene := radialBoxScene(innerBox)
 	// scene := parallelBoxScene(innerBox)
 	// scene := parallelSineFieldsScene(innerBox)
-	scene := ParallelCoherentScene(innerBox)
+	// scene := ParallelCoherentScene(innerBox)
+	scene := CirclesInSquareScene(innerBox)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",
@@ -115,9 +116,16 @@ func radialBoxWithCircleExclusion(container Object, center Point, nLines int, ra
 }
 
 func segmentsToLineLikes(segments []LineSegment) []LineLike {
-
 	linelikes := make([]LineLike, len(segments))
 	for i, seg := range segments {
+		linelikes[i] = seg
+	}
+	return linelikes
+}
+
+func circlesToLineLikes(circles []Circle) []LineLike {
+	linelikes := make([]LineLike, len(circles))
+	for i, seg := range circles {
 		linelikes[i] = seg
 	}
 	return linelikes
