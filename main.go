@@ -21,7 +21,8 @@ func main() {
 	// scene := parallelBoxScene(innerBox)
 	// scene := parallelSineFieldsScene(innerBox)
 	// scene := ParallelCoherentScene(innerBox)
-	scene := CirclesInSquareScene(innerBox)
+	// scene := CirclesInSquareScene(innerBox)
+	scene := TestDensityScene(innerBox)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",
@@ -51,26 +52,6 @@ func getLinesInsideScene(box Box, n int) Scene {
 		1000,
 	}
 	return getLinesInsidePolygonScene(box, poly, n)
-}
-
-func partitionIntoSquares(box Box, nHorizontal int) []Box {
-	width := box.Width()
-	squareSide := width / (float64(nHorizontal))
-	boxes := []Box{}
-	verticalIteractions := int(box.Height() / float64(squareSide))
-	for v := range verticalIteractions {
-		vv := float64(v)
-		for h := range nHorizontal {
-			hh := float64(h)
-			boxes = append(boxes, Box{
-				x:    hh*squareSide + box.x,
-				y:    vv*squareSide + box.y,
-				xEnd: (hh+1)*squareSide + box.x,
-				yEnd: (vv+1)*squareSide + box.y,
-			})
-		}
-	}
-	return boxes
 }
 
 func randRangeMinusPlusOne() float64 {

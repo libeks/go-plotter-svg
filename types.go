@@ -31,27 +31,44 @@ func (s Scene) Layers() []Layer {
 	// assume that the 0th layer contains the guidelines
 	layers := s.layers
 	lines := []LineLike{}
+	increment := 25.0
 	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
 
-		for j := 300.0; j < 800.0; j += 100.0 {
+		for j := 300.0; j <= 700.0; j += increment {
+			len := 75.0
+			if j == 500 {
+				len = 100.0
+			}
 			lines = append(lines,
-				LineSegment{Point{j + ii*1000, 200}, Point{j + ii*1000, 300}},
+				LineSegment{Point{j + ii*1000, 300 - len}, Point{j + ii*1000, 300}},
 			)
 		}
-		for j := 300.0; j < 800.0; j += 100.0 {
+		for j := 300.0; j <= 700.0; j += increment {
+			len := 75.0
+			if j == 500 {
+				len = 100.0
+			}
 			lines = append(lines,
-				LineSegment{Point{j + ii*1000, 700}, Point{j + ii*1000, 800}},
+				LineSegment{Point{j + ii*1000, 700}, Point{j + ii*1000, 700 + len}},
 			)
 		}
-		for j := 300.0; j < 800.0; j += 100.0 {
+		for j := 300.0; j <= 700.0; j += increment {
+			len := 75.0
+			if j == 500 {
+				len = 100.0
+			}
 			lines = append(lines,
-				LineSegment{Point{200 + ii*1000, j}, Point{300 + ii*1000, j}},
+				LineSegment{Point{300 - len + ii*1000, j}, Point{300 + ii*1000, j}},
 			)
 		}
-		for j := 300.0; j < 800.0; j += 100.0 {
+		for j := 300.0; j <= 700.0; j += increment {
+			len := 75.0
+			if j == 500 {
+				len = 100.0
+			}
 			lines = append(lines,
-				LineSegment{Point{700 + ii*1000, j}, Point{800 + ii*1000, j}},
+				LineSegment{Point{700 + ii*1000, j}, Point{700 + len + ii*1000, j}},
 			)
 		}
 
@@ -450,7 +467,7 @@ func (b Box) Lines() []LineLike {
 
 func (b Box) Corners() []Point {
 	return []Point{
-		Point{b.x, b.y}, Point{b.x, b.yEnd},
+		{b.x, b.y}, Point{b.x, b.yEnd},
 		Point{b.xEnd, b.yEnd}, Point{b.xEnd, b.y},
 	}
 }

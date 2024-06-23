@@ -16,6 +16,7 @@ var (
 	ParallelSineFieldScene = func(box Box) Scene { return parallelSineFieldsScene(box) }
 	ParallelCoherentScene  = func(box Box) Scene { return parallelCoherentSineFieldsScene(box) }
 	CirclesInSquareScene   = func(box Box) Scene { return circlesInSquareScene(box) }
+	TestDensityScene       = func(box Box) Scene { return testDensityScene(box) }
 )
 
 func getLineFieldInObjects(box Box) Scene {
@@ -118,14 +119,49 @@ func circlesInSquareScene(box Box) Scene {
 
 func testDensityScene(box Box) Scene {
 	scene := Scene{}.WithGuides()
-	layer1 := limitCirclesToShape(
-		concentricCircles(
-			box, box.Center(), 100,
-		),
-		box.AsPolygon(),
-	)
+	quarters := partitionIntoSquares(box, 2)
+	colors := []string{
+		"red",
+		"green",
+		"blue",
+		"orange",
+	}
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
-	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
+	for i, quarter := range quarters {
+		lineLikes := []LineLike{}
+		quarterBox := quarter.box.WithPadding(50)
+		testBoxes := partitionIntoSquares(quarterBox, 5)
+		fmt.Printf("got %d boxes\n", len(testBoxes))
+		for _, tbox := range testBoxes {
+			jj := float64(tbox.j)
+			ii := float64(tbox.i)
+			var lines []LineLike
+			tboxx := tbox.box.WithPadding(50)
+			spacing := (jj + 1) * 10
+			if tbox.i < 4 {
+				lines = segmentsToLineLikes(
+					limitLinesToShape(
+						LinearLineField(
+							tboxx, ii*math.Pi/4, spacing,
+						),
+						tboxx.AsPolygon(),
+					),
+				)
+			} else {
+				lines = limitCirclesToShape(
+					concentricCircles(
+						tboxx, tboxx.Center(), spacing,
+					),
+					tboxx.AsPolygon(),
+				)
+			}
+			lineLikes = append(lineLikes, lines...)
+		}
+		layerName := fmt.Sprintf("pen %d", i)
+		scene = scene.AddLayer(NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
+	}
+
+	// scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	return scene
 }
 
@@ -174,8 +210,8 @@ func parallelBoxScene(box Box) Scene {
 	for _, minibox := range boxes {
 		spacing := randInRange(minLineWidth, maxLineWidth)
 		angle := randInRange(minAngle, maxAngle)
-		lines := LinearLineField(minibox, angle, spacing)
-		lineseg := limitLinesToShape(lines, minibox.WithPadding(50).AsPolygon())
+		lines := LinearLineField(minibox.box, angle, spacing)
+		lineseg := limitLinesToShape(lines, minibox.box.WithPadding(50).AsPolygon())
 		segments = append(segments, segmentsToLineLikes(lineseg))
 	}
 	layer1, layer2 := randomlyAllocateSegments(segments, 0.5)
@@ -193,11 +229,11 @@ func radialBoxScene(box Box) Scene {
 	segments := [][]LineLike{}
 	boxes := partitionIntoSquares(box, 10)
 	for _, minibox := range boxes {
-		boxcenter := minibox.Center()
+		boxcenter := minibox.box.Center()
 		xwiggle := randRangeMinusPlusOne() * wiggle
 		ywiggle := randRangeMinusPlusOne() * wiggle
 		center := Point{boxcenter.x + xwiggle, boxcenter.y + ywiggle}
-		segments = append(segments, radialBoxWithCircleExclusion(minibox.WithPadding(50).AsPolygon(), center, nSegments, exclusionRadius))
+		segments = append(segments, radialBoxWithCircleExclusion(minibox.box.WithPadding(50).AsPolygon(), center, nSegments, exclusionRadius))
 	}
 	layer1 := []LineLike{}
 	layer2 := []LineLike{}
@@ -275,4 +311,34 @@ func getCurlyScene(box Box) Scene {
 	curlyBrush2 := getCurlyBrush(box, 300.0, math.Pi/3)
 	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
 	return scene
+}
+
+type IndexedBox struct {
+	box Box
+	i   int
+	j   int
+}
+
+func partitionIntoSquares(box Box, nHorizontal int) []IndexedBox {
+	width := box.Width()
+	squareSide := width / (float64(nHorizontal))
+	boxes := []IndexedBox{}
+	verticalIteractions := int(box.Height() / float64(squareSide))
+	for v := range verticalIteractions {
+		vv := float64(v)
+		for h := range nHorizontal {
+			hh := float64(h)
+			boxes = append(boxes, IndexedBox{
+				box: Box{
+					x:    hh*squareSide + box.x,
+					y:    vv*squareSide + box.y,
+					xEnd: (hh+1)*squareSide + box.x,
+					yEnd: (vv+1)*squareSide + box.y,
+				},
+				i: h,
+				j: v,
+			})
+		}
+	}
+	return boxes
 }

@@ -16,7 +16,6 @@ type Object interface {
 
 func ClipLineToObject(line Line, obj Object) []LineSegment {
 	ts := obj.IntersectTs(line)
-	// fmt.Printf("Line intersecting object at %v\n", ts)
 	if len(ts) == 0 {
 		return nil
 	}
@@ -24,7 +23,6 @@ func ClipLineToObject(line Line, obj Object) []LineSegment {
 		panic(fmt.Errorf("not sure what to do with only one intersection %v", ts))
 	}
 	slices.Sort(ts)
-	// fmt.Printf("ts: %v\n", ts)
 	segments := []LineSegment{}
 	for i, t1 := range ts {
 		if i == len(ts)-1 {
@@ -38,7 +36,6 @@ func ClipLineToObject(line Line, obj Object) []LineSegment {
 			p2 := line.At(t2)
 			seg := LineSegment{p1, p2}
 			segments = append(segments, seg)
-			// fmt.Printf("adding segment %s at index %d\n", seg, i)
 		}
 	}
 	return segments
@@ -156,11 +153,6 @@ func (o CompositeObject) IntersectCircleTs(circle Circle) []float64 {
 		ts = append(ts, obj.IntersectCircleTs(circle)...)
 	}
 	return ts
-}
-
-func positiveATan(y, x float64) float64 {
-	angle := math.Atan2(y, x)
-	return angle
 }
 
 func angleDifference(a2, a1 float64) float64 {
@@ -332,7 +324,6 @@ func (c Circle) IntersectLineSegmentT(ls LineSegment) []float64 {
 			ts = append(ts, v.Atan())
 		}
 	}
-	fmt.Printf("Returning circle ts %v\n", ts)
 	return ts
 }
 
@@ -375,7 +366,6 @@ type CircleArc struct {
 }
 
 func (c CircleArc) XML(color, width string) xmlwriter.Elem {
-	fmt.Printf("writing arc %s\n", c)
 	p1 := c.circle.At(c.t1)
 	p2 := c.circle.At(c.t2)
 	return xmlwriter.Elem{
