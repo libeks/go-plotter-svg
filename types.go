@@ -36,22 +36,22 @@ func (s Scene) Layers() []Layer {
 
 		for j := 300.0; j < 800.0; j += 100.0 {
 			lines = append(lines,
-				LineSegment{j + ii*1000, 200, j + ii*1000, 300},
+				LineSegment{Point{j + ii*1000, 200}, Point{j + ii*1000, 300}},
 			)
 		}
 		for j := 300.0; j < 800.0; j += 100.0 {
 			lines = append(lines,
-				LineSegment{j + ii*1000, 700, j + ii*1000, 800},
+				LineSegment{Point{j + ii*1000, 700}, Point{j + ii*1000, 800}},
 			)
 		}
 		for j := 300.0; j < 800.0; j += 100.0 {
 			lines = append(lines,
-				LineSegment{200 + ii*1000, j, 300 + ii*1000, j},
+				LineSegment{Point{200 + ii*1000, j}, Point{300 + ii*1000, j}},
 			)
 		}
 		for j := 300.0; j < 800.0; j += 100.0 {
 			lines = append(lines,
-				LineSegment{700 + ii*1000, j, 800 + ii*1000, j},
+				LineSegment{Point{700 + ii*1000, j}, Point{800 + ii*1000, j}},
 			)
 		}
 
@@ -60,8 +60,8 @@ func (s Scene) Layers() []Layer {
 	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
 		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]LineLike{
-			LineSegment{500.0 + ii*1000, 300.0, 500 + ii*1000, 700},
-			LineSegment{300 + ii*1000, 500.0, 700 + ii*1000, 500},
+			LineSegment{Point{500.0 + ii*1000, 300.0}, Point{500 + ii*1000, 700}},
+			LineSegment{Point{300 + ii*1000, 500.0}, Point{700 + ii*1000, 500}},
 		}).WithColor(layers[i].color).WithWidth(layers[i].width).WithOffset(layers[i].offsetX, layers[i].offsetY))
 	}
 	return layers
@@ -130,7 +130,7 @@ func (v Vector) Len() float64 {
 }
 
 func (v Vector) Point() Point {
-	return Point{v.x, v.y}
+	return Point(v) // S1016 complains if I do explicit Point struct
 }
 
 // Perp returns a vector perpendicular to v of the same lenght,
@@ -252,18 +252,20 @@ func (l Line) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 }
 
 type LineSegment struct {
-	x1 float64
-	y1 float64
-	x2 float64
-	y2 float64
+	p1 Point
+	p2 Point
+	// x1 float64
+	// y1 float64
+	// x2 float64
+	// y2 float64
 }
 
 func (l LineSegment) String() string {
-	return fmt.Sprintf("LineSegment (%.1f, %.1f) -> (%.1f, %.1f)", l.x1, l.y1, l.x2, l.y2)
+	return fmt.Sprintf("LineSegment (%s) -> (%s)", l.p1, l.p2)
 }
 
 func (l LineSegment) Reverse() LineSegment {
-	return LineSegment{l.x2, l.y2, l.x1, l.y1}
+	return LineSegment{l.p2, l.p1}
 }
 
 func (l LineSegment) XML(color, width string) xmlwriter.Elem {
@@ -271,19 +273,19 @@ func (l LineSegment) XML(color, width string) xmlwriter.Elem {
 		Name: "line", Attrs: []xmlwriter.Attr{
 			{
 				Name:  "x1",
-				Value: fmt.Sprintf("%.1f", l.x1),
+				Value: fmt.Sprintf("%.1f", l.p1.x),
 			},
 			{
 				Name:  "x2",
-				Value: fmt.Sprintf("%.1f", l.x2),
+				Value: fmt.Sprintf("%.1f", l.p2.x),
 			},
 			{
 				Name:  "y1",
-				Value: fmt.Sprintf("%.1f", l.y1),
+				Value: fmt.Sprintf("%.1f", l.p1.y),
 			},
 			{
 				Name:  "y2",
-				Value: fmt.Sprintf("%.1f", l.y2),
+				Value: fmt.Sprintf("%.1f", l.p2.y),
 			},
 			{
 				Name:  "stroke",
@@ -303,8 +305,8 @@ func (l LineSegment) XML(color, width string) xmlwriter.Elem {
 
 func (l LineSegment) Line() Line {
 	return Line{
-		p: Point{l.x1, l.y1},
-		v: Vector{l.x2 - l.x1, l.y2 - l.y1},
+		p: l.p1,
+		v: l.p2.Subtract(l.p1),
 	}
 }
 
@@ -429,10 +431,10 @@ func (b Box) Lines() []LineLike {
 
 func (b Box) ClipLineToBox(l Line) *LineSegment {
 	ls := []LineSegment{
-		{b.x, b.y, b.x, b.yEnd},
-		{b.x, b.yEnd, b.xEnd, b.yEnd},
-		{b.xEnd, b.yEnd, b.xEnd, b.y},
-		{b.xEnd, b.y, b.x, b.y},
+		{Point{b.x, b.y}, Point{b.x, b.yEnd}},
+		{Point{b.x, b.yEnd}, Point{b.xEnd, b.yEnd}},
+		{Point{b.xEnd, b.yEnd}, Point{b.xEnd, b.y}},
+		{Point{b.xEnd, b.y}, Point{b.x, b.y}},
 	}
 	ts := []float64{}
 	for _, lineseg := range ls {
@@ -446,9 +448,7 @@ func (b Box) ClipLineToBox(l Line) *LineSegment {
 	if len(ts) == 2 {
 		p1 := l.At(ts[0])
 		p2 := l.At(ts[1])
-		return &LineSegment{
-			p1.x, p1.y, p2.x, p2.y,
-		}
+		return &LineSegment{p1, p2}
 	}
 	panic(fmt.Errorf("line had weird number of intersections with box: %v", ts))
 }

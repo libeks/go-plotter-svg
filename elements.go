@@ -149,9 +149,9 @@ func (h StrokeStrip) Lines() []LineLike {
 		}
 		var line LineSegment
 		if h.Direction.CardinalDirection == Horizontal {
-			line = LineSegment{h.box.x, h.box.y + float64(j)*h.padding, h.box.xEnd, h.box.y + float64(j)*h.padding}
+			line = LineSegment{Point{h.box.x, h.box.y + float64(j)*h.padding}, Point{h.box.xEnd, h.box.y + float64(j)*h.padding}}
 		} else {
-			line = LineSegment{h.box.x + float64(j)*h.padding, h.box.y, h.box.x + float64(j)*h.padding, h.box.yEnd}
+			line = LineSegment{Point{h.box.x + float64(j)*h.padding, h.box.y}, Point{h.box.x + float64(j)*h.padding, h.box.yEnd}}
 		}
 		if reverse {
 			lines[i] = line.Reverse()

@@ -33,7 +33,7 @@ func ClipLineToObject(line Line, obj Object) []LineSegment {
 		if obj.Inside(midPoint.x, midPoint.y) {
 			p1 := line.At(t1)
 			p2 := line.At(t2)
-			seg := LineSegment{p1.x, p1.y, p2.x, p2.y}
+			seg := LineSegment{p1, p2}
 			segments = append(segments, seg)
 			// fmt.Printf("adding segment %s at index %d\n", seg, i)
 		}
@@ -55,8 +55,7 @@ func ClipLineSegmentToObject(ls LineSegment, obj Object) []LineSegment {
 			p1 := line.At(t1)
 			p2 := line.At(t2)
 			segments = append(segments, LineSegment{
-				p1.x, p1.y,
-				p2.x, p2.y,
+				p1, p2,
 			})
 		}
 	}
@@ -175,7 +174,7 @@ func (p Polygon) EdgeLines() []LineSegment {
 	for i, p1 := range p.points {
 		j := (i + 1) % len(p.points)
 		p2 := p.points[j]
-		segments = append(segments, LineSegment{p1.x, p1.y, p2.x, p2.y})
+		segments = append(segments, LineSegment{p1, p2})
 	}
 	return segments
 }

@@ -20,7 +20,8 @@ func main() {
 	// scene := getLineFieldInObjects(innerBox)
 	// scene := radialBoxScene(innerBox)
 	// scene := parallelBoxScene(innerBox)
-	scene := parallelSineFieldsScene(innerBox)
+	// scene := parallelSineFieldsScene(innerBox)
+	scene := parallelCoherentSineFieldsScene(innerBox)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",
@@ -107,7 +108,7 @@ func getLinesInsidePolygonScene(box Box, poly Object, n int) Scene {
 		x := rand.Float64()*(box.xEnd-box.x) + box.x
 		y := rand.Float64()*(box.yEnd-box.y) + box.y
 		if poly.Inside(x, y) {
-			lines = append(lines, LineSegment{x, y, x + 100, y})
+			lines = append(lines, LineSegment{Point{x, y}, Point{x + 100, y}})
 		}
 	}
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
@@ -226,7 +227,7 @@ type SineDensity struct {
 }
 
 func (d SineDensity) Density(a float64) float64 {
-	theta := d.cycles*a*math.Pi + d.offset
+	theta := d.cycles * (a + d.offset) * math.Pi
 	dRange := d.max - d.min
 	return d.min + dRange*(math.Sin(theta)+1)/2
 }
@@ -253,6 +254,39 @@ func parallelSineFieldsScene(box Box) Scene {
 		limitLinesToShape(
 			LinearDensityLineField(
 				box, 2.0, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0}.Density,
+			),
+			box.AsPolygon(),
+		),
+	)
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
+	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
+	scene = scene.AddLayer(NewLayer("content3").WithLineLike(layer3).WithOffset(0, 0).WithColor("green"))
+	return scene
+}
+
+func parallelCoherentSineFieldsScene(box Box) Scene {
+	scene := Scene{}.WithGuides()
+	layer1 := segmentsToLineLikes(
+		limitLinesToShape(
+			LinearDensityLineField(
+				box, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0}.Density,
+			),
+			box.AsPolygon(),
+		),
+	)
+	layer2 := segmentsToLineLikes(
+		limitLinesToShape(
+			LinearDensityLineField(
+				box, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0.1}.Density,
+			),
+			box.AsPolygon(),
+		),
+	)
+	layer3 := segmentsToLineLikes(
+		limitLinesToShape(
+			LinearDensityLineField(
+				box, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0.2}.Density,
 			),
 			box.AsPolygon(),
 		),
