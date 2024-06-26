@@ -22,7 +22,8 @@ func main() {
 	// scene := parallelSineFieldsScene(innerBox)
 	// scene := ParallelCoherentScene(innerBox)
 	// scene := CirclesInSquareScene(innerBox)
-	scene := TestDensityScene(innerBox)
+	// scene := TestDensityScene(innerBox)
+	scene := TruchetScene(innerBox)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",

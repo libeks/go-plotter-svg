@@ -17,6 +17,7 @@ var (
 	ParallelCoherentScene  = func(box Box) Scene { return parallelCoherentSineFieldsScene(box) }
 	CirclesInSquareScene   = func(box Box) Scene { return circlesInSquareScene(box) }
 	TestDensityScene       = func(box Box) Scene { return testDensityScene(box) }
+	TruchetScene           = func(box Box) Scene { return getTruchetScene(box) }
 )
 
 func getLineFieldInObjects(box Box) Scene {
@@ -310,6 +311,19 @@ func getCurlyScene(box Box) Scene {
 	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curlyBrush).WithColor("red").WithWidth(10).WithOffset(-2, 40))
 	curlyBrush2 := getCurlyBrush(box, 300.0, math.Pi/3)
 	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
+	return scene
+}
+
+func getTruchetScene(box Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
+	dataSource := RandomDataSource{}
+	// dataSource := ConstantDataSource{0.0}
+	grid := NewGrid(box, 40, dataSource, truchetTiles)
+	curves := grid.GererateCurves()
+	// curlyBrush := getCurlyBrush(box, 400.0, math.Pi/4)
+	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curves).WithColor("red").WithWidth(10))
+
 	return scene
 }
 
