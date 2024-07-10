@@ -5,6 +5,98 @@ import (
 	"math/rand"
 )
 
+func truchetTilesWithStrikeThrough(box Box, dataSource DataSource) []*Curve {
+	val := dataSource.GetValue(box.Center())
+	if val < 0.4 {
+		return []*Curve{
+			{
+				endpoints: []EndpointMidpoint{
+					{
+						endpoint: North,
+						midpoint: 0.5,
+					},
+					{
+						endpoint: West,
+						midpoint: 0.5,
+					},
+				},
+				CurveType: CircleSegment,
+			},
+			{
+				endpoints: []EndpointMidpoint{
+					{
+						endpoint: East,
+						midpoint: 0.5,
+					},
+					{
+						endpoint: South,
+						midpoint: 0.5,
+					},
+				},
+				CurveType: CircleSegment,
+			},
+		}
+	} else if val > 0.6 {
+		return []*Curve{
+			{
+				endpoints: []EndpointMidpoint{
+					{
+						endpoint: North,
+						midpoint: 0.5,
+					},
+					{
+						endpoint: East,
+						midpoint: 0.5,
+					},
+				},
+				CurveType: CircleSegment,
+			},
+			{
+				endpoints: []EndpointMidpoint{
+					{
+						endpoint: West,
+						midpoint: 0.5,
+					},
+					{
+						endpoint: South,
+						midpoint: 0.5,
+					},
+				},
+				CurveType: CircleSegment,
+			},
+		}
+	} else {
+		return []*Curve{
+			{
+				endpoints: []EndpointMidpoint{
+					{
+						endpoint: North,
+						midpoint: 0.5,
+					},
+					{
+						endpoint: South,
+						midpoint: 0.5,
+					},
+				},
+				CurveType: LineOver,
+			},
+			{
+				endpoints: []EndpointMidpoint{
+					{
+						endpoint: West,
+						midpoint: 0.5,
+					},
+					{
+						endpoint: East,
+						midpoint: 0.5,
+					},
+				},
+				CurveType: LineUnder,
+			},
+		}
+	}
+}
+
 func truchetTiles(box Box, dataSource DataSource) []*Curve {
 	val := dataSource.GetValue(box.Center())
 	if val < 0.5 {
@@ -161,8 +253,8 @@ type CurveType int
 const (
 	StraightLine CurveType = iota
 	CircleSegment
-	OverCurve
-	UnderCurve
+	LineOver
+	LineUnder
 )
 
 type EndpointMidpoint struct {
@@ -193,20 +285,39 @@ func (c *Curve) XMLChunk(from NWSE) PathChunk {
 	}
 	to := c.GetOtherDirection(from)
 	if to == nil {
-		// return ""
-		panic("No to direction")
+		panic("No 'to' direction")
 	}
 	// mFrom := c.GetMidpoint(from)
 	mTo := c.GetMidpoint(*to)
+	mFrom := c.GetMidpoint(from)
+	startPoint := c.Cell.At(from, *mFrom)
 	endPoint := c.Cell.At(*to, *mTo)
 	radius := c.Cell.Box.Width() / 2
 	winding := from.Winding(*to)
 	switch winding {
 	case Straight:
-		return LineChunk{
-			endpoint: endPoint,
+		if c.CurveType == LineOver {
+			fmt.Printf("doing line over %s\n", c)
+			return LineChunk{
+				endpoint: endPoint,
+			}
+		} else if c.CurveType == LineUnder {
+			fmt.Printf("doing line under %s\n", c)
+			return LineGapChunk{
+				startpoint:   startPoint,
+				gapSizeRatio: 0.5,
+				endpoint:     endPoint,
+			}
+		} else {
+			fmt.Printf("curve type %s\n", c.CurveType)
 		}
-		// return fmt.Sprintf("L %.1f %.1f", endPoint.x, endPoint.y)
+	case StraightUnder:
+		fmt.Printf("doing line under %s\n", c)
+		return LineGapChunk{
+			startpoint:   startPoint,
+			gapSizeRatio: 0.5,
+			endpoint:     endPoint,
+		}
 	case Clockwise:
 		return CircleArcChunk{
 			radius:      radius,
@@ -214,7 +325,6 @@ func (c *Curve) XMLChunk(from NWSE) PathChunk {
 			isLong:      false,
 			endpoint:    endPoint,
 		}
-		// return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, 0, endPoint.x, endPoint.y)
 	case CounterClockwise:
 		return CircleArcChunk{
 			radius:      radius,
@@ -222,13 +332,22 @@ func (c *Curve) XMLChunk(from NWSE) PathChunk {
 			isLong:      false,
 			endpoint:    endPoint,
 		}
-		// return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, 1, endPoint.x, endPoint.y)
+	case Undefined:
+		fmt.Printf("winding is undefined: %s\n", winding)
+		return LineChunk{
+			endpoint: endPoint,
+		}
+	default:
+		fmt.Printf("winding is %s\n", winding)
+		return LineChunk{
+			endpoint: endPoint,
+		}
 	}
-	// return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, swing, endPoint.x, endPoint.y)
+	fmt.Printf("not even default: winding is %s\n", winding)
+
 	return LineChunk{
 		endpoint: endPoint,
 	}
-	// return fmt.Sprintf("L %.1f %.1f", endPoint.x, endPoint.y)
 }
 
 func (c *Curve) GetMidpoint(endpoint NWSE) *float64 {
@@ -252,7 +371,6 @@ func (c Curve) HasEndpoint(endpoint NWSE) bool {
 func (c *Curve) GetOtherDirection(endpoint NWSE) *NWSE {
 	var other *NWSE
 	found := false
-	// fmt.Printf("Getting other direction for %s, from %s\n", c, endpoint)
 	for _, pt := range c.endpoints {
 		if pt.endpoint == endpoint {
 			found = true
@@ -261,10 +379,8 @@ func (c *Curve) GetOtherDirection(endpoint NWSE) *NWSE {
 		}
 	}
 	if found {
-		// fmt.Printf("Other direction for %s, from %s is %s\n", c, endpoint, other)
 		return other
 	}
-	// fmt.Printf("Other direction for %s, from %s is nil\n", c, endpoint)
 	return nil
 }
 
@@ -338,7 +454,7 @@ func (c *Cell) PopulateCurves(curveConverter func(box Box, dataSource DataSource
 	for _, curve := range c.curves {
 		curve.Cell = c
 		curve.visited = false
-		curve.CurveType = StraightLine
+		// curve.CurveType = StraightLine
 	}
 }
 
@@ -393,47 +509,29 @@ type Grid struct {
 }
 
 func (g Grid) At(x, y int) *Cell {
-	// fmt.Printf("Getting at %d %d\n", x, y)
 	if x < 0 || x >= g.nY || y < 0 || y >= g.nX {
-		// fmt.Printf("Nothing at %d %d\n", x, y)
 		return nil
 	}
-	// fmt.Printf("Returning  %s\n", g.cells[cellCoord{x, y}])
 	return g.cells[cellCoord{x, y}]
 }
 
 func (g Grid) GenerateCurve(cell *Cell, direction NWSE) LineLike {
 	startPoint := cell.At(direction, 0.5)
-	// instructions := []string{fmt.Sprintf("M %.1f %.1f", startPoint.x, startPoint.y)}
 	path := NewPath(startPoint)
 	for {
-		// fmt.Printf("GenerateCurve %s %s\n", cell, direction)
 		if !cell.IsDone() {
 			curve, nextCell, nextDirection := cell.VisitFrom(direction) // *Curve, *Cell, *NWSE
 			if curve != nil {
 				path = path.AddPathChunk(curve.XMLChunk(direction))
-				// instructions = append(instructions, curve.XML(direction))
 				if nextCell == nil {
-					// if len(instructions) > 1 {
-					// return Path{s: strings.Join(instructions, " ")}
-					// }
 					return path
 				}
 				cell = nextCell
 				direction = nextDirection.Opposite()
-				// fmt.Printf("GenerateCurve next is %s %s\n", cell, direction)
 			} else {
-				// if len(instructions) > 1 {
-				// return Path{s: strings.Join(instructions, " ")}
-				// }
-				// return Path{s: ""}
 				return path
 			}
 		} else {
-			// if len(instructions) > 1 {
-			// 	return Path{s: strings.Join(instructions, " ")}
-			// }
-			// return Path{s: ""}
 			return path
 		}
 	}
@@ -444,25 +542,21 @@ func (g Grid) GererateCurves() []LineLike {
 	curves := []LineLike{}
 	// start with perimeter
 	// first from the top
-	// fmt.Printf("Top row\n")
 	for x := range g.nX {
 		cell := g.At(x, 0)
 		direction := North
 		curves = append(curves, g.GenerateCurve(cell, direction))
 	}
-	// fmt.Printf("Right column\n")
 	for y := range g.nY {
 		cell := g.At(g.nX-1, y)
 		direction := East
 		curves = append(curves, g.GenerateCurve(cell, direction))
 	}
-	// fmt.Printf("Bottom row\n")
 	for x := g.nX - 1; x >= 0; x-- {
 		cell := g.At(x, g.nY-1)
 		direction := South
 		curves = append(curves, g.GenerateCurve(cell, direction))
 	}
-	// fmt.Printf("Left column\n")
 	for y := g.nY - 1; y >= 0; y-- {
 		cell := g.At(0, y)
 		direction := West

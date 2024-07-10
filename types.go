@@ -116,6 +116,27 @@ func (c LineChunk) Endpoint() Point {
 	return c.endpoint
 }
 
+type LineGapChunk struct {
+	startpoint   Point
+	gapSizeRatio float64 // the relative ratio of the length of the line to keep empty in the middle
+	endpoint     Point
+}
+
+func (c LineGapChunk) XMLChunk() string {
+	v := c.endpoint.Subtract(c.startpoint)
+	end1 := c.startpoint.Add(v.Mult(0.5 - c.gapSizeRatio/2))
+	start2 := c.startpoint.Add(v.Mult(0.5 + c.gapSizeRatio/2))
+	return fmt.Sprintf("L %.1f %.1f M %.1f %.1f L %.1f %.1f", end1.x, end1.y, start2.x, start2.y, c.endpoint.x, c.endpoint.y)
+}
+
+func (c LineGapChunk) Length(start Point) float64 {
+	return start.Subtract(c.endpoint).Len()
+}
+
+func (c LineGapChunk) Endpoint() Point {
+	return c.endpoint
+}
+
 type CircleArcChunk struct {
 	radius      float64
 	endpoint    Point

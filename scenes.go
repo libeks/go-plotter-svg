@@ -318,10 +318,10 @@ func getTruchetScene(box Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
 	dataSource := RandomDataSource{}
-	// dataSource := ConstantDataSource{0.0}
-	grid := NewGrid(box, 80, dataSource, truchetTiles)
+	// dataSource := ConstantDataSource{1.0}
+	// grid := NewGrid(box, 30, dataSource, truchetTiles)
+	grid := NewGrid(box, 30, dataSource, truchetTilesWithStrikeThrough)
 	curves := grid.GererateCurves()
-	// curlyBrush := getCurlyBrush(box, 400.0, math.Pi/4)
 	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curves).WithColor("red").WithWidth(10))
 
 	return scene
@@ -337,8 +337,11 @@ func partitionIntoSquares(box Box, nHorizontal int) []IndexedBox {
 	width := box.Width()
 	squareSide := width / (float64(nHorizontal))
 	boxes := []IndexedBox{}
-	verticalIteractions := int(box.Height() / float64(squareSide))
-	for v := range verticalIteractions {
+	verticalIterations := int(box.Height() / float64(squareSide))
+	if verticalIterations < nHorizontal && math.Abs(box.Height()-(float64(nHorizontal)*float64(squareSide))) < 0.1 {
+		verticalIterations = nHorizontal
+	}
+	for v := range verticalIterations {
 		vv := float64(v)
 		for h := range nHorizontal {
 			hh := float64(h)
