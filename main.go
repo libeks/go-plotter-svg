@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
+	"time"
 
 	svg "github.com/ajstarks/svgo"
 )
@@ -24,11 +26,63 @@ func main() {
 	// scene := CirclesInSquareScene(innerBox)
 	// scene := TestDensityScene(innerBox)
 	scene := TruchetScene(innerBox)
+	calculateStatistics(scene)
 	SVG{fname: fname,
 		width:  "12in",
 		height: "9in",
 		Scene:  scene,
 	}.WriteSVG()
+}
+
+func calculateStatistics(scene Scene) {
+	yesGuides := "no"
+	if scene.guides {
+		yesGuides = "with "
+	}
+
+	fmt.Printf("Scene has %d layers, %s guides\n", len(scene.layers), yesGuides)
+	for i, layer := range scene.layers {
+		lengths := []float64{}
+		upDistances := []float64{}
+		start := Point{0, 0}
+		for _, linelike := range layer.linelikes {
+			lengths = append(lengths, linelike.Len())
+			end := linelike.End()
+			upDistances = append(upDistances, end.Subtract(start).Len())
+			start = end
+		}
+		end := Point{0, 0}
+		upDistances = append(upDistances, end.Subtract(start).Len())
+		downLen := imageSpaceToMeters(sumFloats(lengths))
+		upLen := imageSpaceToMeters(sumFloats(upDistances))
+		totalDistance := downLen + upLen
+		timeEstimate := metersToTime(totalDistance)
+		fmt.Printf("layer %d has %d curves, down distance %.1fm, up distance %.1fm, total %.1fm traveled\n", i, len(layer.linelikes), downLen, upLen, totalDistance)
+		fmt.Printf("Would take about %s to plot\n", timeToMinSec(timeEstimate))
+	}
+}
+
+func timeToMinSec(d time.Duration) string {
+	minutes := int(d / time.Minute)
+	seconds := int((d - time.Duration(float64(minutes)*float64(time.Minute))) / time.Second)
+	return fmt.Sprintf("%dm%ds", minutes, seconds)
+}
+
+func metersToTime(m float64) time.Duration {
+	return time.Duration(22.6 * float64(time.Second) * m)
+}
+
+func imageSpaceToMeters(l float64) float64 {
+	const unitPerMeter = 44092.0
+	return l / unitPerMeter
+}
+
+func sumFloats(l []float64) float64 {
+	total := 0.0
+	for _, v := range l {
+		total += v
+	}
+	return total
 }
 
 func getCurlyBrush(box Box, width, angle float64) []LineLike {

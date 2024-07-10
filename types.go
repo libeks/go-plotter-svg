@@ -89,6 +89,9 @@ type LineLike interface {
 	XML(color, width string) xmlwriter.Elem
 	String() string
 	IsEmpty() bool
+	Len() float64
+	Start() Point
+	End() Point
 }
 
 type PathChunk interface {
@@ -162,7 +165,7 @@ func (p Path) AddPathChunk(chunk PathChunk) Path {
 	return p
 }
 
-func (p Path) Length() float64 {
+func (p Path) Len() float64 {
 	total := 0.0
 	start := p.start
 	for _, chunk := range p.chunks {
@@ -170,6 +173,17 @@ func (p Path) Length() float64 {
 		start = chunk.Endpoint()
 	}
 	return total
+}
+
+func (p Path) Start() Point {
+	return p.start
+}
+
+func (p Path) End() Point {
+	if len(p.chunks) > 0 {
+		return p.chunks[len(p.chunks)-1].Endpoint()
+	}
+	return p.start
 }
 
 func (p Path) String() string {
@@ -380,10 +394,6 @@ func (l Line) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 type LineSegment struct {
 	p1 Point
 	p2 Point
-	// x1 float64
-	// y1 float64
-	// x2 float64
-	// y2 float64
 }
 
 func (l LineSegment) String() string {
@@ -427,6 +437,18 @@ func (l LineSegment) XML(color, width string) xmlwriter.Elem {
 			},
 		},
 	}
+}
+
+func (l LineSegment) Len() float64 {
+	return l.p2.Subtract(l.p1).Len()
+}
+
+func (l LineSegment) Start() Point {
+	return l.p1
+}
+
+func (l LineSegment) End() Point {
+	return l.p2
 }
 
 func (l LineSegment) Line() Line {

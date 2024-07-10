@@ -74,11 +74,7 @@ func ClipCircleToObject(c Circle, obj Object) []LineLike {
 		midT := average(t1, t2)
 		midPoint := c.At(midT)
 		if obj.Inside(midPoint) {
-			segments = append(segments, CircleArc{
-				circle: c,
-				t1:     t1,
-				t2:     t2,
-			})
+			segments = append(segments, CircleArc(c, t1, t2))
 		}
 	}
 	return segments
@@ -238,6 +234,20 @@ type Circle struct {
 	radius float64
 }
 
+func (c Circle) Len() float64 {
+	return math.Pi * 2 * c.radius
+}
+
+func (c Circle) Start() Point {
+	// usually the plotter plots circles starting and ending at the left extreme point
+	return c.center.Add(Vector{-1, 0}.Mult(c.radius))
+}
+
+func (c Circle) End() Point {
+	// usually the plotter plots circles starting and ending at the left extreme point
+	return c.center.Add(Vector{-1, 0}.Mult(c.radius))
+}
+
 func (c Circle) String() string {
 	return fmt.Sprintf("Circle @%s, r:%.1f", c.center, c.radius)
 }
@@ -363,44 +373,65 @@ func (c Circle) XML(color, width string) xmlwriter.Elem {
 	}
 }
 
-type CircleArc struct {
-	circle Circle
-	t1     float64
-	t2     float64
-}
-
-func (c CircleArc) XML(color, width string) xmlwriter.Elem {
-	p1 := c.circle.At(c.t1)
-	p2 := c.circle.At(c.t2)
-	return xmlwriter.Elem{
-		Name: "path", Attrs: []xmlwriter.Attr{
-			{
-				Name:  "d",
-				Value: fmt.Sprintf("M %.1f %.1f A %.1f %.1f 0 0 1 %.1f %.1f", p1.x, p1.y, c.circle.radius, c.circle.radius, p2.x, p2.y),
-			},
-			{
-				Name:  "stroke",
-				Value: color,
-			},
-			{
-				Name:  "fill",
-				Value: "none",
-			},
-			{
-				Name:  "stroke-width",
-				Value: width,
-			},
-		},
+func CircleArc(circle Circle, t1 float64, t2 float64) Path {
+	p1 := circle.At(t1)
+	p2 := circle.At(t2)
+	isLong := false
+	if t2-t1 > math.Pi {
+		isLong = true
 	}
+	path := NewPath(p1).AddPathChunk(CircleArcChunk{
+		radius:      circle.radius,
+		endpoint:    p2,
+		isLong:      isLong,
+		isClockwise: false,
+	})
+	return path
 }
 
-func (c CircleArc) IsEmpty() bool {
-	return c.t1 == c.t2
-}
+// type CircleArc struct {
+// 	circle Circle
+// 	t1     float64
+// 	t2     float64
+// }
 
-func (c CircleArc) String() string {
-	return fmt.Sprintf("CircleArc %s from %.1f to %.1f", c.circle, c.t1, c.t2)
-}
+// func (c CircleArc) XML(color, width string) xmlwriter.Elem {
+// 	p1 := c.circle.At(c.t1)
+// 	p2 := c.circle.At(c.t2)
+// 	path := NewPath(p1).AddPathChunk(CircleArcChunk{
+// 		radius:   c.circle.radius,
+// 		endpoint: p2,
+// 	})
+// 	return path.XML(color, width)
+// 	// return xmlwriter.Elem{
+// 	// 	Name: "path", Attrs: []xmlwriter.Attr{
+// 	// 		{
+// 	// 			Name:  "d",
+// 	// 			Value: fmt.Sprintf("M %.1f %.1f A %.1f %.1f 0 0 1 %.1f %.1f", p1.x, p1.y, c.circle.radius, c.circle.radius, p2.x, p2.y),
+// 	// 		},
+// 	// 		{
+// 	// 			Name:  "stroke",
+// 	// 			Value: color,
+// 	// 		},
+// 	// 		{
+// 	// 			Name:  "fill",
+// 	// 			Value: "none",
+// 	// 		},
+// 	// 		{
+// 	// 			Name:  "stroke-width",
+// 	// 			Value: width,
+// 	// 		},
+// 	// 	},
+// 	// }
+// }
+
+// func (c CircleArc) IsEmpty() bool {
+// 	return c.t1 == c.t2
+// }
+
+// func (c CircleArc) String() string {
+// 	return fmt.Sprintf("CircleArc %s from %.1f to %.1f", c.circle, c.t1, c.t2)
+// }
 
 func quadratic(a, b, c float64) []float64 {
 	discriminant := b*b - 4*a*c
