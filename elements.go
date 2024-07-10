@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math"
-	"strings"
 )
 
 type CurlyFill struct {
@@ -16,8 +15,8 @@ func (f CurlyFill) String() string {
 	return fmt.Sprintf("CurlyFill %s angle: %.3f, spacing: %.3f", f.box, f.angle, f.spacing)
 }
 
-func (f CurlyFill) GetPath() string {
-	commands := []string{}
+func (f CurlyFill) GetPath() Path {
+	// commands := []string{}
 	// find the starting point - extreme point of box in direction perpendicular to
 	w := f.spacing
 	boxWidth := float64(f.box.xEnd - f.box.x)
@@ -34,7 +33,8 @@ func (f CurlyFill) GetPath() string {
 	// start at (0,h)
 	x := 0.0
 	y := h
-	commands = append(commands, fmt.Sprintf("M %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+	// commands = append(commands, fmt.Sprintf("M %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+	path := NewPath(Point{f.box.x + x, f.box.y + y})
 	i := 0
 	for {
 		ii := float64(i)
@@ -52,11 +52,18 @@ func (f CurlyFill) GetPath() string {
 
 		x = cx - w*sina
 		y = cy - w*cosa
-		commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+		path = path.AddPathChunk(LineChunk{endpoint: Point{f.box.x + x, f.box.y + y}})
+		// commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
 
 		x2 := cx + w*sina
 		y2 := cy + w*cosa
-		commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 1 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
+		path = path.AddPathChunk(CircleArcChunk{
+			radius:      w,
+			endpoint:    Point{f.box.x + x2, f.box.y + y2},
+			isLong:      false,
+			isClockwise: true,
+		})
+		// commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 1 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
 
 		cx = w
 		cy = (4*(ii+1))*h - w*tana // iterate over 4,8,12,...
@@ -70,14 +77,21 @@ func (f CurlyFill) GetPath() string {
 
 		x = cx - w*sina
 		y = cy - w*cosa
-		commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
+		path = path.AddPathChunk(LineChunk{endpoint: Point{f.box.x + x, f.box.y + y}})
+		// commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
 
 		x2 = cx + w*sina
 		y2 = cy + w*cosa
-		commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 0 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
+		path = path.AddPathChunk(CircleArcChunk{
+			radius:      w,
+			endpoint:    Point{f.box.x + x2, f.box.y + y2},
+			isLong:      false,
+			isClockwise: false,
+		})
+		// commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 0 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
 		i += 1
 	}
-	return strings.Join(commands, " ")
+	return path
 }
 
 type StripImage struct {

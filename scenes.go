@@ -319,7 +319,7 @@ func getTruchetScene(box Box) Scene {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
 	dataSource := RandomDataSource{}
 	// dataSource := ConstantDataSource{0.0}
-	grid := NewGrid(box, 40, dataSource, truchetTiles)
+	grid := NewGrid(box, 80, dataSource, truchetTiles)
 	curves := grid.GererateCurves()
 	// curlyBrush := getCurlyBrush(box, 400.0, math.Pi/4)
 	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curves).WithColor("red").WithWidth(10))

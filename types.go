@@ -88,14 +88,104 @@ func (s Scene) Layers() []Layer {
 type LineLike interface {
 	XML(color, width string) xmlwriter.Elem
 	String() string
+	IsEmpty() bool
+}
+
+type PathChunk interface {
+	XMLChunk() string
+	Length(start Point) float64
+	Endpoint() Point
+}
+
+type LineChunk struct {
+	endpoint Point
+}
+
+func (c LineChunk) XMLChunk() string {
+	return fmt.Sprintf("L %.1f %.1f", c.endpoint.x, c.endpoint.y)
+}
+
+func (c LineChunk) Length(start Point) float64 {
+	return start.Subtract(c.endpoint).Len()
+}
+
+func (c LineChunk) Endpoint() Point {
+	return c.endpoint
+}
+
+type CircleArcChunk struct {
+	radius      float64
+	endpoint    Point
+	isLong      bool
+	isClockwise bool
+}
+
+func (c CircleArcChunk) XMLChunk() string {
+	long := 0
+	if c.isLong {
+		long = 1
+	}
+	clockwise := 0
+	if c.isClockwise {
+		clockwise = 1
+	}
+	return fmt.Sprintf("A %.1f %.1f 0 %d %d %.1f %.1f", c.radius, c.radius, long, clockwise, c.endpoint.x, c.endpoint.y)
+}
+
+func (c CircleArcChunk) Length(start Point) float64 {
+	dv := start.Subtract(c.endpoint)
+	distance := dv.Len()
+	angle := math.Asin(distance / (2 * c.radius))
+	if c.isLong {
+		return 2 * (math.Pi - angle) * c.radius
+	}
+	return 2 * angle * c.radius
+}
+
+func (c CircleArcChunk) Endpoint() Point {
+	return c.endpoint
+}
+
+func NewPath(start Point) Path {
+	return Path{
+		start: start,
+	}
 }
 
 type Path struct {
-	s string
+	start  Point
+	chunks []PathChunk
+}
+
+func (p Path) AddPathChunk(chunk PathChunk) Path {
+	p.chunks = append(p.chunks, chunk)
+	return p
+}
+
+func (p Path) Length() float64 {
+	total := 0.0
+	start := p.start
+	for _, chunk := range p.chunks {
+		total += chunk.Length(start)
+		start = chunk.Endpoint()
+	}
+	return total
 }
 
 func (p Path) String() string {
-	return fmt.Sprintf("Path (%s)", p.s)
+	return fmt.Sprintf("Path (%s)", p.pathString())
+}
+
+func (p Path) pathString() string {
+	strs := []string{fmt.Sprintf("M %.1f %.1f", p.start.x, p.start.y)}
+	for _, xml := range p.chunks {
+		strs = append(strs, xml.XMLChunk())
+	}
+	return strings.Join(strs, " ")
+}
+
+func (p Path) IsEmpty() bool {
+	return len(p.chunks) == 0
 }
 
 func (p Path) XML(color, width string) xmlwriter.Elem {
@@ -103,7 +193,7 @@ func (p Path) XML(color, width string) xmlwriter.Elem {
 		Name: "path", Attrs: []xmlwriter.Attr{
 			{
 				Name:  "d",
-				Value: p.s,
+				Value: p.pathString(),
 			},
 			{
 				Name:  "stroke",
@@ -346,6 +436,10 @@ func (l LineSegment) Line() Line {
 	}
 }
 
+func (l LineSegment) IsEmpty() bool {
+	return l.p1 == l.p2
+}
+
 func (l LineSegment) IntersectLineT(l2 Line) *float64 {
 	l1 := l.Line()
 	t := l1.IntersectT(l2)
@@ -448,20 +542,26 @@ func (b Box) String() string {
 }
 
 func (b Box) Lines() []LineLike {
-	commands := []string{}
+	path := NewPath(Point{b.x, b.y})
+	// commands := []string{}
 	// find the starting point - extreme point of box in direction perpendicular to
 
-	commands = append(commands, fmt.Sprintf("M %.3f %.3f", b.x, b.y))
+	// commands = append(commands, fmt.Sprintf("M %.3f %.3f", b.x, b.y))
 
-	commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.x, float64(b.yEnd)))
-	commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.xEnd, float64(b.yEnd)))
-	commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.xEnd, float64(b.y)))
-	commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.x, float64(b.y)))
+	path = path.AddPathChunk(LineChunk{endpoint: Point{b.x, b.yEnd}})
+	path = path.AddPathChunk(LineChunk{endpoint: Point{b.xEnd, b.yEnd}})
+	path = path.AddPathChunk(LineChunk{endpoint: Point{b.xEnd, b.y}})
+	path = path.AddPathChunk(LineChunk{endpoint: Point{b.x, b.y}})
+	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.x, float64(b.yEnd)))
+	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.xEnd, float64(b.yEnd)))
+	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.xEnd, float64(b.y)))
+	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.x, float64(b.y)))
 
 	return []LineLike{
-		Path{
-			strings.Join(commands, " "),
-		},
+		// Path{
+		// 	strings.Join(commands, " "),
+		// },
+		path,
 	}
 }
 

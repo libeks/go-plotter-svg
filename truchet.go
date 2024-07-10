@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 )
 
 func truchetTiles(box Box, dataSource DataSource) []*Curve {
@@ -13,26 +12,28 @@ func truchetTiles(box Box, dataSource DataSource) []*Curve {
 			{
 				endpoints: []EndpointMidpoint{
 					{
-						endpoint: N,
+						endpoint: North,
 						midpoint: 0.5,
 					},
 					{
-						endpoint: W,
+						endpoint: West,
 						midpoint: 0.5,
 					},
 				},
+				CurveType: CircleSegment,
 			},
 			{
 				endpoints: []EndpointMidpoint{
 					{
-						endpoint: E,
+						endpoint: East,
 						midpoint: 0.5,
 					},
 					{
-						endpoint: S,
+						endpoint: South,
 						midpoint: 0.5,
 					},
 				},
+				CurveType: CircleSegment,
 			},
 		}
 	} else {
@@ -40,26 +41,28 @@ func truchetTiles(box Box, dataSource DataSource) []*Curve {
 			{
 				endpoints: []EndpointMidpoint{
 					{
-						endpoint: N,
+						endpoint: North,
 						midpoint: 0.5,
 					},
 					{
-						endpoint: E,
+						endpoint: East,
 						midpoint: 0.5,
 					},
 				},
+				CurveType: CircleSegment,
 			},
 			{
 				endpoints: []EndpointMidpoint{
 					{
-						endpoint: W,
+						endpoint: West,
 						midpoint: 0.5,
 					},
 					{
-						endpoint: S,
+						endpoint: South,
 						midpoint: 0.5,
 					},
 				},
+				CurveType: CircleSegment,
 			},
 		}
 	}
@@ -71,28 +74,29 @@ const (
 	Clockwise Winding = iota
 	CounterClockwise
 	Straight
+	StraightUnder
 	Undefined
 )
 
 type NWSE int
 
 const (
-	N NWSE = 0x1
-	W NWSE = 0x2
-	S NWSE = 0x4
-	E NWSE = 0x8
+	North NWSE = 0x1
+	West  NWSE = 0x2
+	South NWSE = 0x4
+	East  NWSE = 0x8
 )
 
 func (d NWSE) Opposite() NWSE {
 	switch d {
-	case N:
-		return S
-	case E:
-		return W
-	case S:
-		return N
-	case W:
-		return E
+	case North:
+		return South
+	case East:
+		return West
+	case South:
+		return North
+	case West:
+		return East
 	default:
 		panic(fmt.Errorf("Direction %s doesn't have an opposite", d))
 	}
@@ -100,40 +104,40 @@ func (d NWSE) Opposite() NWSE {
 
 func (d NWSE) Winding(next NWSE) Winding {
 	switch d {
-	case N:
+	case North:
 		switch next {
-		case W:
+		case West:
 			return CounterClockwise
-		case S:
+		case South:
 			return Straight
-		case E:
+		case East:
 			return Clockwise
 		}
-	case E:
+	case East:
 		switch next {
-		case N:
+		case North:
 			return CounterClockwise
-		case W:
+		case West:
 			return Straight
-		case S:
+		case South:
 			return Clockwise
 		}
-	case S:
+	case South:
 		switch next {
-		case E:
+		case East:
 			return CounterClockwise
-		case N:
+		case North:
 			return Straight
-		case W:
+		case West:
 			return Clockwise
 		}
-	case W:
+	case West:
 		switch next {
-		case S:
+		case South:
 			return CounterClockwise
-		case E:
+		case East:
 			return Straight
-		case N:
+		case North:
 			return Clockwise
 		}
 	}
@@ -141,7 +145,7 @@ func (d NWSE) Winding(next NWSE) Winding {
 }
 
 func (d NWSE) String() string {
-	i := N
+	i := North
 	str := ""
 	for _, val := range []string{"North", "West", "South", "East"} {
 		if (d & i) > 0 {
@@ -183,13 +187,14 @@ func (c *Curve) String() string {
 	return fmt.Sprintf("Curve at %s with endpoints %v", c.Cell, c.endpoints)
 }
 
-func (c *Curve) XML(from NWSE) string {
+func (c *Curve) XMLChunk(from NWSE) PathChunk {
 	if !c.HasEndpoint(from) {
 		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
 	}
 	to := c.GetOtherDirection(from)
 	if to == nil {
-		return ""
+		// return ""
+		panic("No to direction")
 	}
 	// mFrom := c.GetMidpoint(from)
 	mTo := c.GetMidpoint(*to)
@@ -198,14 +203,32 @@ func (c *Curve) XML(from NWSE) string {
 	winding := from.Winding(*to)
 	switch winding {
 	case Straight:
-		return fmt.Sprintf("L %.1f %.1f", endPoint.x, endPoint.y)
+		return LineChunk{
+			endpoint: endPoint,
+		}
+		// return fmt.Sprintf("L %.1f %.1f", endPoint.x, endPoint.y)
 	case Clockwise:
-		return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, 0, endPoint.x, endPoint.y)
+		return CircleArcChunk{
+			radius:      radius,
+			isClockwise: false, // Truchet circle arcs swing the other direction from winding
+			isLong:      false,
+			endpoint:    endPoint,
+		}
+		// return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, 0, endPoint.x, endPoint.y)
 	case CounterClockwise:
-		return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, 1, endPoint.x, endPoint.y)
+		return CircleArcChunk{
+			radius:      radius,
+			isClockwise: true, // Truchet circle arcs swing the other direction from winding
+			isLong:      false,
+			endpoint:    endPoint,
+		}
+		// return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, 1, endPoint.x, endPoint.y)
 	}
 	// return fmt.Sprintf("A %.1f %.1f 0 0 %d %.1f %.1f", radius, radius, swing, endPoint.x, endPoint.y)
-	return fmt.Sprintf("L %.1f %.1f", endPoint.x, endPoint.y)
+	return LineChunk{
+		endpoint: endPoint,
+	}
+	// return fmt.Sprintf("L %.1f %.1f", endPoint.x, endPoint.y)
 }
 
 func (c *Curve) GetMidpoint(endpoint NWSE) *float64 {
@@ -229,7 +252,7 @@ func (c Curve) HasEndpoint(endpoint NWSE) bool {
 func (c *Curve) GetOtherDirection(endpoint NWSE) *NWSE {
 	var other *NWSE
 	found := false
-	fmt.Printf("Getting other direction for %s, from %s\n", c, endpoint)
+	// fmt.Printf("Getting other direction for %s, from %s\n", c, endpoint)
 	for _, pt := range c.endpoints {
 		if pt.endpoint == endpoint {
 			found = true
@@ -238,10 +261,10 @@ func (c *Curve) GetOtherDirection(endpoint NWSE) *NWSE {
 		}
 	}
 	if found {
-		fmt.Printf("Other direction for %s, from %s is %s\n", c, endpoint, other)
+		// fmt.Printf("Other direction for %s, from %s is %s\n", c, endpoint, other)
 		return other
 	}
-	fmt.Printf("Other direction for %s, from %s is nil\n", c, endpoint)
+	// fmt.Printf("Other direction for %s, from %s is nil\n", c, endpoint)
 	return nil
 }
 
@@ -283,13 +306,13 @@ func (c *Cell) NextUnseen() *Curve {
 
 func (c *Cell) GetCellInDirection(direction NWSE) *Cell {
 	switch direction {
-	case N:
+	case North:
 		return c.Grid.At(c.x, c.y-1)
-	case S:
+	case South:
 		return c.Grid.At(c.x, c.y+1)
-	case W:
+	case West:
 		return c.Grid.At(c.x-1, c.y)
-	case E:
+	case East:
 		return c.Grid.At(c.x+1, c.y)
 	default:
 		panic(fmt.Errorf("unrecognized direction %s", direction))
@@ -321,13 +344,13 @@ func (c *Cell) PopulateCurves(curveConverter func(box Box, dataSource DataSource
 
 func (c *Cell) At(direction NWSE, t float64) Point {
 	switch direction {
-	case N:
+	case North:
 		return Point{interpolate(c.Box.x, c.Box.xEnd, t), c.Box.y}
-	case W:
+	case West:
 		return Point{c.Box.x, interpolate(c.Box.y, c.Box.yEnd, t)}
-	case S:
+	case South:
 		return Point{interpolate(c.Box.x, c.Box.xEnd, t), c.Box.yEnd}
-	case E:
+	case East:
 		return Point{c.Box.xEnd, interpolate(c.Box.y, c.Box.yEnd, t)}
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
@@ -370,43 +393,48 @@ type Grid struct {
 }
 
 func (g Grid) At(x, y int) *Cell {
-	fmt.Printf("Getting at %d %d\n", x, y)
+	// fmt.Printf("Getting at %d %d\n", x, y)
 	if x < 0 || x >= g.nY || y < 0 || y >= g.nX {
-		fmt.Printf("Nothing at %d %d\n", x, y)
+		// fmt.Printf("Nothing at %d %d\n", x, y)
 		return nil
 	}
-	fmt.Printf("Returning  %s\n", g.cells[cellCoord{x, y}])
+	// fmt.Printf("Returning  %s\n", g.cells[cellCoord{x, y}])
 	return g.cells[cellCoord{x, y}]
 }
 
 func (g Grid) GenerateCurve(cell *Cell, direction NWSE) LineLike {
 	startPoint := cell.At(direction, 0.5)
-	instructions := []string{fmt.Sprintf("M %.1f %.1f", startPoint.x, startPoint.y)}
+	// instructions := []string{fmt.Sprintf("M %.1f %.1f", startPoint.x, startPoint.y)}
+	path := NewPath(startPoint)
 	for {
-		fmt.Printf("GenerateCurve %s %s\n", cell, direction)
+		// fmt.Printf("GenerateCurve %s %s\n", cell, direction)
 		if !cell.IsDone() {
 			curve, nextCell, nextDirection := cell.VisitFrom(direction) // *Curve, *Cell, *NWSE
 			if curve != nil {
-				instructions = append(instructions, curve.XML(direction))
+				path = path.AddPathChunk(curve.XMLChunk(direction))
+				// instructions = append(instructions, curve.XML(direction))
 				if nextCell == nil {
-					if len(instructions) > 1 {
-						return Path{s: strings.Join(instructions, " ")}
-					}
+					// if len(instructions) > 1 {
+					// return Path{s: strings.Join(instructions, " ")}
+					// }
+					return path
 				}
 				cell = nextCell
 				direction = nextDirection.Opposite()
-				fmt.Printf("GenerateCurve next is %s %s\n", cell, direction)
+				// fmt.Printf("GenerateCurve next is %s %s\n", cell, direction)
 			} else {
-				if len(instructions) > 1 {
-					return Path{s: strings.Join(instructions, " ")}
-				}
-				return Path{s: ""}
+				// if len(instructions) > 1 {
+				// return Path{s: strings.Join(instructions, " ")}
+				// }
+				// return Path{s: ""}
+				return path
 			}
 		} else {
-			if len(instructions) > 1 {
-				return Path{s: strings.Join(instructions, " ")}
-			}
-			return Path{s: ""}
+			// if len(instructions) > 1 {
+			// 	return Path{s: strings.Join(instructions, " ")}
+			// }
+			// return Path{s: ""}
+			return path
 		}
 	}
 	// return nil
@@ -416,29 +444,41 @@ func (g Grid) GererateCurves() []LineLike {
 	curves := []LineLike{}
 	// start with perimeter
 	// first from the top
-	fmt.Printf("Top row\n")
+	// fmt.Printf("Top row\n")
 	for x := range g.nX {
 		cell := g.At(x, 0)
-		direction := N
+		direction := North
 		curves = append(curves, g.GenerateCurve(cell, direction))
 	}
-	fmt.Printf("Right column\n")
+	// fmt.Printf("Right column\n")
 	for y := range g.nY {
 		cell := g.At(g.nX-1, y)
-		direction := E
+		direction := East
 		curves = append(curves, g.GenerateCurve(cell, direction))
 	}
-	fmt.Printf("Bottom row\n")
-	for x := range g.nX {
+	// fmt.Printf("Bottom row\n")
+	for x := g.nX - 1; x >= 0; x-- {
 		cell := g.At(x, g.nY-1)
-		direction := S
+		direction := South
 		curves = append(curves, g.GenerateCurve(cell, direction))
 	}
-	fmt.Printf("Left column\n")
-	for y := range g.nY {
+	// fmt.Printf("Left column\n")
+	for y := g.nY - 1; y >= 0; y-- {
 		cell := g.At(0, y)
-		direction := W
+		direction := West
 		curves = append(curves, g.GenerateCurve(cell, direction))
+	}
+	for x := 1; x < g.nX-1; x++ {
+		for y := 1; y < g.nY-1; y++ {
+			cell := g.At(x, y)
+			for _, direction := range []NWSE{North, West, South, East} {
+				c := g.GenerateCurve(cell, direction)
+				if !c.IsEmpty() {
+
+					curves = append(curves, c)
+				}
+			}
+		}
 	}
 	return curves
 }

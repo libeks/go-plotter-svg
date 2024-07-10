@@ -251,6 +251,10 @@ func (c Circle) At(t float64) Point {
 	return c.center.Add(Vector{c.radius, 0}.RotateCCW(t))
 }
 
+func (c Circle) IsEmpty() bool {
+	return c.radius == 0
+}
+
 // return the line ts when intersecting with the circle
 func (c Circle) IntersectTs(line Line) []float64 {
 	w := line.p.Subtract(c.center)
@@ -388,6 +392,10 @@ func (c CircleArc) XML(color, width string) xmlwriter.Elem {
 			},
 		},
 	}
+}
+
+func (c CircleArc) IsEmpty() bool {
+	return c.t1 == c.t2
 }
 
 func (c CircleArc) String() string {

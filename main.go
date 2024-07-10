@@ -38,7 +38,8 @@ func getCurlyBrush(box Box, width, angle float64) []LineLike {
 		angle:   angle,
 		spacing: float64(brushWidth),
 	}
-	return []LineLike{Path{path.GetPath()}}
+	// return []LineLike{Path{path.GetPath()}}
+	return []LineLike{path.GetPath()}
 }
 
 func getLinesInsideScene(box Box, n int) Scene {
@@ -105,13 +106,13 @@ func segmentsToLineLikes(segments []LineSegment) []LineLike {
 	return linelikes
 }
 
-func circlesToLineLikes(circles []Circle) []LineLike {
-	linelikes := make([]LineLike, len(circles))
-	for i, seg := range circles {
-		linelikes[i] = seg
-	}
-	return linelikes
-}
+// func circlesToLineLikes(circles []Circle) []LineLike {
+// 	linelikes := make([]LineLike, len(circles))
+// 	for i, seg := range circles {
+// 		linelikes[i] = seg
+// 	}
+// 	return linelikes
+// }
 
 type PlotImage interface {
 	Render(*svg.SVG)         // render non-guideline layers (layesr 1+)
