@@ -12,3 +12,4 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * Brush
 	* Allow for repeating strokes every now and then
 * Do a Marching Squares approach
+* For truchet, try more points per edge, like 6 (laid out 1-2-1-2, which has 4 non-intersecting tiles)
