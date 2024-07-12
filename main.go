@@ -19,7 +19,7 @@ func main() {
 	sizePx := 10000.0
 	padding := 1000.0
 
-	outerBox := box.Box{0, 0, sizePx, sizePx}
+	outerBox := box.Box{X: 0, Y: 0, XEnd: sizePx, YEnd: sizePx}
 	innerBox := outerBox.WithPadding(padding)
 	// scene := getCurlyScene(outerBox)
 	// scene := getLinesInsideScene(innerBox, 1000)

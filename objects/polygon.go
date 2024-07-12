@@ -18,8 +18,6 @@ func (p Polygon) String() string {
 }
 
 func (p Polygon) Inside(pt primitives.Point) bool {
-	// TODO: take point as input
-	// compute the winding angle from the point
 	totalAngle := 0.0
 	for i, p1 := range p.Points {
 		j := (i + 1) % len(p.Points)
