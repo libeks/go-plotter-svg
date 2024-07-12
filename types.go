@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"math"
-	"strings"
 
 	"github.com/shabbyrobe/xmlwriter"
+
+	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/objects"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 type Scene struct {
@@ -30,7 +32,7 @@ func (s Scene) Layers() []Layer {
 	// draw guides on the upper edge of the image
 	// assume that the 0th layer contains the guidelines
 	layers := s.layers
-	lines := []LineLike{}
+	ls := []lines.LineLike{}
 	increment := 25.0
 	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
@@ -40,8 +42,8 @@ func (s Scene) Layers() []Layer {
 			if j == 500 {
 				len = 100.0
 			}
-			lines = append(lines,
-				LineSegment{Point{j + ii*1000, 300 - len}, Point{j + ii*1000, 300}},
+			ls = append(ls,
+				lines.LineSegment{P1: primitives.Point{X: j + ii*1000, Y: 300 - len}, P2: primitives.Point{X: j + ii*1000, Y: 300}},
 			)
 		}
 		for j := 300.0; j <= 700.0; j += increment {
@@ -49,8 +51,8 @@ func (s Scene) Layers() []Layer {
 			if j == 500 {
 				len = 100.0
 			}
-			lines = append(lines,
-				LineSegment{Point{j + ii*1000, 700}, Point{j + ii*1000, 700 + len}},
+			ls = append(ls,
+				lines.LineSegment{P1: primitives.Point{X: j + ii*1000, Y: 700}, P2: primitives.Point{X: j + ii*1000, Y: 700 + len}},
 			)
 		}
 		for j := 300.0; j <= 700.0; j += increment {
@@ -58,8 +60,8 @@ func (s Scene) Layers() []Layer {
 			if j == 500 {
 				len = 100.0
 			}
-			lines = append(lines,
-				LineSegment{Point{300 - len + ii*1000, j}, Point{300 + ii*1000, j}},
+			ls = append(ls,
+				lines.LineSegment{P1: primitives.Point{X: 300 - len + ii*1000, Y: j}, P2: primitives.Point{X: 300 + ii*1000, Y: j}},
 			)
 		}
 		for j := 300.0; j <= 700.0; j += increment {
@@ -67,448 +69,21 @@ func (s Scene) Layers() []Layer {
 			if j == 500 {
 				len = 100.0
 			}
-			lines = append(lines,
-				LineSegment{Point{700 + ii*1000, j}, Point{700 + len + ii*1000, j}},
+			ls = append(ls,
+				lines.LineSegment{P1: primitives.Point{X: 700 + ii*1000, Y: j}, P2: primitives.Point{X: 700 + len + ii*1000, Y: j}},
 			)
 		}
 
 	}
-	layers = append(layers, NewLayer("GUIDELINES-pen").WithLineLike(lines))
+	layers = append(layers, NewLayer("GUIDELINES-pen").WithLineLike(ls))
 	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
-		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]LineLike{
-			LineSegment{Point{500.0 + ii*1000, 300.0}, Point{500 + ii*1000, 700}},
-			LineSegment{Point{300 + ii*1000, 500.0}, Point{700 + ii*1000, 500}},
+		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]lines.LineLike{
+			lines.LineSegment{P1: primitives.Point{X: 500.0 + ii*1000, Y: 300.0}, P2: primitives.Point{X: 500 + ii*1000, Y: 700}},
+			lines.LineSegment{P1: primitives.Point{X: 300 + ii*1000, Y: 500.0}, P2: primitives.Point{X: 700 + ii*1000, Y: 500}},
 		}).WithColor(layers[i].color).WithWidth(layers[i].width).WithOffset(layers[i].offsetX, layers[i].offsetY))
 	}
 	return layers
-}
-
-// implemented by LineSegment, Path, CircleArc, Circle
-type LineLike interface {
-	XML(color, width string) xmlwriter.Elem
-	String() string
-	IsEmpty() bool
-	Len() float64
-	Start() Point
-	End() Point
-}
-
-type PathChunk interface {
-	XMLChunk() string
-	Length(start Point) float64
-	Endpoint() Point
-}
-
-type LineChunk struct {
-	endpoint Point
-}
-
-func (c LineChunk) XMLChunk() string {
-	return fmt.Sprintf("L %.1f %.1f", c.endpoint.x, c.endpoint.y)
-}
-
-func (c LineChunk) Length(start Point) float64 {
-	return start.Subtract(c.endpoint).Len()
-}
-
-func (c LineChunk) Endpoint() Point {
-	return c.endpoint
-}
-
-type LineGapChunk struct {
-	startpoint   Point
-	gapSizeRatio float64 // the relative ratio of the length of the line to keep empty in the middle
-	endpoint     Point
-}
-
-func (c LineGapChunk) XMLChunk() string {
-	v := c.endpoint.Subtract(c.startpoint)
-	end1 := c.startpoint.Add(v.Mult(0.5 - c.gapSizeRatio/2))
-	start2 := c.startpoint.Add(v.Mult(0.5 + c.gapSizeRatio/2))
-	return fmt.Sprintf("L %.1f %.1f M %.1f %.1f L %.1f %.1f", end1.x, end1.y, start2.x, start2.y, c.endpoint.x, c.endpoint.y)
-}
-
-func (c LineGapChunk) Length(start Point) float64 {
-	return start.Subtract(c.endpoint).Len()
-}
-
-func (c LineGapChunk) Endpoint() Point {
-	return c.endpoint
-}
-
-type CircleArcChunk struct {
-	radius      float64
-	endpoint    Point
-	isLong      bool
-	isClockwise bool
-}
-
-func (c CircleArcChunk) XMLChunk() string {
-	long := 0
-	if c.isLong {
-		long = 1
-	}
-	clockwise := 0
-	if c.isClockwise {
-		clockwise = 1
-	}
-	return fmt.Sprintf("A %.1f %.1f 0 %d %d %.1f %.1f", c.radius, c.radius, long, clockwise, c.endpoint.x, c.endpoint.y)
-}
-
-func (c CircleArcChunk) Length(start Point) float64 {
-	dv := start.Subtract(c.endpoint)
-	distance := dv.Len()
-	angle := math.Asin(distance / (2 * c.radius))
-	if c.isLong {
-		return 2 * (math.Pi - angle) * c.radius
-	}
-	return 2 * angle * c.radius
-}
-
-func (c CircleArcChunk) Endpoint() Point {
-	return c.endpoint
-}
-
-func NewPath(start Point) Path {
-	return Path{
-		start: start,
-	}
-}
-
-type Path struct {
-	start  Point
-	chunks []PathChunk
-}
-
-func (p Path) AddPathChunk(chunk PathChunk) Path {
-	p.chunks = append(p.chunks, chunk)
-	return p
-}
-
-func (p Path) Len() float64 {
-	total := 0.0
-	start := p.start
-	for _, chunk := range p.chunks {
-		total += chunk.Length(start)
-		start = chunk.Endpoint()
-	}
-	return total
-}
-
-func (p Path) Start() Point {
-	return p.start
-}
-
-func (p Path) End() Point {
-	if len(p.chunks) > 0 {
-		return p.chunks[len(p.chunks)-1].Endpoint()
-	}
-	return p.start
-}
-
-func (p Path) String() string {
-	return fmt.Sprintf("Path (%s)", p.pathString())
-}
-
-func (p Path) pathString() string {
-	strs := []string{fmt.Sprintf("M %.1f %.1f", p.start.x, p.start.y)}
-	for _, xml := range p.chunks {
-		strs = append(strs, xml.XMLChunk())
-	}
-	return strings.Join(strs, " ")
-}
-
-func (p Path) IsEmpty() bool {
-	return len(p.chunks) == 0
-}
-
-func (p Path) XML(color, width string) xmlwriter.Elem {
-	return xmlwriter.Elem{
-		Name: "path", Attrs: []xmlwriter.Attr{
-			{
-				Name:  "d",
-				Value: p.pathString(),
-			},
-			{
-				Name:  "stroke",
-				Value: color,
-			},
-			{
-				Name:  "fill",
-				Value: "none",
-			},
-			{
-				Name:  "stroke-width",
-				Value: width,
-			},
-		},
-	}
-}
-
-type Vector struct {
-	x float64
-	y float64
-}
-
-func (v Vector) String() string {
-	return fmt.Sprintf("Vector (%.1f, %.1f)", v.x, v.y)
-}
-
-func (v Vector) Mult(t float64) Vector {
-	return Vector{t * v.x, t * v.y}
-}
-
-func (v Vector) Add(w Vector) Vector {
-	return Vector{v.x + w.x, v.y + w.y}
-}
-
-func (v Vector) Dot(w Vector) float64 {
-	return v.x*w.x + v.y*w.y
-}
-
-func (v Vector) Len() float64 {
-	return math.Sqrt(v.Dot(v))
-}
-
-func (v Vector) Point() Point {
-	return Point(v) // S1016 complains if I do explicit Point struct
-}
-
-// RotateCCW rotates the vector counter clockwise by t in radians
-func (v Vector) RotateCCW(t float64) Vector {
-	cos := math.Cos(t)
-	sin := math.Sin(t)
-	return Vector{
-		v.x*cos - v.y*sin,
-		v.x*sin + v.y*cos,
-	}
-}
-
-// returns the angle theta of the vector counter clockwise wrt. 0x axis
-func (v Vector) Atan() float64 {
-	return math.Atan2(v.y, v.x)
-}
-
-func (v Vector) Unit() Vector {
-	return v.Mult(1 / v.Len())
-}
-
-// Perp returns a vector perpendicular to v of the same lenght,
-// rotated counter-clockwise by 90deg
-func (v Vector) Perp() Vector {
-	return Vector{-v.y, v.x}
-}
-
-type Point struct {
-	x float64
-	y float64
-}
-
-func (p Point) String() string {
-	return fmt.Sprintf("Point (%.1f, %.1f)", p.x, p.y)
-}
-
-func (p Point) Add(v Vector) Point {
-	return Point{p.x + v.x, p.y + v.y}
-}
-
-func (p Point) Subtract(p2 Point) Vector {
-	return Vector{p.x - p2.x, p.y - p2.y}
-}
-
-type Line struct {
-	p Point
-	v Vector
-}
-
-func (l Line) String() string {
-	return fmt.Sprintf("Line (%s, %s)", l.p, l.v)
-}
-
-// Return a point on the line that is t lenghts of v away from p.
-func (l Line) At(t float64) Point {
-	return l.p.Add(l.v.Mult(t))
-}
-
-func (l Line) Intersect(l2 Line) *Point {
-	// TODO: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-	// first line is x1,y1 = l.p, x2,y2 = l.p + l.v. so x2-x1 = l.v.x, y2-y1 = l.v.y
-	// second line is x3,y3 = l2.p, x4,y4 = l2.p + l2.v, so x4-x3 = l2.v.x, y4-y3 = l2.v.y
-	// determinant is (x1-x2)(y3-y4) - (y1-y2)(x3-x4) = (x2-x1)(y4-y3) - (y2-y1)(x4-x3)
-	determinant := l.v.x*l2.v.y - l.v.y*l2.v.x
-	if determinant == 0 {
-		return nil
-	}
-	// result is
-	// x = ((x1*y2 - y1*x2)(x3-x4) - (x1-x2)(x3*y4 - y3*x4))/determinant
-	// y = ((x1*y2 - y1*x2)(y3-y4) - (y1-y2)(x3*y4 - y3*x4))/determinant
-	x1x2 := -l.v.x
-	x3x4 := -l2.v.x
-	y1y2 := -l.v.y
-	y3y4 := -l2.v.y
-	x1y2y1x2 := (l.p.x*(l.p.y+l.v.y) - l.p.y*(l.p.x+l.v.x))
-	x3y4y3x4 := (l2.p.x * (l2.p.y + l2.v.y)) * (l2.p.y * (l2.p.x + l2.v.x))
-
-	x := (x1y2y1x2*x3x4 - x1x2*x3y4y3x4) / determinant
-	y := (x1y2y1x2*y3y4 - y1y2*x3y4y3x4) / determinant
-	return &Point{x, y}
-}
-
-// Return the intersect t parameter of the line l when intersecting line l2
-func (l Line) IntersectT(l2 Line) *float64 {
-	// TODO: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-	// first line is x1,y1 = l.p, x2,y2 = l.p + l.v. so x2-x1 = l.v.x, y2-y1 = l.v.y
-	// second line is x3,y3 = l2.p, x4,y4 = l2.p + l2.v, so x4-x3 = l2.v.x, y4-y3 = l2.v.y
-	x1x2 := -l.v.x
-	x3x4 := -l2.v.x
-	y1y2 := -l.v.y
-	y3y4 := -l2.v.y
-	x1x3 := l.p.x - l2.p.x
-	y1y3 := l2.p.y - l2.p.y
-
-	divisor := (x1x2*y3y4 - y1y2*x3x4)
-	if divisor == 0.0 {
-		return nil
-	}
-	t := (x1x3*y3y4 - y1y3*x3x4) / divisor
-	return &t
-}
-
-// Return the intersection parameters t,u for both lines l and l2
-func (l Line) IntersectTU(l2 Line) (*float64, *float64) {
-	// TODO: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-	// first line is x1,y1 = l.p, x2,y2 = l.p + l.v. so x2-x1 = l.v.x, y2-y1 = l.v.y
-	// second line is x3,y3 = l2.p, x4,y4 = l2.p + l2.v, so x4-x3 = l2.v.x, y4-y3 = l2.v.y
-
-	x1x2 := -l.v.x
-	x3x4 := -l2.v.x
-	y1y2 := -l.v.y
-	y3y4 := -l2.v.y
-	x1x3 := l.p.x - l2.p.x
-	y1y3 := l.p.y - l2.p.y
-
-	divisor := (x1x2*y3y4 - y1y2*x3x4)
-	if divisor == 0.0 {
-		return nil, nil
-	}
-	t := (x1x3*y3y4 - y1y3*x3x4) / divisor
-	u := (x1x2*y1y3 - y1y2*x1x3) / -divisor // note the divisor is negative here. I initially missed that.
-	// fmt.Printf("t:%.3f, u: %.3f\n", t, u)
-	return &t, &u
-}
-
-func (l Line) IntersectLineSegmentT(ls2 LineSegment) *float64 {
-	l2 := ls2.Line()
-	t, u := l.IntersectTU(l2)
-	// fmt.Printf("Intersecting %s with %s, got t: %+v, u: %+v\n", l, ls2, t, u)
-	if t == nil || u == nil {
-		return nil
-	}
-	uu := *u
-	if uu <= 1.0 && uu >= 0.0 {
-		return t
-	}
-	return nil
-}
-
-type LineSegment struct {
-	p1 Point
-	p2 Point
-}
-
-func (l LineSegment) String() string {
-	return fmt.Sprintf("LineSegment (%s) -> (%s)", l.p1, l.p2)
-}
-
-func (l LineSegment) Reverse() LineSegment {
-	return LineSegment{l.p2, l.p1}
-}
-
-func (l LineSegment) XML(color, width string) xmlwriter.Elem {
-	return xmlwriter.Elem{
-		Name: "line", Attrs: []xmlwriter.Attr{
-			{
-				Name:  "x1",
-				Value: fmt.Sprintf("%.1f", l.p1.x),
-			},
-			{
-				Name:  "x2",
-				Value: fmt.Sprintf("%.1f", l.p2.x),
-			},
-			{
-				Name:  "y1",
-				Value: fmt.Sprintf("%.1f", l.p1.y),
-			},
-			{
-				Name:  "y2",
-				Value: fmt.Sprintf("%.1f", l.p2.y),
-			},
-			{
-				Name:  "stroke",
-				Value: color,
-			},
-			{
-				Name:  "fill",
-				Value: "none",
-			},
-			{
-				Name:  "stroke-width",
-				Value: width,
-			},
-		},
-	}
-}
-
-func (l LineSegment) Len() float64 {
-	return l.p2.Subtract(l.p1).Len()
-}
-
-func (l LineSegment) Start() Point {
-	return l.p1
-}
-
-func (l LineSegment) End() Point {
-	return l.p2
-}
-
-func (l LineSegment) Line() Line {
-	return Line{
-		p: l.p1,
-		v: l.p2.Subtract(l.p1),
-	}
-}
-
-func (l LineSegment) IsEmpty() bool {
-	return l.p1 == l.p2
-}
-
-func (l LineSegment) IntersectLineT(l2 Line) *float64 {
-	l1 := l.Line()
-	t := l1.IntersectT(l2)
-	if t == nil {
-		return nil
-	}
-	tt := *t
-	if tt <= 1.0 && tt >= 0.0 {
-		return t
-	}
-	return nil
-}
-
-func (l LineSegment) IntersectLineSegmentT(ls2 LineSegment) *float64 {
-	l1 := l.Line()
-	l2 := ls2.Line()
-	t, u := l1.IntersectTU(l2)
-	if t == nil || u == nil {
-		return nil
-	}
-	tt := *t
-	uu := *u
-	if (tt <= 1.0 && tt >= 0.0) && (uu <= 1.0 && uu >= 0.0) {
-		return t
-	}
-	return nil
 }
 
 func NewLayer(annotation string) Layer {
@@ -517,14 +92,14 @@ func NewLayer(annotation string) Layer {
 
 type Layer struct {
 	name      string
-	linelikes []LineLike
+	linelikes []lines.LineLike
 	offsetX   float64
 	offsetY   float64
 	color     string
 	width     float64
 }
 
-func (l Layer) WithLineLike(linelikes []LineLike) Layer {
+func (l Layer) WithLineLike(linelikes []lines.LineLike) Layer {
 	l.linelikes = append(l.linelikes, linelikes...)
 	return l
 }
@@ -584,43 +159,33 @@ func (b Box) String() string {
 	return fmt.Sprintf("Box (%.1f, %.1f) -> (%.1f, %.1f)", b.x, b.y, b.xEnd, b.yEnd)
 }
 
-func (b Box) Lines() []LineLike {
-	path := NewPath(Point{b.x, b.y})
-	// commands := []string{}
+func (b Box) Lines() []lines.LineLike {
+	path := lines.NewPath(primitives.Point{X: b.x, Y: b.y})
 	// find the starting point - extreme point of box in direction perpendicular to
 
-	// commands = append(commands, fmt.Sprintf("M %.3f %.3f", b.x, b.y))
+	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.x, Y: b.yEnd}})
+	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.xEnd, Y: b.yEnd}})
+	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.xEnd, Y: b.y}})
+	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.x, Y: b.y}})
 
-	path = path.AddPathChunk(LineChunk{endpoint: Point{b.x, b.yEnd}})
-	path = path.AddPathChunk(LineChunk{endpoint: Point{b.xEnd, b.yEnd}})
-	path = path.AddPathChunk(LineChunk{endpoint: Point{b.xEnd, b.y}})
-	path = path.AddPathChunk(LineChunk{endpoint: Point{b.x, b.y}})
-	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.x, float64(b.yEnd)))
-	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.xEnd, float64(b.yEnd)))
-	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.xEnd, float64(b.y)))
-	// commands = append(commands, fmt.Sprintf("L %.3f %.3f", b.x, float64(b.y)))
-
-	return []LineLike{
-		// Path{
-		// 	strings.Join(commands, " "),
-		// },
+	return []lines.LineLike{
 		path,
 	}
 }
 
-func (b Box) Corners() []Point {
-	return []Point{
-		{b.x, b.y}, Point{b.x, b.yEnd},
-		Point{b.xEnd, b.yEnd}, Point{b.xEnd, b.y},
+func (b Box) Corners() []primitives.Point {
+	return []primitives.Point{
+		{X: b.x, Y: b.y}, {X: b.x, Y: b.yEnd},
+		{X: b.xEnd, Y: b.yEnd}, {X: b.xEnd, Y: b.y},
 	}
 }
 
-func (b Box) ClipLineToBox(l Line) *LineSegment {
-	ls := []LineSegment{
-		{Point{b.x, b.y}, Point{b.x, b.yEnd}},
-		{Point{b.x, b.yEnd}, Point{b.xEnd, b.yEnd}},
-		{Point{b.xEnd, b.yEnd}, Point{b.xEnd, b.y}},
-		{Point{b.xEnd, b.y}, Point{b.x, b.y}},
+func (b Box) ClipLineToBox(l lines.Line) *lines.LineSegment {
+	ls := []lines.LineSegment{
+		{P1: primitives.Point{X: b.x, Y: b.y}, P2: primitives.Point{X: b.x, Y: b.yEnd}},
+		{P1: primitives.Point{X: b.x, Y: b.yEnd}, P2: primitives.Point{X: b.xEnd, Y: b.yEnd}},
+		{P1: primitives.Point{X: b.xEnd, Y: b.yEnd}, P2: primitives.Point{X: b.xEnd, Y: b.y}},
+		{P1: primitives.Point{X: b.xEnd, Y: b.y}, P2: primitives.Point{X: b.x, Y: b.y}},
 	}
 	ts := []float64{}
 	for _, lineseg := range ls {
@@ -634,7 +199,7 @@ func (b Box) ClipLineToBox(l Line) *LineSegment {
 	if len(ts) == 2 {
 		p1 := l.At(ts[0])
 		p2 := l.At(ts[1])
-		return &LineSegment{p1, p2}
+		return &lines.LineSegment{P1: p1, P2: p2}
 	}
 	panic(fmt.Errorf("line had weird number of intersections with box: %v", ts))
 }
@@ -648,8 +213,8 @@ func (b Box) WithPadding(pad float64) Box {
 	}
 }
 
-func (b Box) Center() Point {
-	return Point{b.x + (b.xEnd-b.x)/2, b.y + (b.yEnd-b.y)/2}
+func (b Box) Center() primitives.Point {
+	return primitives.Point{X: b.x + (b.xEnd-b.x)/2, Y: b.y + (b.yEnd-b.y)/2}
 }
 
 func (b Box) Width() float64 {
@@ -660,8 +225,8 @@ func (b Box) Height() float64 {
 	return b.yEnd - b.y
 }
 
-func (b Box) AsPolygon() Object {
-	return Polygon{
-		points: b.Corners(),
+func (b Box) AsPolygon() objects.Object {
+	return objects.Polygon{
+		Points: b.Corners(),
 	}
 }

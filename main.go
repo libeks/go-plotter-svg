@@ -7,6 +7,10 @@ import (
 	"time"
 
 	svg "github.com/ajstarks/svgo"
+
+	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/objects"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 func main() {
@@ -44,14 +48,14 @@ func calculateStatistics(scene Scene) {
 	for i, layer := range scene.layers {
 		lengths := []float64{}
 		upDistances := []float64{}
-		start := Point{0, 0}
+		start := primitives.Origin
 		for _, linelike := range layer.linelikes {
 			lengths = append(lengths, linelike.Len())
 			end := linelike.End()
 			upDistances = append(upDistances, end.Subtract(start).Len())
 			start = end
 		}
-		end := Point{0, 0}
+		end := primitives.Point{0, 0}
 		upDistances = append(upDistances, end.Subtract(start).Len())
 		downLen := imageSpaceToMeters(sumFloats(lengths))
 		upLen := imageSpaceToMeters(sumFloats(upDistances))
@@ -85,7 +89,7 @@ func sumFloats(l []float64) float64 {
 	return total
 }
 
-func getCurlyBrush(box Box, width, angle float64) []LineLike {
+func getCurlyBrush(box Box, width, angle float64) []lines.LineLike {
 	brushWidth := width
 	path := CurlyFill{
 		box:     box.WithPadding(brushWidth),
@@ -93,7 +97,7 @@ func getCurlyBrush(box Box, width, angle float64) []LineLike {
 		spacing: float64(brushWidth),
 	}
 	// return []LineLike{Path{path.GetPath()}}
-	return []LineLike{path.GetPath()}
+	return []lines.LineLike{path.GetPath()}
 }
 
 func getLinesInsideScene(box Box, n int) Scene {
@@ -103,9 +107,9 @@ func getLinesInsideScene(box Box, n int) Scene {
 	// 	{7000, 7000},
 	// 	{3000, 7000},
 	// }}
-	poly := Circle{
-		Point{5000, 5000},
-		1000,
+	poly := objects.Circle{
+		Center: primitives.Point{5000, 5000},
+		Radius: 1000,
 	}
 	return getLinesInsidePolygonScene(box, poly, n)
 }
@@ -118,9 +122,9 @@ func randInRange(min, max float64) float64 {
 	return (max-min)*rand.Float64() + min
 }
 
-func randomlyAllocateSegments(segments [][]LineLike, threshold float64) ([]LineLike, []LineLike) {
-	layer1 := []LineLike{}
-	layer2 := []LineLike{}
+func randomlyAllocateSegments(segments [][]lines.LineLike, threshold float64) ([]lines.LineLike, []lines.LineLike) {
+	layer1 := []lines.LineLike{}
+	layer2 := []lines.LineLike{}
 	for _, segs := range segments {
 		if rand.Float64() > threshold {
 			layer1 = append(layer1, segs...)
@@ -144,16 +148,16 @@ func (d SineDensity) Density(a float64) float64 {
 	return d.min + dRange*(math.Sin(theta)+1)/2
 }
 
-func radialBoxWithCircleExclusion(container Object, center Point, nLines int, radius float64) []LineLike {
+func radialBoxWithCircleExclusion(container objects.Object, center primitives.Point, nLines int, radius float64) []lines.LineLike {
 	radial := CircularLineField(nLines, center)
-	compObject := NewComposite().With(container).Without(Circle{center, radius})
+	compObject := objects.NewComposite().With(container).Without(objects.Circle{center, radius})
 	lines := limitLinesToShape(radial, compObject)
 	segments := segmentsToLineLikes(lines)
 	return segments
 }
 
-func segmentsToLineLikes(segments []LineSegment) []LineLike {
-	linelikes := make([]LineLike, len(segments))
+func segmentsToLineLikes(segments []lines.LineSegment) []lines.LineLike {
+	linelikes := make([]lines.LineLike, len(segments))
 	for i, seg := range segments {
 		linelikes[i] = seg
 	}

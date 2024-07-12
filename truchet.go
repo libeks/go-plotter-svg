@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"math/rand"
+
+	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 func truchetTilesWithStrikeThrough(box Box, dataSource DataSource) []*Curve {
@@ -279,7 +282,7 @@ func (c *Curve) String() string {
 	return fmt.Sprintf("Curve at %s with endpoints %v", c.Cell, c.endpoints)
 }
 
-func (c *Curve) XMLChunk(from NWSE) PathChunk {
+func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 	if !c.HasEndpoint(from) {
 		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
 	}
@@ -298,55 +301,55 @@ func (c *Curve) XMLChunk(from NWSE) PathChunk {
 	case Straight:
 		if c.CurveType == LineOver {
 			fmt.Printf("doing line over %s\n", c)
-			return LineChunk{
-				endpoint: endPoint,
+			return lines.LineChunk{
+				End: endPoint,
 			}
 		} else if c.CurveType == LineUnder {
 			fmt.Printf("doing line under %s\n", c)
-			return LineGapChunk{
-				startpoint:   startPoint,
-				gapSizeRatio: 0.5,
-				endpoint:     endPoint,
+			return lines.LineGapChunk{
+				Start:        startPoint,
+				GapSizeRatio: 0.5,
+				End:          endPoint,
 			}
 		} else {
 			fmt.Printf("curve type %s\n", c.CurveType)
 		}
 	case StraightUnder:
 		fmt.Printf("doing line under %s\n", c)
-		return LineGapChunk{
-			startpoint:   startPoint,
-			gapSizeRatio: 0.5,
-			endpoint:     endPoint,
+		return lines.LineGapChunk{
+			Start:        startPoint,
+			GapSizeRatio: 0.5,
+			End:          endPoint,
 		}
 	case Clockwise:
-		return CircleArcChunk{
-			radius:      radius,
-			isClockwise: false, // Truchet circle arcs swing the other direction from winding
-			isLong:      false,
-			endpoint:    endPoint,
+		return lines.CircleArcChunk{
+			Radius:      radius,
+			IsClockwise: false, // Truchet circle arcs swing the other direction from winding
+			IsLong:      false,
+			End:         endPoint,
 		}
 	case CounterClockwise:
-		return CircleArcChunk{
-			radius:      radius,
-			isClockwise: true, // Truchet circle arcs swing the other direction from winding
-			isLong:      false,
-			endpoint:    endPoint,
+		return lines.CircleArcChunk{
+			Radius:      radius,
+			IsClockwise: true, // Truchet circle arcs swing the other direction from winding
+			IsLong:      false,
+			End:         endPoint,
 		}
 	case Undefined:
 		fmt.Printf("winding is undefined: %s\n", winding)
-		return LineChunk{
-			endpoint: endPoint,
+		return lines.LineChunk{
+			End: endPoint,
 		}
 	default:
 		fmt.Printf("winding is %s\n", winding)
-		return LineChunk{
-			endpoint: endPoint,
+		return lines.LineChunk{
+			End: endPoint,
 		}
 	}
 	fmt.Printf("not even default: winding is %s\n", winding)
 
-	return LineChunk{
-		endpoint: endPoint,
+	return lines.LineChunk{
+		End: endPoint,
 	}
 }
 
@@ -458,16 +461,16 @@ func (c *Cell) PopulateCurves(curveConverter func(box Box, dataSource DataSource
 	}
 }
 
-func (c *Cell) At(direction NWSE, t float64) Point {
+func (c *Cell) At(direction NWSE, t float64) primitives.Point {
 	switch direction {
 	case North:
-		return Point{interpolate(c.Box.x, c.Box.xEnd, t), c.Box.y}
+		return primitives.Point{X: interpolate(c.Box.x, c.Box.xEnd, t), Y: c.Box.y}
 	case West:
-		return Point{c.Box.x, interpolate(c.Box.y, c.Box.yEnd, t)}
+		return primitives.Point{X: c.Box.x, Y: interpolate(c.Box.y, c.Box.yEnd, t)}
 	case South:
-		return Point{interpolate(c.Box.x, c.Box.xEnd, t), c.Box.yEnd}
+		return primitives.Point{X: interpolate(c.Box.x, c.Box.xEnd, t), Y: c.Box.yEnd}
 	case East:
-		return Point{c.Box.xEnd, interpolate(c.Box.y, c.Box.yEnd, t)}
+		return primitives.Point{X: c.Box.xEnd, Y: interpolate(c.Box.y, c.Box.yEnd, t)}
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
 	}
@@ -515,9 +518,9 @@ func (g Grid) At(x, y int) *Cell {
 	return g.cells[cellCoord{x, y}]
 }
 
-func (g Grid) GenerateCurve(cell *Cell, direction NWSE) LineLike {
+func (g Grid) GenerateCurve(cell *Cell, direction NWSE) lines.LineLike {
 	startPoint := cell.At(direction, 0.5)
-	path := NewPath(startPoint)
+	path := lines.NewPath(startPoint)
 	for {
 		if !cell.IsDone() {
 			curve, nextCell, nextDirection := cell.VisitFrom(direction) // *Curve, *Cell, *NWSE
@@ -538,8 +541,8 @@ func (g Grid) GenerateCurve(cell *Cell, direction NWSE) LineLike {
 	// return nil
 }
 
-func (g Grid) GererateCurves() []LineLike {
-	curves := []LineLike{}
+func (g Grid) GererateCurves() []lines.LineLike {
+	curves := []lines.LineLike{}
 	// start with perimeter
 	// first from the top
 	for x := range g.nX {
@@ -578,20 +581,20 @@ func (g Grid) GererateCurves() []LineLike {
 }
 
 type DataSource interface {
-	GetValue(p Point) float64
+	GetValue(p primitives.Point) float64
 }
 
 type ConstantDataSource struct {
 	val float64
 }
 
-func (s ConstantDataSource) GetValue(p Point) float64 {
+func (s ConstantDataSource) GetValue(p primitives.Point) float64 {
 	return s.val
 }
 
 type RandomDataSource struct {
 }
 
-func (s RandomDataSource) GetValue(p Point) float64 {
+func (s RandomDataSource) GetValue(p primitives.Point) float64 {
 	return rand.Float64()
 }

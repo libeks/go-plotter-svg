@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+
+	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/objects"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 var (
@@ -23,39 +27,39 @@ var (
 func getLineFieldInObjects(box Box) Scene {
 	scene := Scene{}.WithGuides()
 
-	poly1 := Polygon{
-		[]Point{
-			{3000, 3000},
-			{4900, 3000},
-			{4900, 7000},
-			{3000, 7000},
+	poly1 := objects.Polygon{
+		Points: []primitives.Point{
+			{X: 3000, Y: 3000},
+			{X: 4900, Y: 3000},
+			{X: 4900, Y: 7000},
+			{X: 3000, Y: 7000},
 		},
 	}
-	poly2 := Polygon{
-		[]Point{
-			{5100, 3000},
-			{7000, 3000},
-			{7000, 7000},
-			{5100, 7000},
+	poly2 := objects.Polygon{
+		[]primitives.Point{
+			{X: 5100, Y: 3000},
+			{X: 7000, Y: 3000},
+			{X: 7000, Y: 7000},
+			{X: 5100, Y: 7000},
 		},
 	}
-	poly3 := Polygon{
-		[]Point{
-			{3000, 3000},
-			{7000, 3000},
-			{7000, 4900},
-			{3000, 4900},
+	poly3 := objects.Polygon{
+		[]primitives.Point{
+			{X: 3000, Y: 3000},
+			{X: 7000, Y: 3000},
+			{X: 7000, Y: 4900},
+			{X: 3000, Y: 4900},
 		},
 	}
-	poly4 := Polygon{
-		[]Point{
-			{3000, 5100},
-			{7000, 5100},
-			{7000, 7000},
-			{3000, 7000},
+	poly4 := objects.Polygon{
+		[]primitives.Point{
+			{X: 3000, Y: 5100},
+			{X: 7000, Y: 5100},
+			{X: 7000, Y: 7000},
+			{X: 3000, Y: 7000},
 		},
 	}
-	radial := CircularLineField(3, Point{5000, 5000})
+	radial := CircularLineField(3, primitives.Point{5000, 5000})
 	fmt.Printf("radial : %s\n", radial)
 	lines1 := segmentsToLineLikes(limitLinesToShape(radial, poly1))
 	fmt.Printf("linelikes: %s\n", lines1)
@@ -129,18 +133,18 @@ func testDensityScene(box Box) Scene {
 	}
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
 	for i, quarter := range quarters {
-		lineLikes := []LineLike{}
+		lineLikes := []lines.LineLike{}
 		quarterBox := quarter.box.WithPadding(50)
 		testBoxes := partitionIntoSquares(quarterBox, 5)
 		fmt.Printf("got %d boxes\n", len(testBoxes))
 		for _, tbox := range testBoxes {
 			jj := float64(tbox.j)
 			ii := float64(tbox.i)
-			var lines []LineLike
+			var ls []lines.LineLike
 			tboxx := tbox.box.WithPadding(50)
 			spacing := (jj + 1) * 10
 			if tbox.i < 4 {
-				lines = segmentsToLineLikes(
+				ls = segmentsToLineLikes(
 					limitLinesToShape(
 						LinearLineField(
 							tboxx, ii*math.Pi/4, spacing,
@@ -149,14 +153,14 @@ func testDensityScene(box Box) Scene {
 					),
 				)
 			} else {
-				lines = limitCirclesToShape(
+				ls = limitCirclesToShape(
 					concentricCircles(
 						tboxx, tboxx.Center(), spacing,
 					),
 					tboxx.AsPolygon(),
 				)
 			}
-			lineLikes = append(lineLikes, lines...)
+			lineLikes = append(lineLikes, ls...)
 		}
 		layerName := fmt.Sprintf("pen %d", i)
 		scene = scene.AddLayer(NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
@@ -206,7 +210,7 @@ func parallelBoxScene(box Box) Scene {
 	maxAngle := math.Pi
 	// angle := math.Pi / 3
 	scene := Scene{}.WithGuides()
-	segments := [][]LineLike{}
+	segments := [][]lines.LineLike{}
 	boxes := partitionIntoSquares(box, 10)
 	for _, minibox := range boxes {
 		spacing := randInRange(minLineWidth, maxLineWidth)
@@ -227,17 +231,17 @@ func radialBoxScene(box Box) Scene {
 	exclusionRadius := 100.0
 	wiggle := 200.0
 	scene := Scene{}.WithGuides()
-	segments := [][]LineLike{}
+	segments := [][]lines.LineLike{}
 	boxes := partitionIntoSquares(box, 10)
 	for _, minibox := range boxes {
 		boxcenter := minibox.box.Center()
 		xwiggle := randRangeMinusPlusOne() * wiggle
 		ywiggle := randRangeMinusPlusOne() * wiggle
-		center := Point{boxcenter.x + xwiggle, boxcenter.y + ywiggle}
+		center := primitives.Point{X: boxcenter.X + xwiggle, Y: boxcenter.Y + ywiggle}
 		segments = append(segments, radialBoxWithCircleExclusion(minibox.box.WithPadding(50).AsPolygon(), center, nSegments, exclusionRadius))
 	}
-	layer1 := []LineLike{}
-	layer2 := []LineLike{}
+	layer1 := []lines.LineLike{}
+	layer2 := []lines.LineLike{}
 	for _, segs := range segments {
 		if rand.Float64() > 0.5 {
 			layer1 = append(layer1, segs...)
@@ -251,21 +255,21 @@ func radialBoxScene(box Box) Scene {
 	return scene
 }
 
-func getLinesInsidePolygonScene(box Box, poly Object, n int) Scene {
+func getLinesInsidePolygonScene(box Box, poly objects.Object, n int) Scene {
 	scene := Scene{}
-	lines := []LineLike{}
+	ls := []lines.LineLike{}
 	for {
-		if len(lines) == n {
+		if len(ls) == n {
 			break
 		}
 		x := rand.Float64()*(box.xEnd-box.x) + box.x
 		y := rand.Float64()*(box.yEnd-box.y) + box.y
-		if poly.Inside(Point{x, y}) {
-			lines = append(lines, LineSegment{Point{x, y}, Point{x + 100, y}})
+		if poly.Inside(primitives.Point{X: x, Y: y}) {
+			ls = append(ls, lines.LineSegment{P1: primitives.Point{X: x, Y: y}, P2: primitives.Point{X: x + 100, Y: y}})
 		}
 	}
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(box.Lines()).WithOffset(0, 0))
-	scene = scene.AddLayer(NewLayer("content").WithLineLike(lines).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("content").WithLineLike(ls).WithOffset(0, 0))
 	return scene
 }
 

@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"math"
+
+	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 type CurlyFill struct {
@@ -15,7 +18,7 @@ func (f CurlyFill) String() string {
 	return fmt.Sprintf("CurlyFill %s angle: %.3f, spacing: %.3f", f.box, f.angle, f.spacing)
 }
 
-func (f CurlyFill) GetPath() Path {
+func (f CurlyFill) GetPath() lines.Path {
 	// commands := []string{}
 	// find the starting point - extreme point of box in direction perpendicular to
 	w := f.spacing
@@ -34,7 +37,7 @@ func (f CurlyFill) GetPath() Path {
 	x := 0.0
 	y := h
 	// commands = append(commands, fmt.Sprintf("M %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
-	path := NewPath(Point{f.box.x + x, f.box.y + y})
+	path := lines.NewPath(primitives.Point{X: f.box.x + x, Y: f.box.y + y})
 	i := 0
 	for {
 		ii := float64(i)
@@ -52,16 +55,16 @@ func (f CurlyFill) GetPath() Path {
 
 		x = cx - w*sina
 		y = cy - w*cosa
-		path = path.AddPathChunk(LineChunk{endpoint: Point{f.box.x + x, f.box.y + y}})
+		path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{f.box.x + x, f.box.y + y}})
 		// commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
 
 		x2 := cx + w*sina
 		y2 := cy + w*cosa
-		path = path.AddPathChunk(CircleArcChunk{
-			radius:      w,
-			endpoint:    Point{f.box.x + x2, f.box.y + y2},
-			isLong:      false,
-			isClockwise: true,
+		path = path.AddPathChunk(lines.CircleArcChunk{
+			Radius:      w,
+			End:         primitives.Point{X: f.box.x + x2, Y: f.box.y + y2},
+			IsLong:      false,
+			IsClockwise: true,
 		})
 		// commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 1 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
 
@@ -77,16 +80,16 @@ func (f CurlyFill) GetPath() Path {
 
 		x = cx - w*sina
 		y = cy - w*cosa
-		path = path.AddPathChunk(LineChunk{endpoint: Point{f.box.x + x, f.box.y + y}})
+		path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: f.box.x + x, Y: f.box.y + y}})
 		// commands = append(commands, fmt.Sprintf("L %.3f %.3f", float64(f.box.x)+x, float64(f.box.y)+y))
 
 		x2 = cx + w*sina
 		y2 = cy + w*cosa
-		path = path.AddPathChunk(CircleArcChunk{
-			radius:      w,
-			endpoint:    Point{f.box.x + x2, f.box.y + y2},
-			isLong:      false,
-			isClockwise: false,
+		path = path.AddPathChunk(lines.CircleArcChunk{
+			Radius:      w,
+			End:         primitives.Point{X: f.box.x + x2, Y: f.box.y + y2},
+			IsLong:      false,
+			IsClockwise: false,
 		})
 		// commands = append(commands, fmt.Sprintf("A %.3f %.3f 0 0 0 %.3f %.3f", w, w, float64(f.box.x)+x2, float64(f.box.y)+y2))
 		i += 1
@@ -105,7 +108,7 @@ func (s StripImage) String() string {
 	return fmt.Sprintf("StripImage %s %d groups,  %d lines", s.box, s.nGroups, s.nLines)
 }
 
-func (s StripImage) GetLineLikes() [][]LineLike {
+func (s StripImage) GetLineLikes() [][]lines.LineLike {
 	var barSize float64
 	if s.Direction.CardinalDirection == Horizontal {
 		barSize = (s.box.xEnd - s.box.x) / float64(s.nGroups)
@@ -113,7 +116,7 @@ func (s StripImage) GetLineLikes() [][]LineLike {
 		barSize = (s.box.yEnd - s.box.y) / float64(s.nGroups)
 	}
 	padding := (s.box.yEnd - s.box.y) / float64(s.nLines)
-	linelikes := [][]LineLike{}
+	linelikes := [][]lines.LineLike{}
 	for i := range s.nGroups {
 		var box Box
 		if s.Direction.CardinalDirection == Horizontal {
@@ -143,14 +146,14 @@ func (h StrokeStrip) String() string {
 	return fmt.Sprintf("StrokeStrip %s padding %.1f", h.box, h.padding)
 }
 
-func (h StrokeStrip) Lines() []LineLike {
+func (h StrokeStrip) Lines() []lines.LineLike {
 	var nLines int
 	if h.Direction.CardinalDirection == Horizontal {
 		nLines = int((h.box.yEnd-h.box.y)/h.padding) + 1
 	} else {
 		nLines = int((h.box.xEnd-h.box.x)/h.padding) + 1
 	}
-	lines := make([]LineLike, nLines)
+	ls := make([]lines.LineLike, nLines)
 
 	for i := range nLines {
 		j := i
@@ -161,18 +164,23 @@ func (h StrokeStrip) Lines() []LineLike {
 		if h.Direction.Connection == AlternatingDirection && (i%2 == 1) {
 			reverse = !reverse
 		}
-		var line LineSegment
+		var line lines.LineSegment
 		if h.Direction.CardinalDirection == Horizontal {
-			line = LineSegment{Point{h.box.x, h.box.y + float64(j)*h.padding}, Point{h.box.xEnd, h.box.y + float64(j)*h.padding}}
+			line = lines.LineSegment{
+				P1: primitives.Point{X: h.box.x, Y: h.box.y + float64(j)*h.padding},
+				P2: primitives.Point{X: h.box.xEnd, Y: h.box.y + float64(j)*h.padding},
+			}
 		} else {
-			line = LineSegment{Point{h.box.x + float64(j)*h.padding, h.box.y}, Point{h.box.x + float64(j)*h.padding, h.box.yEnd}}
+			line = lines.LineSegment{
+				P1: primitives.Point{X: h.box.x + float64(j)*h.padding, Y: h.box.y},
+				P2: primitives.Point{X: h.box.x + float64(j)*h.padding, Y: h.box.yEnd},
+			}
 		}
 		if reverse {
-			lines[i] = line.Reverse()
+			ls[i] = line.Reverse()
 		} else {
-			lines[i] = line
+			ls[i] = line
 		}
-		// fmt.Printf("Just added line %s\n", lines[i])
 	}
-	return lines
+	return ls
 }
