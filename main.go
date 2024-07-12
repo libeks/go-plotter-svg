@@ -8,6 +8,7 @@ import (
 
 	svg "github.com/ajstarks/svgo"
 
+	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
@@ -18,7 +19,7 @@ func main() {
 	sizePx := 10000.0
 	padding := 1000.0
 
-	outerBox := Box{0, 0, sizePx, sizePx}
+	outerBox := box.Box{0, 0, sizePx, sizePx}
 	innerBox := outerBox.WithPadding(padding)
 	// scene := getCurlyScene(outerBox)
 	// scene := getLinesInsideScene(innerBox, 1000)
@@ -55,7 +56,7 @@ func calculateStatistics(scene Scene) {
 			upDistances = append(upDistances, end.Subtract(start).Len())
 			start = end
 		}
-		end := primitives.Point{0, 0}
+		end := primitives.Origin
 		upDistances = append(upDistances, end.Subtract(start).Len())
 		downLen := imageSpaceToMeters(sumFloats(lengths))
 		upLen := imageSpaceToMeters(sumFloats(upDistances))
@@ -89,10 +90,10 @@ func sumFloats(l []float64) float64 {
 	return total
 }
 
-func getCurlyBrush(box Box, width, angle float64) []lines.LineLike {
+func getCurlyBrush(b box.Box, width, angle float64) []lines.LineLike {
 	brushWidth := width
 	path := CurlyFill{
-		box:     box.WithPadding(brushWidth),
+		box:     b.WithPadding(brushWidth),
 		angle:   angle,
 		spacing: float64(brushWidth),
 	}
@@ -100,7 +101,7 @@ func getCurlyBrush(box Box, width, angle float64) []lines.LineLike {
 	return []lines.LineLike{path.GetPath()}
 }
 
-func getLinesInsideScene(box Box, n int) Scene {
+func getLinesInsideScene(b box.Box, n int) Scene {
 	// poly := Polygon{[]Point{
 	// 	{3000, 3000},
 	// 	{7000, 3000},
@@ -108,10 +109,10 @@ func getLinesInsideScene(box Box, n int) Scene {
 	// 	{3000, 7000},
 	// }}
 	poly := objects.Circle{
-		Center: primitives.Point{5000, 5000},
+		Center: primitives.Point{X: 5000, Y: 5000},
 		Radius: 1000,
 	}
-	return getLinesInsidePolygonScene(box, poly, n)
+	return getLinesInsidePolygonScene(b, poly, n)
 }
 
 func randRangeMinusPlusOne() float64 {
@@ -150,7 +151,7 @@ func (d SineDensity) Density(a float64) float64 {
 
 func radialBoxWithCircleExclusion(container objects.Object, center primitives.Point, nLines int, radius float64) []lines.LineLike {
 	radial := CircularLineField(nLines, center)
-	compObject := objects.NewComposite().With(container).Without(objects.Circle{center, radius})
+	compObject := objects.NewComposite().With(container).Without(objects.Circle{Center: center, Radius: radius})
 	lines := limitLinesToShape(radial, compObject)
 	segments := segmentsToLineLikes(lines)
 	return segments

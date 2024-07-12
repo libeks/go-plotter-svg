@@ -5,6 +5,7 @@ import (
 	"math"
 	"slices"
 
+	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
@@ -41,10 +42,10 @@ func limitCirclesToShape(circles []objects.Circle, shape objects.Object) []lines
 	return segments
 }
 
-func concentricCircles(box Box, center primitives.Point, spacing float64) []objects.Circle {
+func concentricCircles(b box.Box, center primitives.Point, spacing float64) []objects.Circle {
 	// find out the maximum radius
 	maxDist := 0.0
-	for _, p := range box.Corners() {
+	for _, p := range b.Corners() {
 		v := p.Subtract(center)
 		dist := v.Len()
 		if dist > maxDist {
@@ -61,10 +62,10 @@ func concentricCircles(box Box, center primitives.Point, spacing float64) []obje
 }
 
 // find out min and max line index. The 0th line goes through the origin (0,0)
-func getLineIndexRange(box Box, perpVect primitives.Vector) (float64, float64) {
+func getLineIndexRange(b box.Box, perpVect primitives.Vector) (float64, float64) {
 	iSlice := []float64{}
 	wSq := perpVect.Dot(perpVect)
-	for _, point := range []primitives.Point{{X: box.x, Y: box.y}, {X: box.x, Y: box.yEnd}, {X: box.xEnd, Y: box.y}, {X: box.xEnd, Y: box.yEnd}} {
+	for _, point := range []primitives.Point{{X: b.X, Y: b.Y}, {X: b.X, Y: b.YEnd}, {X: b.XEnd, Y: b.Y}, {X: b.XEnd, Y: b.YEnd}} {
 		pVect := point.Subtract(primitives.Point{X: 0, Y: 0})
 		i := pVect.Dot(perpVect) / wSq
 		iSlice = append(iSlice, i)
@@ -76,11 +77,11 @@ func getLineIndexRange(box Box, perpVect primitives.Vector) (float64, float64) {
 
 // LinearLineField returns a set of parallel lines, all oriented in the direction of angle relative to 0x axis,
 // only returns the lines that would fall inside the box
-func LinearLineField(box Box, angle float64, spacing float64) []lines.Line {
+func LinearLineField(b box.Box, angle float64, spacing float64) []lines.Line {
 	// find out min and max line index. The 0th line goes through the origin (0,0)
 	v := primitives.Vector{X: math.Cos(angle), Y: math.Sin(angle)}.Mult(spacing)
 	w := v.Perp()
-	minI, maxI := getLineIndexRange(box, w)
+	minI, maxI := getLineIndexRange(b, w)
 	ls := []lines.Line{}
 	for i := int(minI) - 1; i <= int(maxI)+1; i++ {
 		ls = append(ls, lines.Line{P: w.Mult(float64(i)).Point(), V: v})
@@ -92,11 +93,11 @@ func LinearLineField(box Box, angle float64, spacing float64) []lines.Line {
 // only returns the lines that would fall inside the box
 // densityFn takes input in the range [0;1] and outputs positive values denoting the spacing to respect
 // at every increment
-func LinearDensityLineField(box Box, angle float64, densityFn func(float64) float64) []lines.Line {
+func LinearDensityLineField(b box.Box, angle float64, densityFn func(float64) float64) []lines.Line {
 	// find out min and max line index. The 0th line goes through the origin (0,0)
 	v := primitives.Vector{X: math.Cos(angle), Y: math.Sin(angle)}
 	w := v.Perp()
-	minI, maxI := getLineIndexRange(box, w)
+	minI, maxI := getLineIndexRange(b, w)
 	ls := []lines.Line{}
 	i := minI
 	for i < maxI+1 {

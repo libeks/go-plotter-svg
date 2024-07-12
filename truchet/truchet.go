@@ -1,15 +1,16 @@
-package main
+package truchet
 
 import (
 	"fmt"
-	"math/rand"
 
+	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
+	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-func truchetTilesWithStrikeThrough(box Box, dataSource DataSource) []*Curve {
-	val := dataSource.GetValue(box.Center())
+func TruchetTilesWithStrikeThrough(b box.Box, dataSource samplers.DataSource) []*Curve {
+	val := dataSource.GetValue(b.Center())
 	if val < 0.4 {
 		return []*Curve{
 			{
@@ -100,8 +101,8 @@ func truchetTilesWithStrikeThrough(box Box, dataSource DataSource) []*Curve {
 	}
 }
 
-func truchetTiles(box Box, dataSource DataSource) []*Curve {
-	val := dataSource.GetValue(box.Center())
+func TruchetTiles(b box.Box, dataSource samplers.DataSource) []*Curve {
+	val := dataSource.GetValue(b.Center())
 	if val < 0.5 {
 		return []*Curve{
 			{
@@ -173,13 +174,17 @@ const (
 	Undefined
 )
 
+func (w Winding) String() string {
+	return []string{"Clockwise", "CounterClockwise", "Straight", "StraightUnder", "Undefined"}[w]
+}
+
 type NWSE int
 
 const (
-	North NWSE = 0x1
-	West  NWSE = 0x2
-	South NWSE = 0x4
-	East  NWSE = 0x8
+	North NWSE = iota
+	West
+	South
+	East
 )
 
 func (d NWSE) Opposite() NWSE {
@@ -193,7 +198,7 @@ func (d NWSE) Opposite() NWSE {
 	case West:
 		return East
 	default:
-		panic(fmt.Errorf("Direction %s doesn't have an opposite", d))
+		panic(fmt.Errorf("direction %s doesn't have an opposite", d))
 	}
 }
 
@@ -240,15 +245,16 @@ func (d NWSE) Winding(next NWSE) Winding {
 }
 
 func (d NWSE) String() string {
-	i := North
-	str := ""
-	for _, val := range []string{"North", "West", "South", "East"} {
-		if (d & i) > 0 {
-			str += val
-		}
-		i = i << 1
-	}
-	return str
+	return []string{"North", "West", "South", "East"}[d]
+	// i := North
+	// str := ""
+	// for _, val := range []string{"North", "West", "South", "East"} {
+	// 	if (d & i) > 0 {
+	// 		str += val
+	// 	}
+	// 	i = i << 1
+	// }
+	// return str
 }
 
 type CurveType int
@@ -259,6 +265,10 @@ const (
 	LineOver
 	LineUnder
 )
+
+func (c CurveType) String() string {
+	return []string{"StraightLine", "CircleSegment", "LineOver", "LineUnder"}[c]
+}
 
 type EndpointMidpoint struct {
 	endpoint NWSE
@@ -290,7 +300,6 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 	if to == nil {
 		panic("No 'to' direction")
 	}
-	// mFrom := c.GetMidpoint(from)
 	mTo := c.GetMidpoint(*to)
 	mFrom := c.GetMidpoint(from)
 	startPoint := c.Cell.At(from, *mFrom)
@@ -394,7 +403,7 @@ func interpolate(a, b, t float64) float64 {
 
 type Cell struct {
 	*Grid
-	Box
+	box.Box
 	x      int
 	y      int
 	curves []*Curve
@@ -452,7 +461,7 @@ func (c *Cell) VisitFrom(direction NWSE) (*Curve, *Cell, *NWSE) {
 	return nil, nil, nil
 }
 
-func (c *Cell) PopulateCurves(curveConverter func(box Box, dataSource DataSource) []*Curve, dataSource DataSource) {
+func (c *Cell) PopulateCurves(curveConverter func(box box.Box, dataSource samplers.DataSource) []*Curve, dataSource samplers.DataSource) {
 	c.curves = curveConverter(c.Box, dataSource)
 	for _, curve := range c.curves {
 		curve.Cell = c
@@ -464,20 +473,20 @@ func (c *Cell) PopulateCurves(curveConverter func(box Box, dataSource DataSource
 func (c *Cell) At(direction NWSE, t float64) primitives.Point {
 	switch direction {
 	case North:
-		return primitives.Point{X: interpolate(c.Box.x, c.Box.xEnd, t), Y: c.Box.y}
+		return primitives.Point{X: interpolate(c.Box.X, c.Box.XEnd, t), Y: c.Box.Y}
 	case West:
-		return primitives.Point{X: c.Box.x, Y: interpolate(c.Box.y, c.Box.yEnd, t)}
+		return primitives.Point{X: c.Box.X, Y: interpolate(c.Box.Y, c.Box.YEnd, t)}
 	case South:
-		return primitives.Point{X: interpolate(c.Box.x, c.Box.xEnd, t), Y: c.Box.yEnd}
+		return primitives.Point{X: interpolate(c.Box.X, c.Box.XEnd, t), Y: c.Box.YEnd}
 	case East:
-		return primitives.Point{X: c.Box.xEnd, Y: interpolate(c.Box.y, c.Box.yEnd, t)}
+		return primitives.Point{X: c.Box.XEnd, Y: interpolate(c.Box.Y, c.Box.YEnd, t)}
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
 	}
 }
 
-func NewGrid(box Box, nx int, dataSource DataSource, curveConverter func(box Box, dataSource DataSource) []*Curve) *Grid {
-	boxes := partitionIntoSquares(box, nx)
+func NewGrid(b box.Box, nx int, dataSource samplers.DataSource, curveConverter func(box.Box, samplers.DataSource) []*Curve) *Grid {
+	boxes := b.PartitionIntoSquares(nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
 	grid := &Grid{}
 	if len(boxes) != nx*nx {
@@ -486,12 +495,12 @@ func NewGrid(box Box, nx int, dataSource DataSource, curveConverter func(box Box
 	for _, childBox := range boxes {
 		cell := &Cell{
 			Grid: grid,
-			Box:  childBox.box,
-			x:    childBox.i,
-			y:    childBox.j,
+			Box:  childBox.Box,
+			x:    childBox.I,
+			y:    childBox.J,
 		}
 		cell.PopulateCurves(curveConverter, dataSource)
-		cells[cellCoord{childBox.i, childBox.j}] = cell
+		cells[cellCoord{childBox.I, childBox.J}] = cell
 	}
 	grid.nX = nx
 	grid.nY = nx
@@ -508,7 +517,7 @@ type Grid struct {
 	nX    int
 	nY    int
 	cells map[cellCoord]*Cell
-	DataSource
+	samplers.DataSource
 }
 
 func (g Grid) At(x, y int) *Cell {
@@ -578,23 +587,4 @@ func (g Grid) GererateCurves() []lines.LineLike {
 		}
 	}
 	return curves
-}
-
-type DataSource interface {
-	GetValue(p primitives.Point) float64
-}
-
-type ConstantDataSource struct {
-	val float64
-}
-
-func (s ConstantDataSource) GetValue(p primitives.Point) float64 {
-	return s.val
-}
-
-type RandomDataSource struct {
-}
-
-func (s RandomDataSource) GetValue(p primitives.Point) float64 {
-	return rand.Float64()
 }
