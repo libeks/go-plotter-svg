@@ -1,4 +1,4 @@
-package main
+package collections
 
 var (
 	Vertical   CardinalDirection = "vertical"

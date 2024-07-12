@@ -1,20 +1,22 @@
-package main
+package svg
 
 import (
 	"os"
 
 	"github.com/shabbyrobe/xmlwriter"
+
+	"github.com/libeks/go-plotter-svg/scenes"
 )
 
 type SVG struct {
-	fname  string
-	width  string
-	height string
-	Scene
+	Fname  string
+	Width  string
+	Height string
+	scenes.Scene
 }
 
 func (s SVG) WriteSVG() {
-	f, err := os.OpenFile(s.fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(s.Fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -23,15 +25,15 @@ func (s SVG) WriteSVG() {
 	ec := &xmlwriter.ErrCollector{}
 	defer ec.Panic()
 	layers := []xmlwriter.Writable{}
-	for i, layer := range s.Scene.Layers() {
+	for i, layer := range s.Scene.GetLayers() {
 		layers = append(layers, layer.XML(i))
 	}
 	ec.Do(
 		w.Start(xmlwriter.Doc{}),
 		w.Start(xmlwriter.Elem{
 			Name: "svg", Attrs: []xmlwriter.Attr{
-				{Name: "width", Value: s.width},
-				{Name: "height", Value: s.height},
+				{Name: "width", Value: s.Width},
+				{Name: "height", Value: s.Height},
 				{Name: "viewBox", Value: "0 0 10000 10000"},
 				{Name: "version", Value: "1.1"},
 				{Name: "id", Value: "svg6"},

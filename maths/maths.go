@@ -1,6 +1,9 @@
 package maths
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 func Average(a, b float64) float64 {
 	return (a + b) / 2
@@ -32,4 +35,20 @@ func Quadratic(a, b, c float64) []float64 {
 		(-b - d) / (2 * a),
 		(-b + d) / (2 * a),
 	}
+}
+
+func SumFloats(l []float64) float64 {
+	total := 0.0
+	for _, v := range l {
+		total += v
+	}
+	return total
+}
+
+func RandRangeMinusPlusOne() float64 {
+	return 2 * (rand.Float64() - 0.5)
+}
+
+func RandInRange(min, max float64) float64 {
+	return (max-min)*rand.Float64() + min
 }

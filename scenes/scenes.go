@@ -1,4 +1,4 @@
-package main
+package scenes
 
 import (
 	"fmt"
@@ -6,7 +6,9 @@ import (
 	"math/rand"
 
 	"github.com/libeks/go-plotter-svg/box"
+	"github.com/libeks/go-plotter-svg/collections"
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
@@ -62,13 +64,13 @@ func getLineFieldInObjects(b box.Box) Scene {
 			{X: 3000, Y: 7000},
 		},
 	}
-	radial := CircularLineField(3, primitives.Point{X: 5000, Y: 5000})
+	radial := collections.CircularLineField(3, primitives.Point{X: 5000, Y: 5000})
 	fmt.Printf("radial : %s\n", radial)
-	lines1 := segmentsToLineLikes(limitLinesToShape(radial, poly1))
+	lines1 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly1))
 	fmt.Printf("linelikes: %s\n", lines1)
-	lines2 := segmentsToLineLikes(limitLinesToShape(radial, poly2))
-	lines3 := segmentsToLineLikes(limitLinesToShape(radial, poly3))
-	lines4 := segmentsToLineLikes(limitLinesToShape(radial, poly4))
+	lines2 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly2))
+	lines3 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly3))
+	lines4 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly4))
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(lines1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0).WithColor("blue"))
@@ -80,25 +82,25 @@ func getLineFieldInObjects(b box.Box) Scene {
 func parallelCoherentSineFieldsScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	layer1 := segmentsToLineLikes(
-		limitLinesToShape(
-			LinearDensityLineField(
-				b, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0}.Density,
+		collections.LimitLinesToShape(
+			collections.LinearDensityLineField(
+				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
 	)
 	layer2 := segmentsToLineLikes(
-		limitLinesToShape(
-			LinearDensityLineField(
-				b, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0.1}.Density,
+		collections.LimitLinesToShape(
+			collections.LinearDensityLineField(
+				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.1}.Density,
 			),
 			b.AsPolygon(),
 		),
 	)
 	layer3 := segmentsToLineLikes(
-		limitLinesToShape(
-			LinearDensityLineField(
-				b, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0.2}.Density,
+		collections.LimitLinesToShape(
+			collections.LinearDensityLineField(
+				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.2}.Density,
 			),
 			b.AsPolygon(),
 		),
@@ -114,8 +116,8 @@ func parallelCoherentSineFieldsScene(b box.Box) Scene {
 // due to overlap, there tends to be a darkening on the left with certain pens
 func circlesInSquareScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	layer1 := limitCirclesToShape(
-		concentricCircles(
+	layer1 := collections.LimitCirclesToShape(
+		collections.ConcentricCircles(
 			b, b.Center(), 100,
 		),
 		b.AsPolygon(),
@@ -148,16 +150,16 @@ func testDensityScene(b box.Box) Scene {
 			spacing := (jj + 1) * 10
 			if tbox.I < 4 {
 				ls = segmentsToLineLikes(
-					limitLinesToShape(
-						LinearLineField(
+					collections.LimitLinesToShape(
+						collections.LinearLineField(
 							tboxx, ii*math.Pi/4, spacing,
 						),
 						tboxx.AsPolygon(),
 					),
 				)
 			} else {
-				ls = limitCirclesToShape(
-					concentricCircles(
+				ls = collections.LimitCirclesToShape(
+					collections.ConcentricCircles(
 						tboxx, tboxx.Center(), spacing,
 					),
 					tboxx.AsPolygon(),
@@ -168,33 +170,31 @@ func testDensityScene(b box.Box) Scene {
 		layerName := fmt.Sprintf("pen %d", i)
 		scene = scene.AddLayer(NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
 	}
-
-	// scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	return scene
 }
 
 func parallelSineFieldsScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	layer1 := segmentsToLineLikes(
-		limitLinesToShape(
-			LinearDensityLineField(
-				b, math.Pi/3, SineDensity{min: 20.0, max: 200, cycles: 5, offset: 0}.Density,
+		collections.LimitLinesToShape(
+			collections.LinearDensityLineField(
+				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 5, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
 	)
 	layer2 := segmentsToLineLikes(
-		limitLinesToShape(
-			LinearDensityLineField(
-				b, 0.6, SineDensity{min: 20.0, max: 200, cycles: 3, offset: 0}.Density,
+		collections.LimitLinesToShape(
+			collections.LinearDensityLineField(
+				b, 0.6, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 3, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
 	)
 	layer3 := segmentsToLineLikes(
-		limitLinesToShape(
-			LinearDensityLineField(
-				b, 2.0, SineDensity{min: 20.0, max: 200, cycles: 7, offset: 0}.Density,
+		collections.LimitLinesToShape(
+			collections.LinearDensityLineField(
+				b, 2.0, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
@@ -216,13 +216,13 @@ func parallelBoxScene(b box.Box) Scene {
 	segments := [][]lines.LineLike{}
 	boxes := b.PartitionIntoSquares(10)
 	for _, minibox := range boxes {
-		spacing := randInRange(minLineWidth, maxLineWidth)
-		angle := randInRange(minAngle, maxAngle)
-		lines := LinearLineField(minibox.Box, angle, spacing)
-		lineseg := limitLinesToShape(lines, minibox.Box.WithPadding(50).AsPolygon())
+		spacing := maths.RandInRange(minLineWidth, maxLineWidth)
+		angle := maths.RandInRange(minAngle, maxAngle)
+		lines := collections.LinearLineField(minibox.Box, angle, spacing)
+		lineseg := collections.LimitLinesToShape(lines, minibox.Box.WithPadding(50).AsPolygon())
 		segments = append(segments, segmentsToLineLikes(lineseg))
 	}
-	layer1, layer2 := randomlyAllocateSegments(segments, 0.5)
+	layer1, layer2 := collections.RandomlyAllocateSegments(segments, 0.5)
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
@@ -238,8 +238,8 @@ func radialBoxScene(b box.Box) Scene {
 	boxes := b.PartitionIntoSquares(10)
 	for _, minibox := range boxes {
 		boxcenter := minibox.Box.Center()
-		xwiggle := randRangeMinusPlusOne() * wiggle
-		ywiggle := randRangeMinusPlusOne() * wiggle
+		xwiggle := maths.RandRangeMinusPlusOne() * wiggle
+		ywiggle := maths.RandRangeMinusPlusOne() * wiggle
 		center := primitives.Point{X: boxcenter.X + xwiggle, Y: boxcenter.Y + ywiggle}
 		segments = append(segments, radialBoxWithCircleExclusion(minibox.Box.WithPadding(50).AsPolygon(), center, nSegments, exclusionRadius))
 	}
@@ -276,27 +276,43 @@ func getLinesInsidePolygonScene(b box.Box, poly objects.Object, n int) Scene {
 	return scene
 }
 
+func getLinesInsideScene(b box.Box, n int) Scene {
+	poly := objects.Circle{
+		Center: primitives.Point{X: 5000, Y: 5000},
+		Radius: 1000,
+	}
+	return getLinesInsidePolygonScene(b, poly, n)
+}
+
+func radialBoxWithCircleExclusion(container objects.Object, center primitives.Point, nLines int, radius float64) []lines.LineLike {
+	radial := collections.CircularLineField(nLines, center)
+	compObject := objects.NewComposite().With(container).Without(objects.Circle{Center: center, Radius: radius})
+	lines := collections.LimitLinesToShape(radial, compObject)
+	segments := segmentsToLineLikes(lines)
+	return segments
+}
+
 func getBrushBackForthScene(b box.Box) Scene {
-	horizontalColumns := &StripImage{
-		box:     b,
-		nGroups: 1,
-		nLines:  30,
-		Direction: Direction{
-			CardinalDirection: Horizontal,
-			StrokeDirection:   AwayToHome,
-			OrderDirection:    AwayToHome,
-			Connection:        SameDirection,
+	horizontalColumns := &collections.StripImage{
+		Box:     b,
+		NGroups: 1,
+		NLines:  30,
+		Direction: collections.Direction{
+			CardinalDirection: collections.Horizontal,
+			StrokeDirection:   collections.AwayToHome,
+			OrderDirection:    collections.AwayToHome,
+			Connection:        collections.SameDirection,
 		},
 	}
-	verticalColumns := &StripImage{
-		box:     b,
-		nGroups: 1,
-		nLines:  30,
-		Direction: Direction{
-			CardinalDirection: Vertical,
-			StrokeDirection:   AwayToHome,
-			OrderDirection:    AwayToHome,
-			Connection:        AlternatingDirection,
+	verticalColumns := &collections.StripImage{
+		Box:     b,
+		NGroups: 1,
+		NLines:  30,
+		Direction: collections.Direction{
+			CardinalDirection: collections.Vertical,
+			StrokeDirection:   collections.AwayToHome,
+			OrderDirection:    collections.AwayToHome,
+			Connection:        collections.AlternatingDirection,
 		},
 	}
 	scene := Scene{}
@@ -319,6 +335,16 @@ func getCurlyScene(b box.Box) Scene {
 	curlyBrush2 := getCurlyBrush(b, 300.0, math.Pi/3)
 	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
 	return scene
+}
+
+func getCurlyBrush(b box.Box, width, angle float64) []lines.LineLike {
+	brushWidth := width
+	path := collections.CurlyFill{
+		Box:     b.WithPadding(brushWidth),
+		Angle:   angle,
+		Spacing: float64(brushWidth),
+	}
+	return []lines.LineLike{path.GetPath()}
 }
 
 func getTruchetScene(b box.Box) Scene {

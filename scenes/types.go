@@ -1,39 +1,39 @@
-package main
+package scenes
 
 import (
 	"fmt"
-
-	"github.com/shabbyrobe/xmlwriter"
+	"time"
 
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 type Scene struct {
-	layers []Layer
-	guides bool
+	Layers []Layer
+	Guides bool
 }
 
 func (s Scene) AddLayer(layer Layer) Scene {
-	s.layers = append(s.layers, layer)
+	s.Layers = append(s.Layers, layer)
 	return s
 }
 
 func (s Scene) WithGuides() Scene {
-	s.guides = true
+	s.Guides = true
 	return s
 }
 
-func (s Scene) Layers() []Layer {
-	if !s.guides || len(s.layers) < 2 {
-		return s.layers
+func (s Scene) GetLayers() []Layer {
+	if !s.Guides || len(s.Layers) < 2 {
+		return s.Layers
 	}
 	// draw guides on the upper edge of the image
 	// assume that the 0th layer contains the guidelines
-	layers := s.layers
+	layers := s.Layers
 	ls := []lines.LineLike{}
 	increment := 25.0
-	for i := 1; i < len(s.layers); i++ {
+	for i := 1; i < len(s.Layers); i++ {
 		ii := float64(i)
 
 		for j := 300.0; j <= 700.0; j += increment {
@@ -75,7 +75,7 @@ func (s Scene) Layers() []Layer {
 
 	}
 	layers = append(layers, NewLayer("GUIDELINES-pen").WithLineLike(ls))
-	for i := 1; i < len(s.layers); i++ {
+	for i := 1; i < len(s.Layers); i++ {
 		ii := float64(i)
 		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]lines.LineLike{
 			lines.LineSegment{P1: primitives.Point{X: 500.0 + ii*1000, Y: 300.0}, P2: primitives.Point{X: 500 + ii*1000, Y: 700}},
@@ -85,64 +85,45 @@ func (s Scene) Layers() []Layer {
 	return layers
 }
 
-func NewLayer(annotation string) Layer {
-	return Layer{name: annotation}
-}
-
-type Layer struct {
-	name      string
-	linelikes []lines.LineLike
-	offsetX   float64
-	offsetY   float64
-	color     string
-	width     float64
-}
-
-func (l Layer) WithLineLike(linelikes []lines.LineLike) Layer {
-	l.linelikes = append(l.linelikes, linelikes...)
-	return l
-}
-
-func (l Layer) WithOffset(x, y float64) Layer {
-	l.offsetX = x
-	l.offsetY = y
-	return l
-}
-
-func (l Layer) WithColor(color string) Layer {
-	l.color = color
-	return l
-}
-
-func (l Layer) WithWidth(width float64) Layer {
-	l.width = width
-	return l
-}
-
-func (l Layer) String() string {
-	return fmt.Sprintf("Layer %s %v", l.name, l.linelikes)
-}
-
-func (l Layer) XML(i int) xmlwriter.Elem {
-	color := "black"
-	if l.color != "" {
-		color = l.color
+func (s Scene) CalculateStatistics() {
+	yesGuides := "no"
+	if s.Guides {
+		yesGuides = "with "
 	}
-	width := "3"
-	if l.width > 0 {
-		width = fmt.Sprintf("%.1f", l.width)
+
+	fmt.Printf("Scene has %d layers, %s guides\n", len(s.Layers), yesGuides)
+	for i, layer := range s.Layers {
+		lengths := []float64{}
+		upDistances := []float64{}
+		start := primitives.Origin
+		for _, linelike := range layer.linelikes {
+			lengths = append(lengths, linelike.Len())
+			end := linelike.End()
+			upDistances = append(upDistances, end.Subtract(start).Len())
+			start = end
+		}
+		end := primitives.Origin
+		upDistances = append(upDistances, end.Subtract(start).Len())
+		downLen := imageSpaceToMeters(maths.SumFloats(lengths))
+		upLen := imageSpaceToMeters(maths.SumFloats(upDistances))
+		totalDistance := downLen + upLen
+		timeEstimate := metersToTime(totalDistance)
+		fmt.Printf("layer %d has %d curves, down distance %.1fm, up distance %.1fm, total %.1fm traveled\n", i, len(layer.linelikes), downLen, upLen, totalDistance)
+		fmt.Printf("Would take about %s to plot\n", timeToMinSec(timeEstimate))
 	}
-	contents := []xmlwriter.Writable{}
-	for _, line := range l.linelikes {
-		contents = append(contents, line.XML(color, width))
-	}
-	return xmlwriter.Elem{
-		Name: "g", Attrs: []xmlwriter.Attr{
-			{Name: "inkscape:groupmode", Value: "layer"},
-			{Name: "inkscape:label", Value: fmt.Sprintf("%d - %s", i, l.name)},
-			{Name: "id", Value: "g5"},
-			{Name: "transform", Value: fmt.Sprintf("translate(%.1f %.1f)", l.offsetX, l.offsetY)}, // no translation for now
-		},
-		Content: contents,
-	}
+}
+
+func timeToMinSec(d time.Duration) string {
+	minutes := int(d / time.Minute)
+	seconds := int((d - time.Duration(float64(minutes)*float64(time.Minute))) / time.Second)
+	return fmt.Sprintf("%dm%ds", minutes, seconds)
+}
+
+func metersToTime(m float64) time.Duration {
+	return time.Duration(22.6 * float64(time.Second) * m)
+}
+
+func imageSpaceToMeters(l float64) float64 {
+	const unitPerMeter = 44092.0
+	return l / unitPerMeter
 }
