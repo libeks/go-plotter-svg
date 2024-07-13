@@ -28,6 +28,9 @@ func (d NWSE) Opposite() NWSE {
 }
 
 func (d NWSE) Winding(next NWSE) Winding {
+	if d == next {
+		return LoopBack
+	}
 	switch d {
 	case North:
 		switch next {

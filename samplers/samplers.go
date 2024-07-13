@@ -11,11 +11,11 @@ type DataSource interface {
 }
 
 type ConstantDataSource struct {
-	val float64
+	Val float64
 }
 
 func (s ConstantDataSource) GetValue(p primitives.Point) float64 {
-	return s.val
+	return s.Val
 }
 
 type RandomDataSource struct {

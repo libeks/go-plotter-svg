@@ -182,8 +182,8 @@ func (g Grid) GererateCurves() []lines.LineLike {
 			curves = append(curves, g.GenerateCurve(cell, dirIndex))
 		}
 	}
-	for x := 1; x < g.nX-1; x++ {
-		for y := 1; y < g.nY-1; y++ {
+	for x := 0; x < g.nX; x++ {
+		for y := 0; y < g.nY; y++ {
 			cell := g.At(x, y)
 			for _, direction := range []NWSE{North, West, South, East} {
 				for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {

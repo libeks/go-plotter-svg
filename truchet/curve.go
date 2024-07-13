@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/maths"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 type Curve struct {
@@ -48,6 +50,9 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 			}
 		} else {
 			fmt.Printf("curve type %s\n", c.CurveType)
+			return lines.LineChunk{
+				End: endPoint,
+			}
 		}
 	case Clockwise:
 		if c.CurveType == Bezier {
@@ -76,6 +81,25 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 				IsLong:      false,
 				End:         endPoint,
 			}
+		}
+	case LoopBack:
+		// TODO: allow for vertical
+		width := c.Cell.Box.Width() * maths.RandInRange(0.2, 0.4)
+		var p1 primitives.Point
+		var p2 primitives.Point
+
+		if from.NWSE == West {
+			p1 = primitives.Point{X: startPoint.X + width, Y: startPoint.Y}
+			p2 = primitives.Point{X: endPoint.X + width, Y: endPoint.Y}
+		} else if from.NWSE == East {
+			p1 = primitives.Point{X: startPoint.X - width, Y: startPoint.Y}
+			p2 = primitives.Point{X: endPoint.X - width, Y: endPoint.Y}
+		}
+		return lines.CubicBezierChunk{
+			Start: startPoint,
+			P1:    p1,
+			P2:    p2,
+			End:   endPoint,
 		}
 	case Undefined:
 		fmt.Printf("winding is undefined: %s\n", winding)
