@@ -26,6 +26,15 @@ type tileSet struct {
 	pairs []pair
 }
 
+func (t tileSet) Other(i int) int {
+	for _, pair := range t.pairs {
+		if other := pair.Other(i); other > 0 {
+			return other
+		}
+	}
+	return -1
+}
+
 // non-intersecting links for a 4-set, corresponds to Catalan number 2
 var TruchetPairs = []tileSet{
 	{
@@ -165,16 +174,16 @@ func (e edgePointMapping) getVertical() []endPointPair {
 	return ret
 }
 
-func (e edgePointMapping) getDirection(i int) NWSE {
+func (e edgePointMapping) getDirection(i int) endPointTuple {
 	for _, pair := range e.pairs {
 		if pair.a.endpoint == i {
-			return pair.a.NWSE
+			return pair.a
 		}
 		if pair.b.endpoint == i {
-			return pair.b.NWSE
+			return pair.b
 		}
 	}
-	return UnknownNWSE
+	return endPointTuple{}
 }
 
 func (e edgePointMapping) other(i int) endPointTuple {
@@ -185,6 +194,19 @@ func (e edgePointMapping) other(i int) endPointTuple {
 		}
 	}
 	return endPointTuple{}
+}
+
+func (e edgePointMapping) endpointsFrom(direction NWSE) []endPointTuple {
+	ret := []endPointTuple{}
+	for _, pair := range e.pairs {
+		if pair.a.NWSE == direction {
+			ret = append(ret, pair.a)
+		}
+		if pair.b.NWSE == direction {
+			ret = append(ret, pair.b)
+		}
+	}
+	return ret
 }
 
 var EndpointMapping4 = edgePointMapping{
@@ -528,8 +550,7 @@ var EndpointMapping6Side = edgePointMapping{
 // }
 
 type EndpointMidpoint struct {
-	endpoint NWSE
-	endIndex int
+	endpoint endPointTuple
 	midpoint float64
 }
 

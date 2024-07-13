@@ -14,6 +14,7 @@ type Cell struct {
 	box.Box
 	x      int
 	y      int
+	tile   tileSet
 	curves []*Curve
 }
 
@@ -41,6 +42,8 @@ func (c *Cell) NextUnseen() *Curve {
 }
 
 func (c *Cell) generateCurves(tileset tileSet) {
+	// TODO: rename tileset to tile
+	c.tile = tileset
 	edgePointMap := c.GetEdgePoints()
 	curves := make([]*Curve, len(tileset.pairs))
 	for i, pair := range tileset.pairs {
@@ -49,7 +52,7 @@ func (c *Cell) generateCurves(tileset tileSet) {
 		b := pair.b
 		bDir := c.Grid.edgePointMapping.getDirection(b)
 		// fmt.Printf("JJJ from %s to %s, tileset %s\n", aDir, bDir, tileset)
-		fmt.Printf("JJJ from %s to %s\n", edgePointMap[a], edgePointMap[b])
+		fmt.Printf("JJJ from %.1f to %.1f\n", edgePointMap[a], edgePointMap[b])
 		curves[i] = &Curve{
 			endpoints: []EndpointMidpoint{
 				{
@@ -84,8 +87,13 @@ func (c *Cell) GetEdgePoints() map[int]float64 {
 	return vals
 }
 
-func (c *Cell) GetCellInDirection(direction NWSE) *Cell {
-	switch direction {
+func (c *Cell) GetEdgePoint(i int) float64 {
+	// TODO: optimize this here code to not have to calculate the whole map
+	return c.GetEdgePoints()[i]
+}
+
+func (c *Cell) GetCellInDirection(direction endPointTuple) *Cell {
+	switch direction.NWSE {
 	case North:
 		return c.Grid.At(c.x, c.y-1)
 	case South:
@@ -100,13 +108,14 @@ func (c *Cell) GetCellInDirection(direction NWSE) *Cell {
 }
 
 // return the curve for this cell that starts from direction and next cell (if any)
-func (c *Cell) VisitFrom(direction NWSE) (*Curve, *Cell, *NWSE) {
+func (c *Cell) VisitFrom(direction endPointTuple) (*Curve, *Cell, *endPointTuple) {
 	for _, curve := range c.curves {
 		if nextDir := curve.GetOtherDirection(direction); nextDir != nil {
 			if curve.visited {
 				continue // curve is already visited, don't double-count
 			}
 			curve.visited = true
+			// nextDir := c.tile.Other(*nextDirIdx)
 			return curve, c.GetCellInDirection(*nextDir), nextDir
 		}
 	}
@@ -129,8 +138,8 @@ func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
 	// }
 }
 
-func (c *Cell) At(direction NWSE, t float64) primitives.Point {
-	switch direction {
+func (c *Cell) At(direction endPointTuple, t float64) primitives.Point {
+	switch direction.NWSE {
 	case North:
 		return primitives.Point{X: maths.Interpolate(c.Box.X, c.Box.XEnd, t), Y: c.Box.Y}
 	case West:

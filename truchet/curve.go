@@ -17,7 +17,7 @@ func (c *Curve) String() string {
 	return fmt.Sprintf("Curve at %s with endpoints %v", c.Cell, c.endpoints)
 }
 
-func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
+func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 	if !c.HasEndpoint(from) {
 		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
 	}
@@ -30,7 +30,7 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 	startPoint := c.Cell.At(from, *mFrom)
 	endPoint := c.Cell.At(*to, *mTo)
 	radius := c.Cell.Box.Width() / 2
-	winding := from.Winding(*to)
+	winding := from.Winding(to.NWSE)
 	// fmt.Printf("from %s, to %s, winding %s\n", from, *to, winding)
 	switch winding {
 	case Straight:
@@ -47,21 +47,35 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 				End:          endPoint,
 			}
 		} else {
-			// fmt.Printf("curve type %s\n", c.CurveType)
+			fmt.Printf("curve type %s\n", c.CurveType)
 		}
 	case Clockwise:
-		return lines.CircleArcChunk{
-			Radius:      radius,
-			IsClockwise: false, // Truchet circle arcs swing the other direction from winding
-			IsLong:      false,
-			End:         endPoint,
+		if c.CurveType == Bezier {
+			return lines.QuadraticBezierChunk{
+				Start: startPoint,
+				End:   endPoint,
+			}
+		} else {
+			return lines.CircleArcChunk{
+				Radius:      radius,
+				IsClockwise: false, // Truchet circle arcs swing the other direction from winding
+				IsLong:      false,
+				End:         endPoint,
+			}
 		}
 	case CounterClockwise:
-		return lines.CircleArcChunk{
-			Radius:      radius,
-			IsClockwise: true, // Truchet circle arcs swing the other direction from winding
-			IsLong:      false,
-			End:         endPoint,
+		if c.CurveType == Bezier {
+			return lines.QuadraticBezierChunk{
+				Start: startPoint,
+				End:   endPoint,
+			}
+		} else {
+			return lines.CircleArcChunk{
+				Radius:      radius,
+				IsClockwise: true, // Truchet circle arcs swing the other direction from winding
+				IsLong:      false,
+				End:         endPoint,
+			}
 		}
 	case Undefined:
 		fmt.Printf("winding is undefined: %s\n", winding)
@@ -74,36 +88,37 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 			End: endPoint,
 		}
 	}
-	// fmt.Printf("not even default: winding is %s\n", winding)
+	fmt.Printf("not even default: winding is %s\n", winding)
 
 	return lines.LineChunk{
 		End: endPoint,
 	}
 }
 
-func (c *Curve) GetMidpoint(endpoint NWSE) *float64 {
+func (c *Curve) GetMidpoint(endpoint endPointTuple) *float64 {
 	for _, pt := range c.endpoints {
-		if pt.endpoint == endpoint {
+		if pt.endpoint.endpoint == endpoint.endpoint {
 			return &pt.midpoint
 		}
 	}
 	return nil
 }
 
-func (c Curve) HasEndpoint(endpoint NWSE) bool {
+func (c Curve) HasEndpoint(endpoint endPointTuple) bool {
 	for _, pt := range c.endpoints {
-		if pt.endpoint == endpoint {
+		if pt.endpoint.endpoint == endpoint.endpoint {
 			return true
 		}
 	}
 	return false
 }
 
-func (c *Curve) GetOtherDirection(endpoint NWSE) *NWSE {
-	var other *NWSE
+// return the index of the other end of this curve, in corrdinates relative to this cell
+func (c *Curve) GetOtherDirection(endpoint endPointTuple) *endPointTuple {
+	var other *endPointTuple
 	found := false
 	for _, pt := range c.endpoints {
-		if pt.endpoint == endpoint {
+		if pt.endpoint.endpoint == endpoint.endpoint {
 			found = true
 		} else {
 			other = &pt.endpoint

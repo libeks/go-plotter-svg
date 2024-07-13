@@ -5,6 +5,7 @@ type CurveType int
 const (
 	StraightLine CurveType = iota
 	CircleSegment
+	Bezier
 	LineOver
 	LineUnder
 	LoopBack
@@ -12,5 +13,5 @@ const (
 )
 
 func (c CurveType) String() string {
-	return []string{"StraightLine", "CircleSegment", "LineOver", "LineUnder"}[c]
+	return []string{"StraightLine", "CircleSegment", "Bezier", "LineOver", "LineUnder", "LoopBack", "Unknown"}[c]
 }

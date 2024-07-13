@@ -127,8 +127,8 @@ func (g Grid) At(x, y int) *Cell {
 	return g.cells[cellCoord{x, y}]
 }
 
-func (g Grid) GenerateCurve(cell *Cell, direction NWSE) lines.LineLike {
-	startPoint := cell.At(direction, 0.5)
+func (g Grid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike {
+	startPoint := cell.At(direction, cell.GetEdgePoint(direction.endpoint))
 	path := lines.NewPath(startPoint)
 	for {
 		if !cell.IsDone() {
@@ -139,7 +139,7 @@ func (g Grid) GenerateCurve(cell *Cell, direction NWSE) lines.LineLike {
 					return path
 				}
 				cell = nextCell
-				direction = nextDirection.Opposite()
+				direction = g.edgePointMapping.other(nextDirection.endpoint)
 			} else {
 				return path
 			}
@@ -157,31 +157,40 @@ func (g Grid) GererateCurves() []lines.LineLike {
 	for x := range g.nX {
 		cell := g.At(x, 0)
 		direction := North
-		curves = append(curves, g.GenerateCurve(cell, direction))
+		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+			curves = append(curves, g.GenerateCurve(cell, dirIndex))
+		}
 	}
 	for y := range g.nY {
 		cell := g.At(g.nX-1, y)
 		direction := East
-		curves = append(curves, g.GenerateCurve(cell, direction))
+		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+			curves = append(curves, g.GenerateCurve(cell, dirIndex))
+		}
 	}
 	for x := g.nX - 1; x >= 0; x-- {
 		cell := g.At(x, g.nY-1)
 		direction := South
-		curves = append(curves, g.GenerateCurve(cell, direction))
+		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+			curves = append(curves, g.GenerateCurve(cell, dirIndex))
+		}
 	}
 	for y := g.nY - 1; y >= 0; y-- {
 		cell := g.At(0, y)
 		direction := West
-		curves = append(curves, g.GenerateCurve(cell, direction))
+		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+			curves = append(curves, g.GenerateCurve(cell, dirIndex))
+		}
 	}
 	for x := 1; x < g.nX-1; x++ {
 		for y := 1; y < g.nY-1; y++ {
 			cell := g.At(x, y)
 			for _, direction := range []NWSE{North, West, South, East} {
-				c := g.GenerateCurve(cell, direction)
-				if !c.IsEmpty() {
-
-					curves = append(curves, c)
+				for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+					c := g.GenerateCurve(cell, dirIndex)
+					if !c.IsEmpty() {
+						curves = append(curves, c)
+					}
 				}
 			}
 		}
