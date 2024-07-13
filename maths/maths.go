@@ -52,3 +52,8 @@ func RandRangeMinusPlusOne() float64 {
 func RandInRange(min, max float64) float64 {
 	return (max-min)*rand.Float64() + min
 }
+
+// interpolate between a,b, with t in range [0,1]/ t=0 => a, t=1 => b
+func Interpolate(a, b, t float64) float64 {
+	return (b-a)*t + a
+}
