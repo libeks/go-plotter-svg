@@ -40,6 +40,50 @@ func (c *Cell) NextUnseen() *Curve {
 	return nil
 }
 
+func (c *Cell) generateCurves(tileset tileSet) {
+	edgePointMap := c.GetEdgePoints()
+	curves := make([]*Curve, len(tileset.pairs))
+	for i, pair := range tileset.pairs {
+		a := pair.a
+		aDir := c.Grid.edgePointMapping.getDirection(a)
+		b := pair.b
+		bDir := c.Grid.edgePointMapping.getDirection(b)
+		// fmt.Printf("JJJ from %s to %s, tileset %s\n", aDir, bDir, tileset)
+		fmt.Printf("JJJ from %s to %s\n", edgePointMap[a], edgePointMap[b])
+		curves[i] = &Curve{
+			endpoints: []EndpointMidpoint{
+				{
+					endpoint: aDir,
+					midpoint: edgePointMap[a],
+				},
+				{
+					endpoint: bDir,
+					midpoint: edgePointMap[b],
+				},
+			},
+			CurveType: StraightLine,
+			visited:   false,
+			Cell:      c,
+		}
+	}
+	c.curves = curves
+}
+
+func (c *Cell) GetEdgePoints() map[int]float64 {
+	edges := map[NWSE]Edge{}
+	edges[North] = c.Grid.rowEdges[cellCoord{c.x, c.y}]
+	edges[South] = c.Grid.rowEdges[cellCoord{c.x, c.y + 1}]
+	edges[West] = c.Grid.columnEdges[cellCoord{c.x, c.y}]
+	edges[East] = c.Grid.columnEdges[cellCoord{c.x + 1, c.y}]
+	vals := map[int]float64{}
+	for _, edgePointMapping := range c.Grid.edgePointMapping.pairs {
+		for _, endPointTuple := range []endPointTuple{edgePointMapping.a, edgePointMapping.b} {
+			vals[endPointTuple.endpoint] = edges[endPointTuple.NWSE].GetPoint(endPointTuple.endpoint)
+		}
+	}
+	return vals
+}
+
 func (c *Cell) GetCellInDirection(direction NWSE) *Cell {
 	switch direction {
 	case North:
@@ -69,13 +113,20 @@ func (c *Cell) VisitFrom(direction NWSE) (*Curve, *Cell, *NWSE) {
 	return nil, nil, nil
 }
 
-func (c *Cell) PopulateCurves(curveConverter func(box box.Box, dataSource samplers.DataSource) []*Curve, dataSource samplers.DataSource) {
-	c.curves = curveConverter(c.Box, dataSource)
-	for _, curve := range c.curves {
-		curve.Cell = c
-		curve.visited = false
-		// curve.CurveType = StraightLine
+func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
+	rand := dataSource.GetValue(c.Box.Center())
+	l := len(c.Grid.tileset)
+	n := int(rand * float64(l))
+	if n == l {
+		n = n - 1
 	}
+	tile := c.Grid.tileset[n]
+	// c.curves = c.generateCurves(tile)
+	c.generateCurves(tile)
+	// for _, curve := range c.curves {
+	// 	curve.Cell = c
+	// 	curve.visited = false
+	// }
 }
 
 func (c *Cell) At(direction NWSE, t float64) primitives.Point {

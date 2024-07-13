@@ -8,8 +8,6 @@ import (
 
 type Curve struct {
 	*Cell
-	// endpoints NWSE
-	// midpoints [2]float64 // in the range of [0;1], in increasing order of N,W,S,E
 	endpoints []EndpointMidpoint
 	CurveType
 	visited bool
@@ -33,6 +31,7 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 	endPoint := c.Cell.At(*to, *mTo)
 	radius := c.Cell.Box.Width() / 2
 	winding := from.Winding(*to)
+	// fmt.Printf("from %s, to %s, winding %s\n", from, *to, winding)
 	switch winding {
 	case Straight:
 		if c.CurveType == LineOver {
@@ -48,7 +47,7 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 				End:          endPoint,
 			}
 		} else {
-			fmt.Printf("curve type %s\n", c.CurveType)
+			// fmt.Printf("curve type %s\n", c.CurveType)
 		}
 	case Clockwise:
 		return lines.CircleArcChunk{
@@ -75,7 +74,7 @@ func (c *Curve) XMLChunk(from NWSE) lines.PathChunk {
 			End: endPoint,
 		}
 	}
-	fmt.Printf("not even default: winding is %s\n", winding)
+	// fmt.Printf("not even default: winding is %s\n", winding)
 
 	return lines.LineChunk{
 		End: endPoint,

@@ -9,6 +9,7 @@ const (
 	West
 	South
 	East
+	UnknownNWSE
 )
 
 func (d NWSE) Opposite() NWSE {
@@ -69,5 +70,5 @@ func (d NWSE) Winding(next NWSE) Winding {
 }
 
 func (d NWSE) String() string {
-	return []string{"North", "West", "South", "East"}[d]
+	return []string{"North", "West", "South", "East", "UnknownNWSE"}[d]
 }

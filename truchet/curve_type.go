@@ -7,6 +7,8 @@ const (
 	CircleSegment
 	LineOver
 	LineUnder
+	LoopBack
+	Unknown
 )
 
 func (c CurveType) String() string {

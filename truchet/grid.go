@@ -5,15 +5,74 @@ import (
 
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-func NewGrid(b box.Box, nx int, dataSource samplers.DataSource, curveConverter func(box.Box, samplers.DataSource) []*Curve) *Grid {
+func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet, dataSource samplers.DataSource) *Grid {
 	boxes := b.PartitionIntoSquares(nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
-	grid := &Grid{}
+	grid := &Grid{
+		edgePointMapping: edgeMapping,
+		tileset:          tileset,
+	}
+	// grid.edgePointMapping = edgeMapping
 	if len(boxes) != nx*nx {
 		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
+	}
+	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
+	for i := range nx + 1 { // for each of horizontal edges
+		hors := edgeMapping.getHorizontal()
+		for j := range nx { // for each cell
+			var intersects []edgeMap
+			if len(hors) == 1 {
+				intersects = []edgeMap{
+					{
+						point: hors[0],
+						val:   maths.RandInRange(0.3, 0.7),
+					},
+				}
+			} else if len(hors) == 2 {
+				intersects = []edgeMap{
+					{
+						point: hors[0],
+						val:   0.33,
+					},
+					{
+						point: hors[1],
+						val:   0.66,
+					},
+				}
+			}
+			grid.rowEdges[cellCoord{j, i}] = Edge{intersects} // flipped order is intentional
+		}
+	}
+	grid.columnEdges = make(map[cellCoord]Edge, nx+1)
+	for i := range nx + 1 { // for each of vertical edges
+		hors := edgeMapping.getVertical()
+		for j := range nx { // for each cell
+			var intersects []edgeMap
+			if len(hors) == 1 {
+				intersects = []edgeMap{
+					{
+						point: hors[0],
+						val:   maths.RandInRange(0.3, 0.7),
+					},
+				}
+			} else if len(hors) == 2 {
+				intersects = []edgeMap{
+					{
+						point: hors[0],
+						val:   0.33,
+					},
+					{
+						point: hors[1],
+						val:   0.66,
+					},
+				}
+			}
+			grid.columnEdges[cellCoord{i, j}] = Edge{intersects}
+		}
 	}
 	for _, childBox := range boxes {
 		cell := &Cell{
@@ -22,7 +81,7 @@ func NewGrid(b box.Box, nx int, dataSource samplers.DataSource, curveConverter f
 			x:    childBox.I,
 			y:    childBox.J,
 		}
-		cell.PopulateCurves(curveConverter, dataSource)
+		cell.PopulateCurves(dataSource)
 		cells[cellCoord{childBox.I, childBox.J}] = cell
 	}
 	grid.nX = nx
@@ -31,10 +90,33 @@ func NewGrid(b box.Box, nx int, dataSource samplers.DataSource, curveConverter f
 	return grid
 }
 
+type edgeMap struct {
+	point endPointPair
+	val   float64
+}
+
+type Edge struct {
+	intersects []edgeMap
+}
+
+func (e Edge) GetPoint(i int) float64 {
+	for _, intersect := range e.intersects {
+		if intersect.point.Has(i) {
+			return intersect.val
+		}
+	}
+	return -1
+}
+
 type Grid struct {
 	nX    int
 	nY    int
 	cells map[cellCoord]*Cell
+	// edge containers, specifying the position of cell border points
+	columnEdges map[cellCoord]Edge
+	rowEdges    map[cellCoord]Edge
+	edgePointMapping
+	tileset []tileSet
 	samplers.DataSource
 }
 
