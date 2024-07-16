@@ -20,57 +20,20 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 	if len(boxes) != nx*nx {
 		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
 	}
+	horPoints := edgeMapping.getHorizontal()
+	vertPoints := edgeMapping.getVertical()
+	getIntersects := getRandomIncreasingIntersects
 	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of horizontal edges
-		hors := edgeMapping.getHorizontal()
 		for j := range nx { // for each cell
-			var intersects []edgeMap
-			if len(hors) == 1 {
-				intersects = []edgeMap{
-					{
-						point: hors[0],
-						val:   maths.RandInRange(0.2, 0.8),
-					},
-				}
-			} else if len(hors) == 2 {
-				intersects = []edgeMap{
-					{
-						point: hors[0],
-						val:   maths.RandInRange(0.2, 0.4),
-					},
-					{
-						point: hors[1],
-						val:   maths.RandInRange(0.6, 0.8),
-					},
-				}
-			}
+			intersects := getIntersects(horPoints, float64(j)/float64(nx+1), float64(i)/float64(nx+1))
 			grid.rowEdges[cellCoord{j, i}] = Edge{intersects} // flipped order is intentional
 		}
 	}
 	grid.columnEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of vertical edges
-		hors := edgeMapping.getVertical()
 		for j := range nx { // for each cell
-			var intersects []edgeMap
-			if len(hors) == 1 {
-				intersects = []edgeMap{
-					{
-						point: hors[0],
-						val:   maths.RandInRange(0.3, 0.7),
-					},
-				}
-			} else if len(hors) == 2 {
-				intersects = []edgeMap{
-					{
-						point: hors[0],
-						val:   maths.RandInRange(0.2, 0.4),
-					},
-					{
-						point: hors[1],
-						val:   maths.RandInRange(0.6, 0.8),
-					},
-				}
-			}
+			intersects := getIntersects(vertPoints, float64(i)/float64(nx+1), float64(j)/float64(nx+1))
 			grid.columnEdges[cellCoord{i, j}] = Edge{intersects}
 		}
 	}
@@ -88,6 +51,81 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 	grid.nY = nx
 	grid.cells = cells
 	return grid
+}
+
+// getIntersections returns the intersection points for coordinates in unit square
+func getRandomIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
+	var intersects []edgeMap
+	if len(pointDef) == 1 {
+		intersects = []edgeMap{
+			{
+				point: pointDef[0],
+				val:   maths.RandInRange(0.2, 0.8),
+			},
+		}
+	} else if len(pointDef) == 2 {
+		intersects = []edgeMap{
+			{
+				point: pointDef[0],
+				val:   maths.RandInRange(0.2, 0.4),
+			},
+			{
+				point: pointDef[1],
+				val:   maths.RandInRange(0.6, 0.8),
+			},
+		}
+	}
+	return intersects
+}
+
+// getIntersections returns the intersection points for coordinates in unit square
+func getRandomIncreasingIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
+	var intersects []edgeMap
+	if len(pointDef) == 1 {
+		intersects = []edgeMap{
+			{
+				point: pointDef[0],
+				val:   maths.RandInRange(0.5-0.3*yCoord, 0.5+0.3*yCoord),
+			},
+		}
+	} else if len(pointDef) == 2 {
+		intersects = []edgeMap{
+			{
+				point: pointDef[0],
+				val:   maths.RandInRange(0.333-0.2*yCoord, 0.333+0.2*yCoord),
+			},
+			{
+				point: pointDef[1],
+				val:   maths.RandInRange(0.666-0.2*yCoord, 0.666+0.2*yCoord),
+			},
+		}
+	}
+	return intersects
+}
+
+// getIntersections returns the intersection points for coordinates in unit square
+func getStaticIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
+	var intersects []edgeMap
+	if len(pointDef) == 1 {
+		intersects = []edgeMap{
+			{
+				point: pointDef[0],
+				val:   0.5,
+			},
+		}
+	} else if len(pointDef) == 2 {
+		intersects = []edgeMap{
+			{
+				point: pointDef[0],
+				val:   0.333,
+			},
+			{
+				point: pointDef[1],
+				val:   0.666,
+			},
+		}
+	}
+	return intersects
 }
 
 type edgeMap struct {
