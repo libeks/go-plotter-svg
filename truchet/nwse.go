@@ -9,8 +9,13 @@ const (
 	West
 	South
 	East
+
 	UnknownNWSE
 )
+
+func (d NWSE) String() string {
+	return []string{"North", "West", "South", "East", "UnknownNWSE"}[d]
+}
 
 func (d NWSE) Opposite() NWSE {
 	switch d {
@@ -27,51 +32,47 @@ func (d NWSE) Opposite() NWSE {
 	}
 }
 
-func (d NWSE) Winding(next NWSE) Winding {
+func (d NWSE) CurveMetaType(next NWSE) CurveMetaType {
 	if d == next {
-		return LoopBack
+		return Loopback
 	}
 	switch d {
 	case North:
 		switch next {
 		case West:
-			return CounterClockwise
+			return QuarterCircle
 		case South:
 			return Straight
 		case East:
-			return Clockwise
+			return QuarterCircle
 		}
 	case East:
 		switch next {
 		case North:
-			return CounterClockwise
+			return QuarterCircle
 		case West:
 			return Straight
 		case South:
-			return Clockwise
+			return QuarterCircle
 		}
 	case South:
 		switch next {
 		case East:
-			return CounterClockwise
+			return QuarterCircle
 		case North:
 			return Straight
 		case West:
-			return Clockwise
+			return QuarterCircle
 		}
 	case West:
 		switch next {
 		case South:
-			return CounterClockwise
+			return QuarterCircle
 		case East:
 			return Straight
 		case North:
-			return Clockwise
+			return QuarterCircle
 		}
 	}
-	return Undefined
-}
-
-func (d NWSE) String() string {
-	return []string{"North", "West", "South", "East", "UnknownNWSE"}[d]
+	return UnknownCurveMetaType
 }

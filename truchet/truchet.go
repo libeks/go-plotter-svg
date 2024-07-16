@@ -69,7 +69,7 @@ var TruchetUnderPairs = []tileSet{
 	{
 		pairs: []pair{
 			NewPair(1, 4),
-			NewPair(2, 4),
+			NewPair(2, 3),
 		},
 	},
 }

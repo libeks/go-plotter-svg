@@ -29,7 +29,7 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 				intersects = []edgeMap{
 					{
 						point: hors[0],
-						val:   maths.RandInRange(0.3, 0.7),
+						val:   maths.RandInRange(0.2, 0.8),
 					},
 				}
 			} else if len(hors) == 2 {
@@ -128,7 +128,7 @@ func (g Grid) At(x, y int) *Cell {
 }
 
 func (g Grid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike {
-	startPoint := cell.At(direction, cell.GetEdgePoint(direction.endpoint))
+	startPoint := cell.AtEdge(direction, cell.GetEdgePoint(direction.endpoint))
 	path := lines.NewPath(startPoint)
 	for {
 		if !cell.IsDone() {
@@ -147,7 +147,14 @@ func (g Grid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike 
 			return path
 		}
 	}
-	// return nil
+}
+
+func (g Grid) GetGridLines() []lines.LineLike {
+	ls := []lines.LineLike{}
+	for _, cell := range g.cells {
+		ls = append(ls, cell.Box.Lines()...)
+	}
+	return ls
 }
 
 func (g Grid) GererateCurves() []lines.LineLike {
