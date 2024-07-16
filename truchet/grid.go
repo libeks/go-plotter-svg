@@ -80,24 +80,14 @@ func getRandomIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edge
 
 // getIntersections returns the intersection points for coordinates in unit square
 func getRandomIncreasingIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
-	var intersects []edgeMap
-	if len(pointDef) == 1 {
-		intersects = []edgeMap{
-			{
-				point: pointDef[0],
-				val:   maths.RandInRange(0.5-0.3*yCoord, 0.5+0.3*yCoord),
-			},
-		}
-	} else if len(pointDef) == 2 {
-		intersects = []edgeMap{
-			{
-				point: pointDef[0],
-				val:   maths.RandInRange(0.333-0.2*yCoord, 0.333+0.2*yCoord),
-			},
-			{
-				point: pointDef[1],
-				val:   maths.RandInRange(0.666-0.2*yCoord, 0.666+0.2*yCoord),
-			},
+	var intersects = make([]edgeMap, len(pointDef))
+	spacing := 1 / float64(len(pointDef)+1)
+	variance := 0.3 / float64(len(pointDef))
+	for i, pt := range pointDef {
+		center := spacing * float64(i+1)
+		intersects[i] = edgeMap{
+			point: pt,
+			val:   maths.RandInRange(center-variance*yCoord, center+variance*yCoord),
 		}
 	}
 	return intersects
