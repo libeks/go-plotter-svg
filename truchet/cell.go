@@ -51,7 +51,6 @@ func (c *Cell) generateCurves(tileset tileSet) {
 		aDir := c.Grid.edgePointMapping.getDirection(a)
 		b := pair.b
 		bDir := c.Grid.edgePointMapping.getDirection(b)
-		// curveType := GetCurveType(aDir.NWSE, bDir.NWSE, edgePointMap[a], edgePointMap[b])
 		curves[i] = &Curve{
 			endpoints: []EndpointMidpoint{
 				{
@@ -63,7 +62,6 @@ func (c *Cell) generateCurves(tileset tileSet) {
 					midpoint: edgePointMap[b],
 				},
 			},
-			// CurveType: curveType,
 			visited: false,
 			Cell:    c,
 		}
@@ -114,7 +112,6 @@ func (c *Cell) VisitFrom(direction endPointTuple) (*Curve, *Cell, *endPointTuple
 				continue // curve is already visited, don't double-count
 			}
 			curve.visited = true
-			// nextDir := c.tile.Other(*nextDirIdx)
 			return curve, c.GetCellInDirection(*nextDir), nextDir
 		}
 	}

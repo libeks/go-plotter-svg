@@ -9,8 +9,7 @@ import (
 type Curve struct {
 	*Cell
 	endpoints []EndpointMidpoint
-	// CurveType
-	visited bool
+	visited   bool
 }
 
 func (c *Curve) String() string {
@@ -120,9 +119,6 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 	tTo := *mTo
 	startPoint := c.Cell.AtEdge(from, tFrom)
 	endPoint := c.Cell.AtEdge(*to, tTo)
-	// radius := c.Cell.Box.Width() / 2
-	// winding := from.Winding(to.NWSE)
-	// fmt.Printf("from %s, to %s, winding %s\n", from, *to, winding)
 	curveType := GetCurveType(from.NWSE, to.NWSE, tFrom, tTo)
 
 	switch curveType.MetaType() {

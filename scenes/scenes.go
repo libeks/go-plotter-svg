@@ -350,8 +350,8 @@ func getCurlyBrush(b box.Box, width, angle float64) []lines.LineLike {
 func getTruchetScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
-	// dataSource := samplers.RandomDataSource{}
-	dataSource := samplers.ConstantDataSource{Val: 1.0}
+	dataSource := samplers.RandomDataSource{}
+	// dataSource := samplers.ConstantDataSource{Val: .5}
 	// grid := NewGrid(box, 30, dataSource, truchetTiles)
 	// grid := truchet.NewGrid(b, 40, truchet.EndpointMapping4, truchet.TruchetUnderPairs, dataSource)
 	grid := truchet.NewGrid(b, 40, truchet.EndpointMapping6Side, truchet.Truchet6Pairs, dataSource)

@@ -36,11 +36,11 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 				intersects = []edgeMap{
 					{
 						point: hors[0],
-						val:   0.33,
+						val:   maths.RandInRange(0.2, 0.4),
 					},
 					{
 						point: hors[1],
-						val:   0.66,
+						val:   maths.RandInRange(0.6, 0.8),
 					},
 				}
 			}
@@ -63,11 +63,11 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 				intersects = []edgeMap{
 					{
 						point: hors[0],
-						val:   0.33,
+						val:   maths.RandInRange(0.2, 0.4),
 					},
 					{
 						point: hors[1],
-						val:   0.66,
+						val:   maths.RandInRange(0.6, 0.8),
 					},
 				}
 			}
