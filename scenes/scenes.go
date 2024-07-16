@@ -351,12 +351,14 @@ func getTruchetScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 	dataSource := samplers.RandomDataSource{}
-	// dataSource := samplers.ConstantDataSource{Val: 0.3}
+	// dataSource := samplers.ConstantDataSource{Val: 1.0}
 	// grid := NewGrid(box, 30, dataSource, truchetTiles)
-	grid := truchet.NewGrid(b, 40, truchet.EndpointMapping4, truchet.TruchetUnderPairs, dataSource)
-	// grid := truchet.NewGrid(b, 10, truchet.EndpointMapping6Side, truchet.Truchet6Pairs, dataSource)
+	// grid := truchet.NewGrid(b, 40, truchet.EndpointMapping4, truchet.TruchetUnderPairs, dataSource)
+	grid := truchet.NewGrid(b, 40, truchet.EndpointMapping6Side, truchet.Truchet6Pairs, dataSource)
 	curves := grid.GererateCurves()
-	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curves).WithColor("red").WithWidth(10))
+	// gridLines := grid.GetGridLines()
+	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(gridLines).WithColor("black").WithWidth(10))
 
 	return scene
 }

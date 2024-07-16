@@ -51,8 +51,7 @@ func (c *Cell) generateCurves(tileset tileSet) {
 		aDir := c.Grid.edgePointMapping.getDirection(a)
 		b := pair.b
 		bDir := c.Grid.edgePointMapping.getDirection(b)
-		// fmt.Printf("JJJ from %s to %s, tileset %s\n", aDir, bDir, tileset)
-		fmt.Printf("JJJ from %.1f to %.1f\n", edgePointMap[a], edgePointMap[b])
+		// curveType := GetCurveType(aDir.NWSE, bDir.NWSE, edgePointMap[a], edgePointMap[b])
 		curves[i] = &Curve{
 			endpoints: []EndpointMidpoint{
 				{
@@ -64,9 +63,9 @@ func (c *Cell) generateCurves(tileset tileSet) {
 					midpoint: edgePointMap[b],
 				},
 			},
-			CurveType: StraightLine,
-			visited:   false,
-			Cell:      c,
+			// CurveType: curveType,
+			visited: false,
+			Cell:    c,
 		}
 	}
 	c.curves = curves
@@ -130,15 +129,10 @@ func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
 		n = n - 1
 	}
 	tile := c.Grid.tileset[n]
-	// c.curves = c.generateCurves(tile)
 	c.generateCurves(tile)
-	// for _, curve := range c.curves {
-	// 	curve.Cell = c
-	// 	curve.visited = false
-	// }
 }
 
-func (c *Cell) At(direction endPointTuple, t float64) primitives.Point {
+func (c *Cell) AtEdge(direction endPointTuple, t float64) primitives.Point {
 	switch direction.NWSE {
 	case North:
 		return primitives.Point{X: maths.Interpolate(c.Box.X, c.Box.XEnd, t), Y: c.Box.Y}
@@ -151,4 +145,8 @@ func (c *Cell) At(direction endPointTuple, t float64) primitives.Point {
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
 	}
+}
+
+func (c *Cell) At(horizontal, vertical float64) primitives.Point {
+	return primitives.Point{X: maths.Interpolate(c.Box.X, c.Box.XEnd, horizontal), Y: maths.Interpolate(c.Box.Y, c.Box.YEnd, vertical)}
 }
