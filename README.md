@@ -12,4 +12,11 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * Brush
 	* Allow for repeating strokes every now and then
 * Do a Marching Squares approach
-* For truchet, try more points per edge, like 6 (laid out 1-2-1-2, which has 4 non-intersecting tiles)
+* Come up with a solution for object-to-curve intersection
+  * The current appraoch only works for lines and circle segments, but does not for Beziers. To generalize, I'll have to step through each line iteratively, though the question is, how densely should I sample for each object? Is there some easy way to find out the "depth" of a point, both inside and outside?
+
+
+# Plot ideas
+
+* Halftone circles in different colors
+* Marching squares

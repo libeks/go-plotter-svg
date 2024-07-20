@@ -70,7 +70,6 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 		// WS, if from = 0.2 and to = 0.6 -> 1.0 - 0.2 + 0.6 = 1.4, qualifies as cubic
 
 		// WS or SW
-		// FIXME: but having them in the opposite direciton flips tFrom and tTo....
 		if 1.0-from+to < 1.0 {
 			return false
 		} else {
