@@ -30,6 +30,7 @@ func (p Path) Len() float64 {
 	start := p.start
 	for _, chunk := range p.chunks {
 		total += chunk.Length(start)
+
 		start = chunk.Endpoint()
 	}
 	return total
