@@ -24,3 +24,14 @@ type RandomDataSource struct {
 func (s RandomDataSource) GetValue(p primitives.Point) float64 {
 	return rand.Float64()
 }
+
+type HighCenterRelativeDataSource struct {
+	Scale float64
+}
+
+// assumes that point will be from a point in the bounding box -1..1
+func (s HighCenterRelativeDataSource) GetValue(p primitives.Point) float64 {
+	// distance to center
+	dist := p.Subtract(primitives.Origin).Len()
+	return 1 / (dist*s.Scale + 1) // should be in range (0,1]
+}

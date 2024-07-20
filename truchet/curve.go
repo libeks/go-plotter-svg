@@ -142,7 +142,6 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 		}
 	case QuarterCircle:
 		crossesDiagonal := c.GetClockIntersectDiagonal(curveType, tFrom, tTo)
-		fmt.Printf("type %s, crossesDiagonal %v, from %.1f to %.1f\n", curveType, crossesDiagonal, tFrom, tTo)
 
 		switch curveType {
 		// if diagonal does from top left to bottom right
@@ -163,7 +162,6 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 			}
 
 		case CClockEN, CClockWS:
-			fmt.Printf("type %s, crossesDiagonal %v, from %.1f to %.1f\n", curveType, crossesDiagonal, tFrom, tTo)
 			if crossesDiagonal {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
