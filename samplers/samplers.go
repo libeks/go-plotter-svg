@@ -35,3 +35,26 @@ func (s HighCenterRelativeDataSource) GetValue(p primitives.Point) float64 {
 	dist := p.Subtract(primitives.Origin).Len()
 	return 1 / (dist*s.Scale + 1) // should be in range (0,1]
 }
+
+type HighInCircleRelativeDataSource struct {
+	Radius float64
+}
+
+// assumes that point will be from a point in the bounding box -1..1
+func (s HighInCircleRelativeDataSource) GetValue(p primitives.Point) float64 {
+	// distance to center
+	dist := p.Subtract(primitives.Origin).Len()
+	if dist < s.Radius {
+		return 1.0
+	}
+	return 0.0
+}
+
+type InvertSampler struct {
+	DataSource
+}
+
+func (s InvertSampler) GetValue(p primitives.Point) float64 {
+	// distance to center
+	return 1.0 - s.DataSource.GetValue(p)
+}
