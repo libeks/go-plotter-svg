@@ -1,8 +1,9 @@
 package lines
 
 import (
-	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/shabbyrobe/xmlwriter"
+
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 // implemented by LineSegment, Path, CircleArc, Circle
@@ -15,6 +16,7 @@ type LineLike interface {
 	End() primitives.Point
 }
 
+// implemented by LineChunk, QuadraticBezierChunk, CubicBezierChunk, LineGapChunk
 type PathChunk interface {
 	XMLChunk() string
 	Length(start primitives.Point) float64

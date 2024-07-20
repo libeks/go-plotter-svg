@@ -86,9 +86,9 @@ func (s Scene) GetLayers() []Layer {
 }
 
 func (s Scene) CalculateStatistics() {
-	yesGuides := "no"
+	yesGuides := "without"
 	if s.Guides {
-		yesGuides = "with "
+		yesGuides = "with"
 	}
 
 	fmt.Printf("Scene has %d layers, %s guides\n", len(s.Layers), yesGuides)
@@ -97,6 +97,7 @@ func (s Scene) CalculateStatistics() {
 		upDistances := []float64{}
 		start := primitives.Origin
 		for _, linelike := range layer.linelikes {
+			// fmt.Printf("line %s has len %.1f\n", linelike, linelike.Len())
 			lengths = append(lengths, linelike.Len())
 			end := linelike.End()
 			upDistances = append(upDistances, end.Subtract(start).Len())

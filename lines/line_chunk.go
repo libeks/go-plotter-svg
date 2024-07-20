@@ -21,3 +21,12 @@ func (c LineChunk) Length(start primitives.Point) float64 {
 func (c LineChunk) Endpoint() primitives.Point {
 	return c.End
 }
+
+type LineStartEndChunk struct {
+	Start primitives.Point
+	End   primitives.Point
+}
+
+func (l LineStartEndChunk) At(t float64) primitives.Point {
+	return l.Start.Add(l.End.Subtract(l.Start).Mult(t))
+}
