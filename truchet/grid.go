@@ -83,9 +83,11 @@ func getRandomIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edge
 // getIntersections returns the intersection points for coordinates in unit square
 func getRandomSourcedIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
 	var intersects = make([]edgeMap, len(pointDef))
-	dataSource := samplers.HighCenterRelativeDataSource{Scale: 4.0}
+	// dataSource := samplers.HighCenterRelativeDataSource{Scale: 6.0}
+	dataSource := samplers.InvertSampler{samplers.HighInCircleRelativeDataSource{Radius: 0.5}}
+	// dataSource := samplers.HighInCircleRelativeDataSource{Radius: 0.5}
 	spacing := 1 / float64(len(pointDef)+1)
-	variance := 0.3 / float64(len(pointDef))
+	variance := 0.5 / float64(len(pointDef))
 	for i, pt := range pointDef {
 		center := spacing * float64(i+1)
 		sourceVal := dataSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
