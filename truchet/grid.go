@@ -23,6 +23,9 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 	}
 	horPoints := edgeMapping.getHorizontal()
 	vertPoints := edgeMapping.getVertical()
+
+	// TODO: move all get*intersects out of here, abstract them away
+
 	// getIntersects := getRandomIncreasingIntersects
 	getIntersects := getRandomSourcedIntersects
 	// getIntersects := getStaticIntersects
