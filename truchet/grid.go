@@ -6,6 +6,7 @@ import (
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
+	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
@@ -22,7 +23,8 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 	}
 	horPoints := edgeMapping.getHorizontal()
 	vertPoints := edgeMapping.getVertical()
-	getIntersects := getRandomIncreasingIntersects
+	// getIntersects := getRandomIncreasingIntersects
+	getIntersects := getRandomSourcedIntersects
 	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of horizontal edges
 		for j := range nx { // for each cell
@@ -73,6 +75,23 @@ func getRandomIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edge
 				point: pointDef[1],
 				val:   maths.RandInRange(0.6, 0.8),
 			},
+		}
+	}
+	return intersects
+}
+
+// getIntersections returns the intersection points for coordinates in unit square
+func getRandomSourcedIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
+	var intersects = make([]edgeMap, len(pointDef))
+	dataSource := samplers.HighCenterRelativeDataSource{Scale: 4.0}
+	spacing := 1 / float64(len(pointDef)+1)
+	variance := 0.3 / float64(len(pointDef))
+	for i, pt := range pointDef {
+		center := spacing * float64(i+1)
+		sourceVal := dataSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
+		intersects[i] = edgeMap{
+			point: pt,
+			val:   maths.RandInRange(center-variance*sourceVal, center+variance*sourceVal),
 		}
 	}
 	return intersects
