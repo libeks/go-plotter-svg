@@ -25,6 +25,7 @@ func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet,
 	vertPoints := edgeMapping.getVertical()
 	// getIntersects := getRandomIncreasingIntersects
 	getIntersects := getRandomSourcedIntersects
+	// getIntersects := getStaticIntersects
 	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of horizontal edges
 		for j := range nx { // for each cell

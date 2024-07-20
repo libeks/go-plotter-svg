@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 type Curve struct {
@@ -57,7 +58,7 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 	case ClockWN, CClockNW:
 
 		// NW or WN, order doesn't matter
-		if from+to < 1.0 {
+		if from+to <= 1.0 {
 			// do quadratic
 			return false
 		} else {
@@ -70,7 +71,7 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 		// WS, if from = 0.2 and to = 0.6 -> 1.0 - 0.2 + 0.6 = 1.4, qualifies as cubic
 
 		// WS or SW
-		if 1.0-from+to < 1.0 {
+		if 1.0-from+to <= 1.0 {
 			return false
 		} else {
 			return true
@@ -82,7 +83,7 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 		// EN, if from = 0.6 and to = 0.2 -> 1.0 - 0.2 + 0.6 = 1.4, qualifies as cubic
 
 		// NE or EN
-		if 1.0-to+from < 1.0 {
+		if 1.0-to+from <= 1.0 {
 			return false
 		} else {
 			return true
@@ -92,7 +93,7 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 		// SE or ES
 		// equivalent to 1.0 - tFrom + 1.0 - tTo < 1.0 <=> 2.0 - (tFrom + tTo) < 1.0 <=> tFrom + tTo > 1.0
 		// again, order doesn't matter, it's symmetric
-		if from+to > 1.0 {
+		if from+to >= 1.0 {
 			return false
 		} else {
 			return true
@@ -102,24 +103,7 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 	}
 }
 
-// func (c *Curve) GetCurveType()
-
-func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
-	if !c.HasEndpoint(from) {
-		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
-	}
-	to := c.GetOtherDirection(from)
-	if to == nil {
-		panic("No 'to' direction")
-	}
-	mTo := c.GetMidpoint(*to)
-	mFrom := c.GetMidpoint(from)
-	tFrom := *mFrom
-	tTo := *mTo
-	startPoint := c.Cell.AtEdge(from, tFrom)
-	endPoint := c.Cell.AtEdge(*to, tTo)
-	curveType := GetCurveType(from.NWSE, to.NWSE, tFrom, tTo)
-
+func getCurveMapping(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
 	switch curveType.MetaType() {
 	case Straight:
 		switch curveType {
@@ -248,6 +232,419 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 	return lines.LineChunk{
 		End: endPoint,
 	}
+}
+
+func getCircularCurveMapping(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
+	switch curveType.MetaType() {
+	case Straight:
+		switch curveType {
+		case HorizontalLeft, HorizontalRight:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(0.5, tFrom),
+				P2:    c.Cell.At(0.5, tTo),
+				End:   endPoint,
+			}
+		case VerticalUp, VerticalDown:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 0.5),
+				P2:    c.Cell.At(tTo, 0.5),
+				End:   endPoint,
+			}
+		default:
+			panic("Unexpected case")
+		}
+	case QuarterCircle:
+		crossesDiagonal := c.GetClockIntersectDiagonal(curveType, tFrom, tTo)
+		// fmt.Printf("crosses diagonal: %v\n", crossesDiagonal)
+		switch curveType {
+		// if diagonal does from top left to bottom right
+		case ClockNE, ClockSW:
+			if crossesDiagonal {
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(tFrom, tFrom),
+					P2:    c.Cell.At(tTo, tTo),
+					End:   endPoint,
+				}
+			} else {
+				if curveType == ClockNE {
+					return lines.CubicBezierChunk{
+						Start: startPoint,
+						P1:    c.Cell.At(tFrom, 0.55*tFrom),
+						P2:    c.Cell.At(1-0.55*tTo, tTo),
+						End:   endPoint,
+					}
+				}
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(tFrom, 1-0.55*tFrom),
+					P2:    c.Cell.At(0.55*tTo, tTo),
+					End:   endPoint,
+				}
+			}
+
+		case CClockEN, CClockWS:
+			if crossesDiagonal {
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(tFrom, tFrom),
+					P2:    c.Cell.At(tTo, tTo),
+					End:   endPoint,
+				}
+			} else {
+				if curveType == CClockEN {
+					return lines.CubicBezierChunk{
+						Start: startPoint,
+						P1:    c.Cell.At(1-0.55*tFrom, tFrom),
+						P2:    c.Cell.At(tTo, 0.55*tTo),
+						End:   endPoint,
+					}
+				}
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(0.55*tFrom, tFrom),
+					P2:    c.Cell.At(tTo, 1-0.55*tTo),
+					End:   endPoint,
+				}
+			}
+
+		case ClockWN, ClockES:
+			if crossesDiagonal {
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(1.0-tFrom, tFrom),
+					P2:    c.Cell.At(tTo, 1.0-tTo),
+					End:   endPoint,
+				}
+			} else {
+				if curveType == ClockWN {
+					return lines.CubicBezierChunk{
+						Start: startPoint,
+						P1:    c.Cell.At(0.55*tFrom, 1-tFrom), // ???
+						P2:    c.Cell.At(1-tTo, 0.55*tTo),     // ???
+						End:   endPoint,
+					}
+				}
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(1.0-0.55*tFrom, tFrom),
+					P2:    c.Cell.At(tTo, 1.0-0.55*tTo),
+					End:   endPoint,
+				}
+			}
+		case CClockNW, CClockSE:
+			if crossesDiagonal {
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(tFrom, 1.0-tFrom),
+					P2:    c.Cell.At(1.0-tTo, tTo),
+					End:   endPoint,
+				}
+			} else {
+				if curveType == CClockNW {
+					return lines.CubicBezierChunk{
+						Start: startPoint,
+						P1:    c.Cell.At(tFrom, 0.55*tFrom),
+						P2:    c.Cell.At(0.55*tTo, tTo),
+						End:   endPoint,
+					}
+				}
+				return lines.CubicBezierChunk{
+					Start: startPoint,
+					P1:    c.Cell.At(tFrom, 1.0-0.55*tFrom),
+					P2:    c.Cell.At(1.0-0.55*tTo, tTo),
+					End:   endPoint,
+				}
+			}
+		default:
+			panic("Unexpected case")
+		}
+	case Loopback:
+		switch curveType {
+		case LoopbackWUp, LoopbackWDown:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(0.3, tFrom),
+				P2:    c.Cell.At(0.3, tTo),
+				End:   endPoint,
+			}
+		case LoopbackEUp, LoopbackEDown:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(0.7, tFrom),
+				P2:    c.Cell.At(0.7, tTo),
+				End:   endPoint,
+			}
+		case LoopbackNLeft, LoopbackNRight:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 0.3),
+				P2:    c.Cell.At(tTo, 0.3),
+				End:   endPoint,
+			}
+		case LoopbackSLeft, LoopbackSRight:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 0.7),
+				P2:    c.Cell.At(tTo, 0.7),
+				End:   endPoint,
+			}
+		default:
+			panic("Unexpected case")
+		}
+	}
+
+	return lines.LineChunk{
+		End: endPoint,
+	}
+}
+
+func getCurlyCurveMapping(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
+	switch curveType.MetaType() {
+	case Straight:
+		switch curveType {
+		case HorizontalLeft, HorizontalRight:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(0.5, tFrom),
+				P2:    c.Cell.At(0.5, tTo),
+				End:   endPoint,
+			}
+		case VerticalUp, VerticalDown:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 0.5),
+				P2:    c.Cell.At(tTo, 0.5),
+				End:   endPoint,
+			}
+		default:
+			panic("Unexpected case")
+		}
+	case QuarterCircle:
+		switch curveType {
+		// if diagonal does from top left to bottom right
+		case ClockNE, ClockSW:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, tFrom),
+				P2:    c.Cell.At(tTo, tTo),
+				End:   endPoint,
+			}
+		case CClockEN, CClockWS:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, tFrom),
+				P2:    c.Cell.At(tTo, tTo),
+				End:   endPoint,
+			}
+
+		case ClockWN, ClockES:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(1.0-tFrom, tFrom),
+				P2:    c.Cell.At(tTo, 1.0-tTo),
+				End:   endPoint,
+			}
+		case CClockNW, CClockSE:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 1.0-tFrom),
+				P2:    c.Cell.At(1.0-tTo, tTo),
+				End:   endPoint,
+			}
+		default:
+			panic("Unexpected case")
+		}
+	case Loopback:
+		switch curveType {
+		case LoopbackWUp, LoopbackWDown:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(0.3, tFrom),
+				P2:    c.Cell.At(0.3, tTo),
+				End:   endPoint,
+			}
+		case LoopbackEUp, LoopbackEDown:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(0.7, tFrom),
+				P2:    c.Cell.At(0.7, tTo),
+				End:   endPoint,
+			}
+		case LoopbackNLeft, LoopbackNRight:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 0.3),
+				P2:    c.Cell.At(tTo, 0.3),
+				End:   endPoint,
+			}
+		case LoopbackSLeft, LoopbackSRight:
+			return lines.CubicBezierChunk{
+				Start: startPoint,
+				P1:    c.Cell.At(tFrom, 0.7),
+				P2:    c.Cell.At(tTo, 0.7),
+				End:   endPoint,
+			}
+		default:
+			panic("Unexpected case")
+		}
+	}
+
+	return lines.LineChunk{
+		End: endPoint,
+	}
+}
+
+func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
+	if !c.HasEndpoint(from) {
+		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
+	}
+	to := c.GetOtherDirection(from)
+	if to == nil {
+		panic("No 'to' direction")
+	}
+	mTo := c.GetMidpoint(*to)
+	mFrom := c.GetMidpoint(from)
+	tFrom := *mFrom
+	tTo := *mTo
+	startPoint := c.Cell.AtEdge(from, tFrom)
+	endPoint := c.Cell.AtEdge(*to, tTo)
+	curveType := GetCurveType(from.NWSE, to.NWSE, tFrom, tTo)
+
+	// return getCurveMapping(c, curveType, tFrom, tTo, startPoint, endPoint)
+	return getCircularCurveMapping(c, curveType, tFrom, tTo, startPoint, endPoint)
+	// return getCurlyCurveMapping(c, curveType, tFrom, tTo, startPoint, endPoint)
+
+	// switch curveType.MetaType() {
+	// case Straight:
+	// 	switch curveType {
+	// 	case HorizontalLeft, HorizontalRight:
+	// 		return lines.CubicBezierChunk{
+	// 			Start: startPoint,
+	// 			P1:    c.Cell.At(0.5, tFrom),
+	// 			P2:    c.Cell.At(0.5, tTo),
+	// 			End:   endPoint,
+	// 		}
+	// 	case VerticalUp, VerticalDown:
+	// 		return lines.CubicBezierChunk{
+	// 			Start: startPoint,
+	// 			P1:    c.Cell.At(tFrom, 0.5),
+	// 			P2:    c.Cell.At(tTo, 0.5),
+	// 			End:   endPoint,
+	// 		}
+	// 	default:
+	// 		panic("Unexpected case")
+	// 	}
+	// case QuarterCircle:
+	// 	crossesDiagonal := c.GetClockIntersectDiagonal(curveType, tFrom, tTo)
+
+	// 	switch curveType {
+	// 	// if diagonal does from top left to bottom right
+	// 	case ClockNE, ClockSW:
+	// 		if crossesDiagonal {
+	// 			return lines.CubicBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tFrom, tFrom),
+	// 				P2:    c.Cell.At(tTo, tTo),
+	// 				End:   endPoint,
+	// 			}
+	// 		} else {
+	// 			return lines.QuadraticBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tFrom, tTo), // this depends on the direction, only applies if start is N or S
+	// 				End:   endPoint,
+	// 			}
+	// 		}
+
+	// 	case CClockEN, CClockWS:
+	// 		if crossesDiagonal {
+	// 			return lines.CubicBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tFrom, tFrom),
+	// 				P2:    c.Cell.At(tTo, tTo),
+	// 				End:   endPoint,
+	// 			}
+	// 		} else {
+	// 			return lines.QuadraticBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tTo, tFrom), // this depends on the direction, only applies if start is E or W
+	// 				End:   endPoint,
+	// 			}
+	// 		}
+
+	// 	case ClockWN, ClockES:
+	// 		if crossesDiagonal {
+	// 			return lines.CubicBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(1.0-tFrom, tFrom),
+	// 				P2:    c.Cell.At(tTo, 1.0-tTo),
+	// 				End:   endPoint,
+	// 			}
+	// 		} else {
+	// 			return lines.QuadraticBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tTo, tFrom),
+	// 				End:   endPoint,
+	// 			}
+	// 		}
+	// 	case CClockNW, CClockSE:
+	// 		if crossesDiagonal {
+	// 			return lines.CubicBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tFrom, 1.0-tFrom),
+	// 				P2:    c.Cell.At(1.0-tTo, tTo),
+	// 				End:   endPoint,
+	// 			}
+	// 		} else {
+	// 			return lines.QuadraticBezierChunk{
+	// 				Start: startPoint,
+	// 				P1:    c.Cell.At(tFrom, tTo),
+	// 				End:   endPoint,
+	// 			}
+	// 		}
+	// 	default:
+	// 		panic("Unexpected case")
+	// 	}
+	// case Loopback:
+	// 	switch curveType {
+	// 	case LoopbackWUp, LoopbackWDown:
+	// 		return lines.CubicBezierChunk{
+	// 			Start: startPoint,
+	// 			P1:    c.Cell.At(0.3, tFrom),
+	// 			P2:    c.Cell.At(0.3, tTo),
+	// 			End:   endPoint,
+	// 		}
+	// 	case LoopbackEUp, LoopbackEDown:
+	// 		return lines.CubicBezierChunk{
+	// 			Start: startPoint,
+	// 			P1:    c.Cell.At(0.7, tFrom),
+	// 			P2:    c.Cell.At(0.7, tTo),
+	// 			End:   endPoint,
+	// 		}
+	// 	case LoopbackNLeft, LoopbackNRight:
+	// 		return lines.CubicBezierChunk{
+	// 			Start: startPoint,
+	// 			P1:    c.Cell.At(tFrom, 0.3),
+	// 			P2:    c.Cell.At(tTo, 0.3),
+	// 			End:   endPoint,
+	// 		}
+	// 	case LoopbackSLeft, LoopbackSRight:
+	// 		return lines.CubicBezierChunk{
+	// 			Start: startPoint,
+	// 			P1:    c.Cell.At(tFrom, 0.7),
+	// 			P2:    c.Cell.At(tTo, 0.7),
+	// 			End:   endPoint,
+	// 		}
+	// 	default:
+	// 		panic("Unexpected case")
+	// 	}
+	// }
+
+	// return lines.LineChunk{
+	// 	End: endPoint,
+	// }
 }
 
 func (c *Curve) GetMidpoint(endpoint endPointTuple) *float64 {
