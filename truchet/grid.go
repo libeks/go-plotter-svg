@@ -10,19 +10,19 @@ import (
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-func NewGrid(b box.Box, nx int, edgeMapping edgePointMapping, tileset []tileSet, dataSource samplers.DataSource) *Grid {
+func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, dataSource samplers.DataSource, curveMapper CurveMapper) *Grid {
 	boxes := b.PartitionIntoSquares(nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
 	grid := &Grid{
-		edgePointMapping: edgeMapping,
-		tileset:          tileset,
+		TruchetTileSet: tileSet,
+		CurveMapper:    curveMapper,
 	}
 	// grid.edgePointMapping = edgeMapping
 	if len(boxes) != nx*nx {
 		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
 	}
-	horPoints := edgeMapping.getHorizontal()
-	vertPoints := edgeMapping.getVertical()
+	horPoints := tileSet.EdgePointMapping.getHorizontal()
+	vertPoints := tileSet.EdgePointMapping.getVertical()
 
 	// TODO: move all get*intersects out of here, abstract them away
 
@@ -88,7 +88,8 @@ func getRandomIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edge
 func getRandomSourcedIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
 	var intersects = make([]edgeMap, len(pointDef))
 	// dataSource := samplers.HighCenterRelativeDataSource{Scale: 6.0}
-	dataSource := samplers.InvertSampler{samplers.HighInCircleRelativeDataSource{Radius: 0.5}}
+	// dataSource := samplers.InsideCircleRelativeDataSource{Radius: 0.5, Inside: 1.0, Outside: 0.0}
+	dataSource := samplers.InsideCircleRelativeDataSource{Radius: 0.5, Inside: 0.0, Outside: 1.0}
 	// dataSource := samplers.HighInCircleRelativeDataSource{Radius: 0.5}
 	spacing := 1 / float64(len(pointDef)+1)
 	variance := 0.5 / float64(len(pointDef))
@@ -168,9 +169,9 @@ type Grid struct {
 	// edge containers, specifying the position of cell border points
 	columnEdges map[cellCoord]Edge
 	rowEdges    map[cellCoord]Edge
-	edgePointMapping
-	tileset []tileSet
-	samplers.DataSource
+	TruchetTileSet
+	CurveMapper
+	endpointWiggle samplers.DataSource
 }
 
 func (g Grid) At(x, y int) *Cell {
@@ -192,7 +193,7 @@ func (g Grid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike 
 					return path
 				}
 				cell = nextCell
-				direction = g.edgePointMapping.other(nextDirection.endpoint)
+				direction = g.TruchetTileSet.EdgePointMapping.other(nextDirection.endpoint)
 			} else {
 				return path
 			}
@@ -217,28 +218,28 @@ func (g Grid) GererateCurves() []lines.LineLike {
 	for x := range g.nX {
 		cell := g.At(x, 0)
 		direction := North
-		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+		for _, dirIndex := range g.TruchetTileSet.EdgePointMapping.endpointsFrom(direction) {
 			curves = append(curves, g.GenerateCurve(cell, dirIndex))
 		}
 	}
 	for y := range g.nY {
 		cell := g.At(g.nX-1, y)
 		direction := East
-		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+		for _, dirIndex := range g.TruchetTileSet.EdgePointMapping.endpointsFrom(direction) {
 			curves = append(curves, g.GenerateCurve(cell, dirIndex))
 		}
 	}
 	for x := g.nX - 1; x >= 0; x-- {
 		cell := g.At(x, g.nY-1)
 		direction := South
-		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+		for _, dirIndex := range g.TruchetTileSet.EdgePointMapping.endpointsFrom(direction) {
 			curves = append(curves, g.GenerateCurve(cell, dirIndex))
 		}
 	}
 	for y := g.nY - 1; y >= 0; y-- {
 		cell := g.At(0, y)
 		direction := West
-		for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+		for _, dirIndex := range g.TruchetTileSet.EdgePointMapping.endpointsFrom(direction) {
 			curves = append(curves, g.GenerateCurve(cell, dirIndex))
 		}
 	}
@@ -246,7 +247,7 @@ func (g Grid) GererateCurves() []lines.LineLike {
 		for y := 0; y < g.nY; y++ {
 			cell := g.At(x, y)
 			for _, direction := range []NWSE{North, West, South, East} {
-				for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
+				for _, dirIndex := range g.TruchetTileSet.EdgePointMapping.endpointsFrom(direction) {
 					c := g.GenerateCurve(cell, dirIndex)
 					if !c.IsEmpty() {
 						curves = append(curves, c)

@@ -12,9 +12,9 @@ import (
 type Cell struct {
 	*Grid
 	box.Box
-	x      int
-	y      int
-	tile   tileSet
+	x int
+	y int
+	tile
 	curves []*Curve
 }
 
@@ -41,16 +41,16 @@ func (c *Cell) NextUnseen() *Curve {
 	return nil
 }
 
-func (c *Cell) generateCurves(tileset tileSet) {
+func (c *Cell) generateCurves(tileset tile) {
 	// TODO: rename tileset to tile
 	c.tile = tileset
 	edgePointMap := c.GetEdgePoints()
 	curves := make([]*Curve, len(tileset.pairs))
 	for i, pair := range tileset.pairs {
 		a := pair.a
-		aDir := c.Grid.edgePointMapping.getDirection(a)
+		aDir := c.Grid.TruchetTileSet.EdgePointMapping.getDirection(a)
 		b := pair.b
-		bDir := c.Grid.edgePointMapping.getDirection(b)
+		bDir := c.Grid.TruchetTileSet.EdgePointMapping.getDirection(b)
 		curves[i] = &Curve{
 			endpoints: []EndpointMidpoint{
 				{
@@ -76,7 +76,7 @@ func (c *Cell) GetEdgePoints() map[int]float64 {
 	edges[West] = c.Grid.columnEdges[cellCoord{c.x, c.y}]
 	edges[East] = c.Grid.columnEdges[cellCoord{c.x + 1, c.y}]
 	vals := map[int]float64{}
-	for _, edgePointMapping := range c.Grid.edgePointMapping.pairs {
+	for _, edgePointMapping := range c.Grid.TruchetTileSet.EdgePointMapping.pairs {
 		for _, endPointTuple := range []endPointTuple{edgePointMapping.a, edgePointMapping.b} {
 			vals[endPointTuple.endpoint] = edges[endPointTuple.NWSE].GetPoint(endPointTuple.endpoint)
 		}
@@ -120,12 +120,12 @@ func (c *Cell) VisitFrom(direction endPointTuple) (*Curve, *Cell, *endPointTuple
 
 func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
 	rand := dataSource.GetValue(c.Box.Center()) // evaluate dataSource in absolute image coordinates
-	l := len(c.Grid.tileset)
+	l := len(c.Grid.TruchetTileSet.Tiles)
 	n := int(rand * float64(l))
 	if n == l {
 		n = n - 1
 	}
-	tile := c.Grid.tileset[n]
+	tile := c.Grid.TruchetTileSet.Tiles[n]
 	c.generateCurves(tile)
 }
 

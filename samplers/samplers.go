@@ -58,3 +58,35 @@ func (s InvertSampler) GetValue(p primitives.Point) float64 {
 	// distance to center
 	return 1.0 - s.DataSource.GetValue(p)
 }
+
+type InsideCircleRelativeDataSource struct {
+	Radius  float64
+	Inside  float64
+	Outside float64
+}
+
+// assumes that point will be from a point in the bounding box -1..1
+func (s InsideCircleRelativeDataSource) GetValue(p primitives.Point) float64 {
+	// distance to center
+	dist := p.Subtract(primitives.Origin).Len()
+	if dist < s.Radius {
+		return s.Inside
+	}
+	return s.Outside
+}
+
+type InsideCircleSubDataSource struct {
+	Radius  float64
+	Inside  DataSource
+	Outside DataSource
+}
+
+// assumes that point will be from a point in the bounding box -1..1
+func (s InsideCircleSubDataSource) GetValue(p primitives.Point) float64 {
+	// distance to center
+	dist := p.Subtract(primitives.Origin).Len()
+	if dist < s.Radius {
+		return s.Inside.GetValue(p)
+	}
+	return s.Outside.GetValue(p)
+}
