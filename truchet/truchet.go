@@ -4,6 +4,23 @@ import (
 	"fmt"
 )
 
+var (
+	Truchet4NonCrossing = TruchetTileSet{
+		Tiles:            TruchetPairs,
+		EdgePointMapping: EndpointMapping4,
+	}
+
+	Truchet4Crossing = TruchetTileSet{
+		Tiles:            TruchetUnderPairs,
+		EdgePointMapping: EndpointMapping4,
+	}
+
+	Truchet6NonCrossingSide = TruchetTileSet{
+		Tiles:            Truchet6Pairs,
+		EdgePointMapping: EndpointMapping6Side,
+	}
+)
+
 func NewPair(a, b int) pair {
 	return pair{a: a, b: b}
 }
@@ -22,11 +39,16 @@ func (p pair) Other(q int) int {
 	return -1
 }
 
-type tileSet struct {
+type TruchetTileSet struct {
+	Tiles            []tile
+	EdgePointMapping edgePointMapping
+}
+
+type tile struct {
 	pairs []pair
 }
 
-func (t tileSet) Other(i int) int {
+func (t tile) Other(i int) int {
 	for _, pair := range t.pairs {
 		if other := pair.Other(i); other > 0 {
 			return other
@@ -36,7 +58,7 @@ func (t tileSet) Other(i int) int {
 }
 
 // non-intersecting links for a 4-set, corresponds to Catalan number 2
-var TruchetPairs = []tileSet{
+var TruchetPairs = []tile{
 	{
 		pairs: []pair{
 			NewPair(1, 2),
@@ -52,7 +74,7 @@ var TruchetPairs = []tileSet{
 }
 
 // all links for 4-set
-var TruchetUnderPairs = []tileSet{
+var TruchetUnderPairs = []tile{
 	{
 		pairs: []pair{
 			NewPair(1, 2),
@@ -75,7 +97,7 @@ var TruchetUnderPairs = []tileSet{
 }
 
 // non-intersecting links for a 6-set, corresponds to Catalan number 3
-var Truchet6Pairs = []tileSet{
+var Truchet6Pairs = []tile{
 	{
 		// ()()()
 		pairs: []pair{
