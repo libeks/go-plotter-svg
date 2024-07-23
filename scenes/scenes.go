@@ -361,7 +361,7 @@ func getTruchetScene(b box.Box) Scene {
 	// truch := truchet.Truchet4NonCrossing
 	truch := truchet.Truchet4Crossing
 	// truch := truchet.Truchet6NonCrossingSide
-	grid := truchet.NewGrid(b, 75, truch, tileSource, edgeSource, truchet.MapCircularCurve)
+	grid := truchet.NewGrid(b, 20, truch, tileSource, edgeSource, truchet.MapCircularCurve)
 	curves := grid.GererateCurves()
 	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
