@@ -90,3 +90,11 @@ func (s InsideCircleSubDataSource) GetValue(p primitives.Point) float64 {
 	}
 	return s.Outside.GetValue(p)
 }
+
+type RandomChooser struct {
+	Values []float64
+}
+
+func (s RandomChooser) GetValue(p primitives.Point) float64 {
+	return s.Values[rand.Intn(len(s.Values))]
+}
