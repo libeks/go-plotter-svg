@@ -10,7 +10,7 @@ import (
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, dataSource samplers.DataSource, curveMapper CurveMapper) *Grid {
+func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *Grid {
 	boxes := b.PartitionIntoSquares(nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
 	grid := &Grid{
@@ -50,7 +50,7 @@ func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, dataSource samplers.Data
 			x:    childBox.I,
 			y:    childBox.J,
 		}
-		cell.PopulateCurves(dataSource)
+		cell.PopulateCurves(tilePicker)
 		cells[cellCoord{childBox.I, childBox.J}] = cell
 	}
 	grid.nX = nx
@@ -96,9 +96,11 @@ func getRandomSourcedIntersects(pointDef []endPointPair, xCoord, yCoord float64)
 	for i, pt := range pointDef {
 		center := spacing * float64(i+1)
 		sourceVal := dataSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
+		valPlusMinus := sourceVal*2 - 1
 		intersects[i] = edgeMap{
 			point: pt,
-			val:   maths.RandInRange(center-variance*sourceVal, center+variance*sourceVal),
+			// val:   maths.RandInRange(center-variance*sourceVal, center+variance*sourceVal),
+			val: center + valPlusMinus*variance,
 		}
 	}
 	return intersects

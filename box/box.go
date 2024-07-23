@@ -74,8 +74,19 @@ func (b Box) WithPadding(pad float64) Box {
 	}
 }
 
+// center of the box in absolute coordinates [0, 10_000]
 func (b Box) Center() primitives.Point {
 	return primitives.Point{X: b.X + (b.XEnd-b.X)/2, Y: b.Y + (b.YEnd-b.Y)/2}
+}
+
+func getRelativeAroundCenter(v float64) float64 {
+	relative := (v) / 10_000
+	return 2*relative - 1
+}
+
+// center of the box in relative coordinates [0.0, 1.0], assuming that the image is in the range [0, 10_000]
+func (b Box) RelativeCenter() primitives.Point {
+	return primitives.Point{X: getRelativeAroundCenter(b.X + (b.XEnd-b.X)/2), Y: getRelativeAroundCenter(b.Y + (b.YEnd-b.Y)/2)}
 }
 
 func (b Box) Width() float64 {
