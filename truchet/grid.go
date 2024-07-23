@@ -5,7 +5,6 @@ import (
 
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
-	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 )
@@ -17,29 +16,24 @@ func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, tilePicker, edgeSource s
 		TruchetTileSet: tileSet,
 		CurveMapper:    curveMapper,
 	}
-	// grid.edgePointMapping = edgeMapping
 	if len(boxes) != nx*nx {
 		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
 	}
 	horPoints := tileSet.EdgePointMapping.getHorizontal()
 	vertPoints := tileSet.EdgePointMapping.getVertical()
 
-	// TODO: move all get*intersects out of here, abstract them away
-
-	// getIntersects := getRandomIncreasingIntersects
-	getIntersects := getRandomSourcedIntersects
-	// getIntersects := getStaticIntersects
+	getIntersects := getSourcedIntersects
 	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of horizontal edges
 		for j := range nx { // for each cell
-			intersects := getIntersects(horPoints, float64(j)/float64(nx+1), float64(i)/float64(nx+1))
+			intersects := getIntersects(horPoints, edgeSource, float64(j)/float64(nx+1), float64(i)/float64(nx+1))
 			grid.rowEdges[cellCoord{j, i}] = Edge{intersects} // flipped order is intentional
 		}
 	}
 	grid.columnEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of vertical edges
 		for j := range nx { // for each cell
-			intersects := getIntersects(vertPoints, float64(i)/float64(nx+1), float64(j)/float64(nx+1))
+			intersects := getIntersects(vertPoints, edgeSource, float64(i)/float64(nx+1), float64(j)/float64(nx+1))
 			grid.columnEdges[cellCoord{i, j}] = Edge{intersects}
 		}
 	}
@@ -59,88 +53,19 @@ func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, tilePicker, edgeSource s
 	return grid
 }
 
-// getIntersections returns the intersection points for coordinates in unit square
-func getRandomIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
-	var intersects []edgeMap
-	if len(pointDef) == 1 {
-		intersects = []edgeMap{
-			{
-				point: pointDef[0],
-				val:   maths.RandInRange(0.2, 0.8),
-			},
-		}
-	} else if len(pointDef) == 2 {
-		intersects = []edgeMap{
-			{
-				point: pointDef[0],
-				val:   maths.RandInRange(0.2, 0.4),
-			},
-			{
-				point: pointDef[1],
-				val:   maths.RandInRange(0.6, 0.8),
-			},
-		}
-	}
-	return intersects
-}
-
-// getIntersections returns the intersection points for coordinates in unit square
-func getRandomSourcedIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
+// getSourcedIntersections returns the intersection points for coordinates in unit square
+func getSourcedIntersects(pointDef []endPointPair, edgeSource samplers.DataSource, xCoord, yCoord float64) []edgeMap {
 	var intersects = make([]edgeMap, len(pointDef))
-	// dataSource := samplers.HighCenterRelativeDataSource{Scale: 6.0}
-	// dataSource := samplers.InsideCircleRelativeDataSource{Radius: 0.5, Inside: 1.0, Outside: 0.0}
-	dataSource := samplers.InsideCircleRelativeDataSource{Radius: 0.5, Inside: 0.0, Outside: 1.0}
-	// dataSource := samplers.HighInCircleRelativeDataSource{Radius: 0.5}
 	spacing := 1 / float64(len(pointDef)+1)
 	variance := 0.5 / float64(len(pointDef))
 	for i, pt := range pointDef {
 		center := spacing * float64(i+1)
-		sourceVal := dataSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
+		sourceVal := edgeSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
 		valPlusMinus := sourceVal*2 - 1
+		// fmt.Printf("val %.1f\n", valPlusMinus)
 		intersects[i] = edgeMap{
 			point: pt,
-			// val:   maths.RandInRange(center-variance*sourceVal, center+variance*sourceVal),
-			val: center + valPlusMinus*variance,
-		}
-	}
-	return intersects
-}
-
-// getIntersections returns the intersection points for coordinates in unit square
-func getRandomIncreasingIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
-	var intersects = make([]edgeMap, len(pointDef))
-	spacing := 1 / float64(len(pointDef)+1)
-	variance := 0.3 / float64(len(pointDef))
-	for i, pt := range pointDef {
-		center := spacing * float64(i+1)
-		intersects[i] = edgeMap{
-			point: pt,
-			val:   maths.RandInRange(center-variance*yCoord, center+variance*yCoord),
-		}
-	}
-	return intersects
-}
-
-// getIntersections returns the intersection points for coordinates in unit square
-func getStaticIntersects(pointDef []endPointPair, xCoord, yCoord float64) []edgeMap {
-	var intersects []edgeMap
-	if len(pointDef) == 1 {
-		intersects = []edgeMap{
-			{
-				point: pointDef[0],
-				val:   0.5,
-			},
-		}
-	} else if len(pointDef) == 2 {
-		intersects = []edgeMap{
-			{
-				point: pointDef[0],
-				val:   0.333,
-			},
-			{
-				point: pointDef[1],
-				val:   0.666,
-			},
+			val:   center + valPlusMinus*variance/2,
 		}
 	}
 	return intersects
