@@ -356,8 +356,8 @@ func getTruchetScene(b box.Box) Scene {
 		Inside:  samplers.RandomChooser{Values: []float64{0, 1}},
 		Outside: samplers.ConstantDataSource{Val: 0.5},
 	}
-	edgeSource := samplers.ConstantDataSource{Val: 0}
-	// edgeSource := samplers.ConstantDataSource{Val: .5}
+	// edgeSource := samplers.ConstantDataSource{Val: 0.5} // 0.5 means we'll use default edge values
+	edgeSource := samplers.RandomChooser{Values: []float64{0.4, 0.5, 0.6}}
 	// truch := truchet.Truchet4NonCrossing
 	truch := truchet.Truchet4Crossing
 	// truch := truchet.Truchet6NonCrossingSide
