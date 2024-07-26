@@ -14,9 +14,9 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * Do a Marching Squares approach
 * Come up with a solution for object-to-curve intersection
   * The current appraoch only works for lines and circle segments, but does not for Beziers. To generalize, I'll have to step through each line iteratively, though the question is, how densely should I sample for each object? Is there some easy way to find out the "depth" of a point, both inside and outside?
-* Fix Truchet tile rendering for edge cases, the normal isn't always perpendicular to tile edge
 
 # Plot ideas
 
 * Halftone circles in different colors
 * Marching squares
+* Concentric circles around several points, all clipped to the respective Voronoi diagram
