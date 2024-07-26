@@ -26,3 +26,7 @@ func (c LineGapChunk) Length(start primitives.Point) float64 {
 func (c LineGapChunk) Endpoint() primitives.Point {
 	return c.End
 }
+
+func (c LineGapChunk) Guides() string {
+	return fmt.Sprintf("M %.1f %.1f L %.1f %.1f", c.Start.X, c.Start.Y, c.End.X, c.End.Y)
+}

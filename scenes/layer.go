@@ -13,16 +13,22 @@ func NewLayer(annotation string) Layer {
 }
 
 type Layer struct {
-	name      string
-	linelikes []lines.LineLike
-	offsetX   float64
-	offsetY   float64
-	color     string
-	width     float64
+	name         string
+	linelikes    []lines.LineLike
+	controllines []lines.LineLike
+	offsetX      float64
+	offsetY      float64
+	color        string
+	width        float64
 }
 
 func (l Layer) WithLineLike(linelikes []lines.LineLike) Layer {
 	l.linelikes = append(l.linelikes, linelikes...)
+	return l
+}
+
+func (l Layer) WithControlLines(linelikes []lines.LineLike) Layer {
+	l.controllines = append(l.controllines, linelikes...)
 	return l
 }
 
@@ -58,6 +64,9 @@ func (l Layer) XML(i int) xmlwriter.Elem {
 	contents := []xmlwriter.Writable{}
 	for _, line := range l.linelikes {
 		contents = append(contents, line.XML(color, width))
+	}
+	for _, line := range l.controllines {
+		contents = append(contents, line.GuideXML(color, width))
 	}
 	return xmlwriter.Elem{
 		Name: "g", Attrs: []xmlwriter.Attr{

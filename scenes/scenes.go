@@ -350,19 +350,29 @@ func getCurlyBrush(b box.Box, width, angle float64) []lines.LineLike {
 func getTruchetScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	tileSource := samplers.RandomDataSource{}
+	// tileSource := samplers.ConstantDataSource{0}
+	// tileSource := samplers.InsideCircleSubDataSource{
+	// 	Radius:  0.5,
+	// 	Inside:  samplers.RandomChooser{Values: []float64{0, 1}},
+	// 	Outside: samplers.ConstantDataSource{Val: 0.5},
+	// }
+	// tileSource := samplers.InsideCircleSubDataSource{
+	// 	Radius:  0.5,
+	// 	Inside:  samplers.RandomChooser{Values: []float64{0, 1}},
+	// 	Outside: samplers.ConstantDataSource{Val: 0.5},
+	// }
 	// edgeSource := samplers.RandomDataSource{}
-	tileSource := samplers.InsideCircleSubDataSource{
-		Radius:  0.5,
-		Inside:  samplers.RandomChooser{Values: []float64{0, 1}},
-		Outside: samplers.ConstantDataSource{Val: 0.5},
-	}
-	// edgeSource := samplers.ConstantDataSource{Val: 0.5} // 0.5 means we'll use default edge values
-	edgeSource := samplers.RandomChooser{Values: []float64{0.4, 0.5, 0.6}}
-	// truch := truchet.Truchet4NonCrossing
-	truch := truchet.Truchet4Crossing
+	// edgeSource := samplers.ConstantDataSource{Val: .2} // 0.5 means we'll use default edge values
+	edgeSource := samplers.RandomChooser{Values: []float64{-.25, 1.25}}
+	// edgeSource := samplers.RandomChooser{Values: []float64{.2, .8}}
+	// edgeSource := samplers.RandomChooser{Values: []float64{0, 1}}
+	truch := truchet.Truchet4NonCrossing
+	// truch := truchet.Truchet4Crossing
 	// truch := truchet.Truchet6NonCrossingSide
-	grid := truchet.NewGrid(b, 20, truch, tileSource, edgeSource, truchet.MapCircularCurve)
+	grid := truchet.NewGrid(b, 30, truch, tileSource, edgeSource, truchet.MapCircularCurve)
 	curves := grid.GererateCurves()
+	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
 	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 

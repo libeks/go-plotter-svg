@@ -154,3 +154,7 @@ func (c Circle) XML(color, width string) xmlwriter.Elem {
 		},
 	}
 }
+
+func (c Circle) GuideXML(color, width string) xmlwriter.Elem {
+	return c.XML(color, width)
+}

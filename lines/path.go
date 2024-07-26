@@ -85,3 +85,34 @@ func (p Path) XML(color, width string) xmlwriter.Elem {
 		},
 	}
 }
+
+func (p Path) getGuideString() string {
+	strs := []string{fmt.Sprintf("M %.1f %.1f", p.start.X, p.start.Y)}
+	for _, xml := range p.chunks {
+		strs = append(strs, xml.Guides())
+	}
+	return strings.Join(strs, " ")
+}
+
+func (p Path) GuideXML(color, width string) xmlwriter.Elem {
+	return xmlwriter.Elem{
+		Name: "path", Attrs: []xmlwriter.Attr{
+			{
+				Name:  "d",
+				Value: p.getGuideString(),
+			},
+			{
+				Name:  "stroke",
+				Value: color,
+			},
+			{
+				Name:  "fill",
+				Value: "none",
+			},
+			{
+				Name:  "stroke-width",
+				Value: width,
+			},
+		},
+	}
+}

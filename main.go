@@ -23,6 +23,8 @@ func main() {
 	// scene := scenes.CirclesInSquareScene(innerBox)
 	// scene := scenes.TestDensityScene(innerBox)
 	scene := scenes.TruchetScene(innerBox)
+	flipCurves := false
+	scene.OptimizeLines(flipCurves)
 	scene.CalculateStatistics()
 	svg.SVG{
 		Fname:  fname,
