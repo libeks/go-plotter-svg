@@ -114,6 +114,11 @@ func (s Scene) CalculateStatistics() {
 	}
 }
 
+func (s Scene) OptimizeLines(flipCurves bool) Scene {
+	// TODO: Actually fill in
+	return s
+}
+
 func timeToMinSec(d time.Duration) string {
 	minutes := int(d / time.Minute)
 	seconds := int((d - time.Duration(float64(minutes)*float64(time.Minute))) / time.Second)

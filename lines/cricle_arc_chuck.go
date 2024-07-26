@@ -39,3 +39,7 @@ func (c CircleArcChunk) Length(start primitives.Point) float64 {
 func (c CircleArcChunk) Endpoint() primitives.Point {
 	return c.End
 }
+
+func (c CircleArcChunk) Guides() string {
+	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
+}

@@ -2,6 +2,7 @@ package truchet
 
 import (
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -155,7 +156,6 @@ func quarterBezierLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, 
 
 func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
 	crossesDiagonal := c.GetClockIntersectDiagonal(curveType, tFrom, tTo)
-	// fmt.Printf("crosses diagonal: %v\n", crossesDiagonal)
 	switch curveType {
 	// if diagonal does from top left to bottom right
 	case ClockNE, ClockSW:
@@ -171,15 +171,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == ClockNE {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(tFrom, circleBezierMultiplier*tFrom),
-					P2:    c.Cell.At(1-circleBezierMultiplier*tTo, tTo),
+					P1:    c.Cell.At(tFrom, maths.Interpolate(0, tTo, 0.55)),
+					P2:    c.Cell.At(maths.Interpolate(tFrom, 1, 0.55), tTo),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(tFrom, 1-circleBezierMultiplier*tFrom),
-				P2:    c.Cell.At(circleBezierMultiplier*tTo, tTo),
+				P1:    c.Cell.At(tFrom, maths.Interpolate(1, tTo, 0.55)),
+				P2:    c.Cell.At(maths.Interpolate(0, tFrom, 0.55), tTo),
 				End:   endPoint,
 			}
 		}
@@ -196,15 +196,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == CClockEN {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(1-circleBezierMultiplier*tFrom, tFrom),
-					P2:    c.Cell.At(tTo, circleBezierMultiplier*tTo),
+					P1:    c.Cell.At(maths.Interpolate(1, tTo, 0.55), tFrom),
+					P2:    c.Cell.At(tTo, maths.Interpolate(0, tFrom, 0.55)),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(circleBezierMultiplier*tFrom, tFrom),
-				P2:    c.Cell.At(tTo, 1-circleBezierMultiplier*tTo),
+				P1:    c.Cell.At(maths.Interpolate(0, tTo, 0.55), tFrom),
+				P2:    c.Cell.At(tTo, maths.Interpolate(1, tFrom, 0.55)),
 				End:   endPoint,
 			}
 		}
@@ -213,23 +213,23 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 		if crossesDiagonal {
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(1.0-tFrom, tFrom),
-				P2:    c.Cell.At(tTo, 1.0-tTo),
+				P1:    c.Cell.At(1-tFrom, tFrom),
+				P2:    c.Cell.At(tTo, 1-tTo),
 				End:   endPoint,
 			}
 		} else {
 			if curveType == ClockWN {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(circleBezierMultiplier*tFrom, 1-tFrom),
-					P2:    c.Cell.At(1-tTo, circleBezierMultiplier*tTo),
+					P1:    c.Cell.At(maths.Interpolate(0, tTo, 0.55), tFrom),
+					P2:    c.Cell.At(tTo, maths.Interpolate(tFrom, 0, 0.55)),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(1.0-circleBezierMultiplier*tFrom, tFrom),
-				P2:    c.Cell.At(tTo, 1.0-circleBezierMultiplier*tTo),
+				P1:    c.Cell.At(maths.Interpolate(1, tTo, 0.55), tFrom),
+				P2:    c.Cell.At(tTo, maths.Interpolate(1, tFrom, 0.55)),
 				End:   endPoint,
 			}
 		}
@@ -245,15 +245,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == CClockNW {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(tFrom, circleBezierMultiplier*tFrom),
-					P2:    c.Cell.At(circleBezierMultiplier*tTo, tTo),
+					P1:    c.Cell.At(tFrom, maths.Interpolate(0, tTo, 0.55)),
+					P2:    c.Cell.At(maths.Interpolate(tFrom, 0, 0.55), tTo),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(tFrom, 1.0-circleBezierMultiplier*tFrom),
-				P2:    c.Cell.At(1.0-circleBezierMultiplier*tTo, tTo),
+				P1:    c.Cell.At(tFrom, maths.Interpolate(1, tTo, 0.55)),
+				P2:    c.Cell.At(maths.Interpolate(1, tFrom, 0.55), tTo),
 				End:   endPoint,
 			}
 		}

@@ -56,6 +56,10 @@ func (l LineSegment) XML(color, width string) xmlwriter.Elem {
 	}
 }
 
+func (l LineSegment) GuideXML(color, width string) xmlwriter.Elem {
+	return l.XML(color, width)
+}
+
 func (l LineSegment) Len() float64 {
 	return l.P2.Subtract(l.P1).Len()
 }

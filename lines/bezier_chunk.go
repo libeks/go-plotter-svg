@@ -53,6 +53,10 @@ func (c QuadraticBezierChunk) Endpoint() primitives.Point {
 	return c.End
 }
 
+func (c QuadraticBezierChunk) Guides() string {
+	return fmt.Sprintf("M %.1f %.1f L %.1f %.1f L %.1f %.1f", c.Start.X, c.Start.Y, c.P1.X, c.P1.Y, c.End.X, c.End.Y)
+}
+
 type CubicBezierChunk struct {
 	Start primitives.Point
 	P1    primitives.Point
@@ -96,6 +100,10 @@ func (c CubicBezierChunk) BBox() primitives.BBox {
 
 func (c CubicBezierChunk) Length(start primitives.Point) float64 {
 	return estimateLength(c, lengthEstimateAccuracy)
+}
+
+func (c CubicBezierChunk) Guides() string {
+	return fmt.Sprintf("M %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f", c.Start.X, c.Start.Y, c.P1.X, c.P1.Y, c.P2.X, c.P2.Y, c.End.X, c.End.Y)
 }
 
 func (c CubicBezierChunk) Endpoint() primitives.Point {
