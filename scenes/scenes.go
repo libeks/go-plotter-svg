@@ -387,18 +387,19 @@ func getSweepTruchet(b box.Box) Scene {
 	curves := grid.GererateCurves()
 	outlineCurves := []lines.LineLike{}
 	distance := 20.0
-	n := 5
+	n := 10
 	fmt.Printf("curves %v\n", curves)
-	for i := -n; i < n; i += 1 {
-		for _, curve := range curves {
-			if !curve.IsEmpty() {
+	for _, curve := range curves {
+		if !curve.IsEmpty() {
+			for i := -n; i < n; i += 1 {
+
 				outlineCurves = append(outlineCurves, curve.OffsetLeft(float64(i)*distance))
 			}
 		}
 	}
 	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
-	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
-	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(outlineCurves).WithColor("purple").WithWidth(10))
-	scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	// scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
+	scene = scene.AddLayer(NewLayer("truchet_offsets").WithLineLike(outlineCurves).WithColor("purple").WithWidth(distance))
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }
