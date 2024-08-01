@@ -155,6 +155,17 @@ func (c Circle) XML(color, width string) xmlwriter.Elem {
 	}
 }
 
-func (c Circle) GuideXML(color, width string) xmlwriter.Elem {
+func (c Circle) ControlLineXML(color, width string) xmlwriter.Elem {
 	return c.XML(color, width)
+}
+
+func (c Circle) OffsetLeft(distance float64) lines.LineLike {
+	// assume that a circle is drawn counter-clockwise
+
+	newRadius := c.Radius + distance
+	// radiusRatio := newRadius / c.Radius
+	return Circle{
+		Center: c.Center,
+		Radius: newRadius,
+	}
 }

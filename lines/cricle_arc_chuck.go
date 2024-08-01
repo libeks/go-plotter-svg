@@ -8,10 +8,17 @@ import (
 )
 
 type CircleArcChunk struct {
+	// TODO: refactor to not require all of these fields
 	Radius      float64
-	End         primitives.Point
-	IsLong      bool
-	IsClockwise bool
+	Center      primitives.Point
+	Start       primitives.Point // could be replaced with startT
+	End         primitives.Point // could be replaced with endT
+	IsLong      bool             // could be removed altogether
+	IsClockwise bool             // could be removed altogether
+}
+
+func (c CircleArcChunk) String() string {
+	return fmt.Sprintf("CircleArcChunk: center %s, radius %.1f with start %s, end %s", c.Center, c.Radius, c.Start, c.End)
 }
 
 func (c CircleArcChunk) XMLChunk() string {
@@ -40,6 +47,30 @@ func (c CircleArcChunk) Endpoint() primitives.Point {
 	return c.End
 }
 
-func (c CircleArcChunk) Guides() string {
+func (c CircleArcChunk) Startpoint() primitives.Point {
+	return c.Start
+}
+
+func (c CircleArcChunk) ControlLines() string {
 	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
+}
+
+func (c CircleArcChunk) OffsetLeft(distance float64) PathChunk {
+	fmt.Printf("offsetting left %s\n", c)
+	// left is counterClockwise
+	if c.IsClockwise {
+		distance *= -1
+	}
+	newRadius := c.Radius + distance
+	radiusRatio := newRadius / c.Radius
+	sv := c.Start.Subtract(c.Center).Mult(radiusRatio)
+	ev := c.End.Subtract(c.Center).Mult(radiusRatio)
+	return CircleArcChunk{
+		Radius:      newRadius,
+		Center:      c.Center,
+		Start:       c.Center.Add(sv),
+		End:         c.Center.Add(ev), // need to know the center here...
+		IsLong:      c.IsLong,
+		IsClockwise: c.IsClockwise,
+	}
 }

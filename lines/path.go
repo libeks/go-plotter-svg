@@ -86,20 +86,20 @@ func (p Path) XML(color, width string) xmlwriter.Elem {
 	}
 }
 
-func (p Path) getGuideString() string {
+func (p Path) getControlLineString() string {
 	strs := []string{fmt.Sprintf("M %.1f %.1f", p.start.X, p.start.Y)}
 	for _, xml := range p.chunks {
-		strs = append(strs, xml.Guides())
+		strs = append(strs, xml.ControlLines())
 	}
 	return strings.Join(strs, " ")
 }
 
-func (p Path) GuideXML(color, width string) xmlwriter.Elem {
+func (p Path) ControlLineXML(color, width string) xmlwriter.Elem {
 	return xmlwriter.Elem{
 		Name: "path", Attrs: []xmlwriter.Attr{
 			{
 				Name:  "d",
-				Value: p.getGuideString(),
+				Value: p.getControlLineString(),
 			},
 			{
 				Name:  "stroke",
@@ -114,5 +114,18 @@ func (p Path) GuideXML(color, width string) xmlwriter.Elem {
 				Value: width,
 			},
 		},
+	}
+}
+
+func (p Path) OffsetLeft(distance float64) LineLike {
+	fmt.Printf("offsetting left %s\n", p)
+	chunks := make([]PathChunk, len(p.chunks))
+	for i, chunk := range p.chunks {
+		chunks[i] = chunk.OffsetLeft(distance)
+	}
+	fmt.Printf("new chunks %v\n", chunks)
+	return Path{
+		start:  chunks[0].Startpoint(),
+		chunks: chunks,
 	}
 }

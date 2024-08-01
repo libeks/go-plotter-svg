@@ -66,7 +66,7 @@ func (l Layer) XML(i int) xmlwriter.Elem {
 		contents = append(contents, line.XML(color, width))
 	}
 	for _, line := range l.controllines {
-		contents = append(contents, line.GuideXML(color, width))
+		contents = append(contents, line.ControlLineXML(color, width))
 	}
 	return xmlwriter.Elem{
 		Name: "g", Attrs: []xmlwriter.Attr{

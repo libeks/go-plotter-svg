@@ -24,10 +24,10 @@ func (b Box) Lines() []lines.LineLike {
 	path := lines.NewPath(primitives.Point{X: b.X, Y: b.Y})
 	// find the starting point - extreme point of box in direction perpendicular to
 
-	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.X, Y: b.YEnd}})
-	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.XEnd, Y: b.YEnd}})
-	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.XEnd, Y: b.Y}})
-	path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: b.X, Y: b.Y}})
+	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.X, Y: b.Y}, End: primitives.Point{X: b.X, Y: b.YEnd}})
+	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.X, Y: b.YEnd}, End: primitives.Point{X: b.XEnd, Y: b.YEnd}})
+	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.XEnd, Y: b.YEnd}, End: primitives.Point{X: b.XEnd, Y: b.Y}})
+	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.XEnd, Y: b.Y}, End: primitives.Point{X: b.X, Y: b.Y}})
 
 	return []lines.LineLike{
 		path,

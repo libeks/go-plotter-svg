@@ -19,6 +19,12 @@ var (
 		loopbackLineMapper,
 	}
 
+	MapCircularCircleCurve = CurveMapper{
+		straightLineMapper,
+		quarterCircleCircleMapper,
+		loopbackLineMapper,
+	}
+
 	MapCurlyCurve = CurveMapper{
 		straightLineMapper,
 		quarterBezLineMapper,
@@ -27,6 +33,12 @@ var (
 )
 
 func straightLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
+	if tFrom == tTo {
+		return lines.LineChunk{
+			Start: startPoint,
+			End:   endPoint,
+		}
+	}
 	switch curveType {
 	case HorizontalLeft, HorizontalRight:
 		return lines.CubicBezierChunk{
@@ -151,6 +163,38 @@ func quarterBezierLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, 
 		}
 	default:
 		panic("Unexpected case")
+	}
+}
+
+func quarterCircleCircleMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
+	radius := c.Box.Width() / 2
+	var clockwise bool
+	switch curveType {
+	case CClockEN, CClockNW, CClockWS, CClockSE:
+		clockwise = true
+	}
+	// get the center
+	var center primitives.Point
+	switch curveType {
+	// if diagonal does from top left to bottom right
+	case ClockNE, CClockEN:
+		center = c.Box.Center().Add(primitives.Vector{X: c.Box.Width() / 2, Y: -c.Box.Height() / 2})
+	case ClockES, CClockSE:
+		center = c.Box.Center().Add(primitives.Vector{X: c.Box.Width() / 2, Y: c.Box.Height() / 2})
+	case ClockSW, CClockWS:
+		center = c.Box.Center().Add(primitives.Vector{X: -c.Box.Width() / 2, Y: c.Box.Height() / 2})
+	case ClockWN, CClockNW:
+		center = c.Box.Center().Add(primitives.Vector{X: -c.Box.Width() / 2, Y: -c.Box.Height() / 2})
+	default:
+		panic("Unexpected case")
+	}
+	return lines.CircleArcChunk{
+		Radius:      radius,
+		Center:      center,
+		IsClockwise: clockwise, // Truchet circle arcs swing the other direction from winding
+		IsLong:      false,
+		End:         endPoint,
+		Start:       startPoint,
 	}
 }
 
