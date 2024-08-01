@@ -21,7 +21,7 @@ type QuadraticBezierChunk struct {
 	End   primitives.Point
 }
 
-func (c QuadraticBezierChunk) XMLChunk() string {
+func (c QuadraticBezierChunk) PathXML() string {
 	return fmt.Sprintf("Q %.1f %.1f, %.1f %.1f", c.P1.X, c.P1.Y, c.End.X, c.End.Y)
 }
 
@@ -77,7 +77,7 @@ func (c CubicBezierChunk) String() string {
 	return fmt.Sprintf("Cubic Bezier with pts (%s %s %s %s)", c.Start, c.P1, c.P2, c.End)
 }
 
-func (c CubicBezierChunk) XMLChunk() string {
+func (c CubicBezierChunk) PathXML() string {
 	return fmt.Sprintf("C %.1f %.1f, %.1f %.1f, %.1f %.1f", c.P1.X, c.P1.Y, c.P2.X, c.P2.Y, c.End.X, c.End.Y)
 }
 

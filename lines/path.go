@@ -9,6 +9,8 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
+const pathThreshold = 0.1
+
 func NewPath(start primitives.Point) Path {
 	return Path{
 		start: start,
@@ -52,9 +54,14 @@ func (p Path) String() string {
 }
 
 func (p Path) pathString() string {
-	strs := []string{fmt.Sprintf("M %.1f %.1f", p.start.X, p.start.Y)}
+	start := p.start
+	strs := []string{fmt.Sprintf("M %.1f %.1f", start.X, start.Y)}
 	for _, xml := range p.chunks {
-		strs = append(strs, xml.XMLChunk())
+		if xml.Startpoint().Subtract(start).Len() > pathThreshold {
+			panic(fmt.Errorf("path chunks are too far apart: %s", xml))
+		}
+		strs = append(strs, xml.PathXML())
+		start = xml.Startpoint()
 	}
 	return strings.Join(strs, " ")
 }

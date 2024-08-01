@@ -20,10 +20,13 @@ type LineLike interface {
 
 // implemented by LineChunk, QuadraticBezierChunk, CubicBezierChunk, LineGapChunk
 type PathChunk interface {
-	XMLChunk() string
+	PathXML() string // returns the XML of this chunk, assuming that the starting point is the endpoint of the
+	// previous chunk
+
 	Length(start primitives.Point) float64
-	Endpoint() primitives.Point
-	ControlLines() string
 	Startpoint() primitives.Point
+	Endpoint() primitives.Point
+
+	ControlLines() string
 	OffsetLeft(distance float64) PathChunk
 }
