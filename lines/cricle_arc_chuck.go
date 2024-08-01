@@ -21,7 +21,7 @@ func (c CircleArcChunk) String() string {
 	return fmt.Sprintf("CircleArcChunk: center %s, radius %.1f with start %s, end %s", c.Center, c.Radius, c.Start, c.End)
 }
 
-func (c CircleArcChunk) XMLChunk() string {
+func (c CircleArcChunk) PathXML() string {
 	long := 0
 	if c.IsLong {
 		long = 1

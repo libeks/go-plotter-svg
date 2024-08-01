@@ -6,12 +6,6 @@ import (
 	"github.com/libeks/go-plotter-svg/lines"
 )
 
-const (
-	// if a Cubic bezier is drawn with this applied to the middle two control points, it
-	// looks very much like a circle
-	circleBezierMultiplier = 0.55
-)
-
 type Curve struct {
 	*Cell
 	endpoints []EndpointMidpoint

@@ -11,7 +11,7 @@ type LineChunk struct {
 	End   primitives.Point
 }
 
-func (c LineChunk) XMLChunk() string {
+func (c LineChunk) PathXML() string {
 	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
 }
 

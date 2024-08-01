@@ -6,6 +6,12 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
+const (
+	// if a Cubic bezier is drawn with this applied to the middle two control points, it
+	// looks very much like a circle
+	circleBzConst = 0.55
+)
+
 var (
 	BlockyCurveMapper = CurveMapper{
 		straightLineMapper,
@@ -215,15 +221,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == ClockNE {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(tFrom, maths.Interpolate(0, tTo, 0.55)),
-					P2:    c.Cell.At(maths.Interpolate(tFrom, 1, 0.55), tTo),
+					P1:    c.Cell.At(tFrom, maths.Interpolate(0, tTo, circleBzConst)),
+					P2:    c.Cell.At(maths.Interpolate(tFrom, 1, circleBzConst), tTo),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(tFrom, maths.Interpolate(1, tTo, 0.55)),
-				P2:    c.Cell.At(maths.Interpolate(0, tFrom, 0.55), tTo),
+				P1:    c.Cell.At(tFrom, maths.Interpolate(1, tTo, circleBzConst)),
+				P2:    c.Cell.At(maths.Interpolate(0, tFrom, circleBzConst), tTo),
 				End:   endPoint,
 			}
 		}
@@ -240,15 +246,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == CClockEN {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(maths.Interpolate(1, tTo, 0.55), tFrom),
-					P2:    c.Cell.At(tTo, maths.Interpolate(0, tFrom, 0.55)),
+					P1:    c.Cell.At(maths.Interpolate(1, tTo, circleBzConst), tFrom),
+					P2:    c.Cell.At(tTo, maths.Interpolate(0, tFrom, circleBzConst)),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(maths.Interpolate(0, tTo, 0.55), tFrom),
-				P2:    c.Cell.At(tTo, maths.Interpolate(1, tFrom, 0.55)),
+				P1:    c.Cell.At(maths.Interpolate(0, tTo, circleBzConst), tFrom),
+				P2:    c.Cell.At(tTo, maths.Interpolate(1, tFrom, circleBzConst)),
 				End:   endPoint,
 			}
 		}
@@ -265,15 +271,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == ClockWN {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(maths.Interpolate(0, tTo, 0.55), tFrom),
-					P2:    c.Cell.At(tTo, maths.Interpolate(tFrom, 0, 0.55)),
+					P1:    c.Cell.At(maths.Interpolate(0, tTo, circleBzConst), tFrom),
+					P2:    c.Cell.At(tTo, maths.Interpolate(tFrom, 0, circleBzConst)),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(maths.Interpolate(1, tTo, 0.55), tFrom),
-				P2:    c.Cell.At(tTo, maths.Interpolate(1, tFrom, 0.55)),
+				P1:    c.Cell.At(maths.Interpolate(1, tTo, circleBzConst), tFrom),
+				P2:    c.Cell.At(tTo, maths.Interpolate(1, tFrom, circleBzConst)),
 				End:   endPoint,
 			}
 		}
@@ -289,15 +295,15 @@ func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float6
 			if curveType == CClockNW {
 				return lines.CubicBezierChunk{
 					Start: startPoint,
-					P1:    c.Cell.At(tFrom, maths.Interpolate(0, tTo, 0.55)),
-					P2:    c.Cell.At(maths.Interpolate(tFrom, 0, 0.55), tTo),
+					P1:    c.Cell.At(tFrom, maths.Interpolate(0, tTo, circleBzConst)),
+					P2:    c.Cell.At(maths.Interpolate(tFrom, 0, circleBzConst), tTo),
 					End:   endPoint,
 				}
 			}
 			return lines.CubicBezierChunk{
 				Start: startPoint,
-				P1:    c.Cell.At(tFrom, maths.Interpolate(1, tTo, 0.55)),
-				P2:    c.Cell.At(maths.Interpolate(1, tFrom, 0.55), tTo),
+				P1:    c.Cell.At(tFrom, maths.Interpolate(1, tTo, circleBzConst)),
+				P2:    c.Cell.At(maths.Interpolate(1, tFrom, circleBzConst), tTo),
 				End:   endPoint,
 			}
 		}
