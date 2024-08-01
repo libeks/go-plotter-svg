@@ -245,6 +245,8 @@ func CircleArc(circle objects.Circle, t1 float64, t2 float64) lines.Path {
 	}
 	path := lines.NewPath(p1).AddPathChunk(lines.CircleArcChunk{
 		Radius:      circle.Radius,
+		Center:      circle.Center,
+		Start:       p1,
 		End:         p2,
 		IsLong:      isLong,
 		IsClockwise: false,

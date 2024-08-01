@@ -22,7 +22,8 @@ func main() {
 	// scene := scenes.ParallelCoherentScene(innerBox)
 	// scene := scenes.CirclesInSquareScene(innerBox)
 	// scene := scenes.TestDensityScene(innerBox)
-	scene := scenes.TruchetScene(innerBox)
+	// scene := scenes.TruchetScene(innerBox)
+	scene := scenes.SweepTruchetScene(innerBox)
 	flipCurves := false
 	scene.OptimizeLines(flipCurves)
 	scene.CalculateStatistics()

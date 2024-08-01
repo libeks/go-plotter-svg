@@ -27,9 +27,9 @@ func (c QuadraticBezierChunk) XMLChunk() string {
 
 // t is in [0,1]
 func (c QuadraticBezierChunk) At(t float64) primitives.Point {
-	a1 := LineStartEndChunk{Start: c.Start, End: c.P1}.At(t)
-	a2 := LineStartEndChunk{Start: c.P1, End: c.End}.At(t)
-	return LineStartEndChunk{Start: a1, End: a2}.At(t)
+	a1 := LineChunk{Start: c.Start, End: c.P1}.At(t)
+	a2 := LineChunk{Start: c.P1, End: c.End}.At(t)
+	return LineChunk{Start: a1, End: a2}.At(t)
 }
 
 func (c QuadraticBezierChunk) BBox() primitives.BBox {
@@ -43,9 +43,9 @@ func (c QuadraticBezierChunk) Length(start primitives.Point) float64 {
 func (c QuadraticBezierChunk) Bisect(t float64) (QuadraticBezierChunk, QuadraticBezierChunk) {
 	p0 := c.Start
 	p1 := c.End
-	a1 := LineStartEndChunk{Start: c.Start, End: c.P1}.At(t)
-	a2 := LineStartEndChunk{Start: c.P1, End: c.End}.At(t)
-	b1 := LineStartEndChunk{Start: a1, End: a2}.At(t)
+	a1 := LineChunk{Start: c.Start, End: c.P1}.At(t)
+	a2 := LineChunk{Start: c.P1, End: c.End}.At(t)
+	b1 := LineChunk{Start: a1, End: a2}.At(t)
 	return QuadraticBezierChunk{Start: p0, P1: a1, End: b1}, QuadraticBezierChunk{Start: b1, P1: a2, End: p1}
 }
 
@@ -53,8 +53,17 @@ func (c QuadraticBezierChunk) Endpoint() primitives.Point {
 	return c.End
 }
 
-func (c QuadraticBezierChunk) Guides() string {
+func (c QuadraticBezierChunk) Startpoint() primitives.Point {
+	return c.Start
+}
+
+func (c QuadraticBezierChunk) ControlLines() string {
 	return fmt.Sprintf("M %.1f %.1f L %.1f %.1f L %.1f %.1f", c.Start.X, c.Start.Y, c.P1.X, c.P1.Y, c.End.X, c.End.Y)
+}
+
+func (c QuadraticBezierChunk) OffsetLeft(distance float64) PathChunk {
+	// TODO: actually implement
+	panic("unimplemented")
 }
 
 type CubicBezierChunk struct {
@@ -74,23 +83,23 @@ func (c CubicBezierChunk) XMLChunk() string {
 
 // t is in [0,1]
 func (c CubicBezierChunk) At(t float64) primitives.Point {
-	a1 := LineStartEndChunk{Start: c.Start, End: c.P1}.At(t)
-	a2 := LineStartEndChunk{Start: c.P1, End: c.P2}.At(t)
-	a3 := LineStartEndChunk{Start: c.P2, End: c.End}.At(t)
-	b1 := LineStartEndChunk{Start: a1, End: a2}.At(t)
-	b2 := LineStartEndChunk{Start: a2, End: a3}.At(t)
-	return LineStartEndChunk{Start: b1, End: b2}.At(t)
+	a1 := LineChunk{Start: c.Start, End: c.P1}.At(t)
+	a2 := LineChunk{Start: c.P1, End: c.P2}.At(t)
+	a3 := LineChunk{Start: c.P2, End: c.End}.At(t)
+	b1 := LineChunk{Start: a1, End: a2}.At(t)
+	b2 := LineChunk{Start: a2, End: a3}.At(t)
+	return LineChunk{Start: b1, End: b2}.At(t)
 }
 
 func (c CubicBezierChunk) Bisect(t float64) (CubicBezierChunk, CubicBezierChunk) {
 	p0 := c.Start
 	p1 := c.End
-	a1 := LineStartEndChunk{Start: c.Start, End: c.P1}.At(t)
-	a2 := LineStartEndChunk{Start: c.P1, End: c.P2}.At(t)
-	a3 := LineStartEndChunk{Start: c.P2, End: c.End}.At(t)
-	b1 := LineStartEndChunk{Start: a1, End: a2}.At(t)
-	b2 := LineStartEndChunk{Start: a2, End: a3}.At(t)
-	cc := LineStartEndChunk{Start: b1, End: b2}.At(t)
+	a1 := LineChunk{Start: c.Start, End: c.P1}.At(t)
+	a2 := LineChunk{Start: c.P1, End: c.P2}.At(t)
+	a3 := LineChunk{Start: c.P2, End: c.End}.At(t)
+	b1 := LineChunk{Start: a1, End: a2}.At(t)
+	b2 := LineChunk{Start: a2, End: a3}.At(t)
+	cc := LineChunk{Start: b1, End: b2}.At(t)
 	return CubicBezierChunk{Start: p0, P1: a1, P2: b1, End: cc}, CubicBezierChunk{Start: cc, P1: b2, P2: a3, End: p1}
 }
 
@@ -102,10 +111,20 @@ func (c CubicBezierChunk) Length(start primitives.Point) float64 {
 	return estimateLength(c, lengthEstimateAccuracy)
 }
 
-func (c CubicBezierChunk) Guides() string {
+func (c CubicBezierChunk) ControlLines() string {
 	return fmt.Sprintf("M %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f", c.Start.X, c.Start.Y, c.P1.X, c.P1.Y, c.P2.X, c.P2.Y, c.End.X, c.End.Y)
 }
 
 func (c CubicBezierChunk) Endpoint() primitives.Point {
 	return c.End
+}
+
+func (c CubicBezierChunk) Startpoint() primitives.Point {
+	return c.Start
+}
+
+func (c CubicBezierChunk) OffsetLeft(distance float64) PathChunk {
+	// TODO: actually implement
+	fmt.Printf("%s\n", c)
+	panic("unimplemented")
 }

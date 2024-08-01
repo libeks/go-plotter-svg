@@ -54,7 +54,7 @@ func (v Vector) Unit() Vector {
 }
 
 // Perp returns a vector perpendicular to v of the same lenght,
-// rotated counter-clockwise by 90deg
+// rotated counter-clockwise ("left") by 90deg
 func (v Vector) Perp() Vector {
 	return Vector{-v.Y, v.X}
 }

@@ -9,6 +9,7 @@ import (
 )
 
 type LineSegment struct {
+	// TODO: how does this differ from LineChunk???
 	P1 primitives.Point
 	P2 primitives.Point
 }
@@ -56,7 +57,7 @@ func (l LineSegment) XML(color, width string) xmlwriter.Elem {
 	}
 }
 
-func (l LineSegment) GuideXML(color, width string) xmlwriter.Elem {
+func (l LineSegment) ControlLineXML(color, width string) xmlwriter.Elem {
 	return l.XML(color, width)
 }
 
@@ -109,4 +110,10 @@ func (l LineSegment) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 		return t
 	}
 	return nil
+}
+
+func (l LineSegment) OffsetLeft(distance float64) LineLike {
+	v := l.P2.Subtract(l.P1).Perp().Unit().Mult(distance)
+	return LineSegment{P1: l.P1.Add(v), P2: l.P2.Add(v)}
+
 }

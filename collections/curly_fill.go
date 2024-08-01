@@ -20,6 +20,7 @@ func (f CurlyFill) String() string {
 }
 
 func (f CurlyFill) GetPath() lines.Path {
+	// TODO: Refactor to use line field instead
 	// find the starting point - extreme point of box in direction perpendicular to
 	w := f.Spacing
 	boxWidth := f.Box.Width()
@@ -54,12 +55,15 @@ func (f CurlyFill) GetPath() lines.Path {
 
 		x = cx - w*sina
 		y = cy - w*cosa
-		path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: f.Box.X + x, Y: f.Box.Y + y}})
+		end := primitives.Point{X: f.Box.X + x, Y: f.Box.Y + y}
+		path = path.AddPathChunk(lines.LineChunk{End: end})
 
 		x2 := cx + w*sina
 		y2 := cy + w*cosa
 		path = path.AddPathChunk(lines.CircleArcChunk{
 			Radius:      w,
+			Center:      primitives.Point{X: f.Box.X + cx, Y: f.Box.Y + cy},
+			Start:       end,
 			End:         primitives.Point{X: f.Box.X + x2, Y: f.Box.Y + y2},
 			IsLong:      false,
 			IsClockwise: true,
@@ -77,12 +81,15 @@ func (f CurlyFill) GetPath() lines.Path {
 
 		x = cx - w*sina
 		y = cy - w*cosa
-		path = path.AddPathChunk(lines.LineChunk{End: primitives.Point{X: f.Box.X + x, Y: f.Box.Y + y}})
+		end = primitives.Point{X: f.Box.X + x, Y: f.Box.Y + y}
+		path = path.AddPathChunk(lines.LineChunk{End: end})
 
 		x2 = cx + w*sina
 		y2 = cy + w*cosa
 		path = path.AddPathChunk(lines.CircleArcChunk{
 			Radius:      w,
+			Center:      primitives.Point{X: f.Box.X + cx, Y: f.Box.Y + cy},
+			Start:       end,
 			End:         primitives.Point{X: f.Box.X + x2, Y: f.Box.Y + y2},
 			IsLong:      false,
 			IsClockwise: false,

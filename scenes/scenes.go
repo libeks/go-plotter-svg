@@ -27,6 +27,7 @@ var (
 	CirclesInSquareScene   = func(b box.Box) Scene { return circlesInSquareScene(b) }
 	TestDensityScene       = func(b box.Box) Scene { return testDensityScene(b) }
 	TruchetScene           = func(b box.Box) Scene { return getTruchetScene(b) }
+	SweepTruchetScene      = func(b box.Box) Scene { return getSweepTruchet(b) }
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -376,5 +377,28 @@ func getTruchetScene(b box.Box) Scene {
 	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 
+	return scene
+}
+
+func getSweepTruchet(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	grid := truchet.NewGrid(b, 2, truchet.Truchet4Crossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
+	curves := grid.GererateCurves()
+	outlineCurves := []lines.LineLike{}
+	distance := 20.0
+	n := 5
+	fmt.Printf("curves %v\n", curves)
+	for i := -n; i < n; i += 1 {
+		for _, curve := range curves {
+			if !curve.IsEmpty() {
+				outlineCurves = append(outlineCurves, curve.OffsetLeft(float64(i)*distance))
+			}
+		}
+	}
+	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
+	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
+	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(outlineCurves).WithColor("purple").WithWidth(10))
+	scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }
