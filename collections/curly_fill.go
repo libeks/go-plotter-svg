@@ -60,7 +60,7 @@ func (f CurlyFill) GetPath() lines.Path {
 
 		x2 := cx + w*sina
 		y2 := cy + w*cosa
-		path = path.AddPathChunk(lines.CircleArcChunk{
+		path = path.AddPathChunk(lines.CircleArcChunkLegacy{
 			Radius:      w,
 			Center:      primitives.Point{X: f.Box.X + cx, Y: f.Box.Y + cy},
 			Start:       end,
@@ -86,7 +86,7 @@ func (f CurlyFill) GetPath() lines.Path {
 
 		x2 = cx + w*sina
 		y2 = cy + w*cosa
-		path = path.AddPathChunk(lines.CircleArcChunk{
+		path = path.AddPathChunk(lines.CircleArcChunkLegacy{
 			Radius:      w,
 			Center:      primitives.Point{X: f.Box.X + cx, Y: f.Box.Y + cy},
 			Start:       end,

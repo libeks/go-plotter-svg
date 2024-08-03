@@ -238,19 +238,7 @@ func filterToRange(vals []float64, min, max float64) []float64 {
 
 func CircleArc(circle objects.Circle, t1 float64, t2 float64) lines.Path {
 	p1 := circle.At(t1)
-	p2 := circle.At(t2)
-	isLong := false
-	if t2-t1 > math.Pi {
-		isLong = true
-	}
-	path := lines.NewPath(p1).AddPathChunk(lines.CircleArcChunk{
-		Radius:      circle.Radius,
-		Center:      circle.Center,
-		Start:       p1,
-		End:         p2,
-		IsLong:      isLong,
-		IsClockwise: false,
-	})
+	path := lines.NewPath(p1).AddPathChunk(lines.CircleArcChunk(circle.Center, circle.Radius, t1, t2, false))
 	return path
 }
 
