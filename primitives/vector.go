@@ -5,6 +5,11 @@ import (
 	"math"
 )
 
+var (
+	UnitRight  = Vector{X: 1, Y: 0}
+	NullVector = Vector{X: 0, Y: 0}
+)
+
 type Vector struct {
 	X float64
 	Y float64
@@ -35,9 +40,9 @@ func (v Vector) Point() Point {
 }
 
 // RotateCCW rotates the vector counter clockwise by t in radians
-func (v Vector) RotateCCW(t float64) Vector {
-	cos := math.Cos(t)
-	sin := math.Sin(t)
+func (v Vector) RotateCCW(rad float64) Vector {
+	cos := math.Cos(rad)
+	sin := math.Sin(rad)
 	return Vector{
 		v.X*cos - v.Y*sin,
 		v.X*sin + v.Y*cos,

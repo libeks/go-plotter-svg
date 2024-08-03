@@ -380,26 +380,32 @@ func getTruchetScene(b box.Box) Scene {
 	return scene
 }
 
-func getSweepTruchet(b box.Box) Scene {
-	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
-	grid := truchet.NewGrid(b, 2, truchet.Truchet4Crossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
-	curves := grid.GererateCurves()
+func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []lines.LineLike {
 	outlineCurves := []lines.LineLike{}
-	distance := 20.0
-	n := 10
 	fmt.Printf("curves %v\n", curves)
 	for _, curve := range curves {
 		if !curve.IsEmpty() {
-			for i := -n; i < n; i += 1 {
-
+			for i := -n; i <= n; i += 1 {
 				outlineCurves = append(outlineCurves, curve.OffsetLeft(float64(i)*distance))
 			}
 		}
 	}
-	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
-	// scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
-	scene = scene.AddLayer(NewLayer("truchet_offsets").WithLineLike(outlineCurves).WithColor("purple").WithWidth(distance))
+	return outlineCurves
+}
+
+func getSweepTruchet(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	grid1 := truchet.NewGrid(b, 3, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
+	curves1 := grid1.GererateCurves()
+	curves2 := truchet.NewGrid(b, 6, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
+	curves3 := truchet.NewGrid(b, 12, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
+	distance := 20.0
+
+	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
+	scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithLineLike(getOffsetForCurves(curves1, distance, 10)).WithColor("red").WithWidth(distance))
+	scene = scene.AddLayer(NewLayer("truchet_offsets_2").WithLineLike(getOffsetForCurves(curves2, distance, 7)).WithColor("green").WithWidth(distance))
+	scene = scene.AddLayer(NewLayer("truchet_offsets_3").WithLineLike(getOffsetForCurves(curves3, distance, 5)).WithColor("blue").WithWidth(distance))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }

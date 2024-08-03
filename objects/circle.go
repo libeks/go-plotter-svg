@@ -22,12 +22,12 @@ func (c Circle) Len() float64 {
 
 func (c Circle) Start() primitives.Point {
 	// usually the plotter plots circles starting and ending at the left extreme point
-	return c.Center.Add(primitives.Vector{-1, 0}.Mult(c.Radius))
+	return c.Center.Add(primitives.Vector{X: -1, Y: 0}.Mult(c.Radius))
 }
 
 func (c Circle) End() primitives.Point {
 	// usually the plotter plots circles starting and ending at the left extreme point
-	return c.Center.Add(primitives.Vector{-1, 0}.Mult(c.Radius))
+	return c.Center.Add(primitives.Vector{X: -1, Y: 0}.Mult(c.Radius))
 }
 
 func (c Circle) String() string {
@@ -40,7 +40,7 @@ func (c Circle) Inside(p primitives.Point) bool {
 }
 
 func (c Circle) At(t float64) primitives.Point {
-	return c.Center.Add(primitives.Vector{c.Radius, 0}.RotateCCW(t))
+	return c.Center.Add(primitives.Vector{X: c.Radius, Y: 0}.RotateCCW(t))
 }
 
 func (c Circle) IsEmpty() bool {

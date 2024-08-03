@@ -58,10 +58,10 @@ func (p Path) pathString() string {
 	strs := []string{fmt.Sprintf("M %.1f %.1f", start.X, start.Y)}
 	for _, xml := range p.chunks {
 		if xml.Startpoint().Subtract(start).Len() > pathThreshold {
-			panic(fmt.Errorf("path chunks are too far apart: %s", xml))
+			panic(fmt.Errorf("path chunks are too far apart: %s, %.1f", xml, xml.Startpoint().Subtract(start).Len()))
 		}
 		strs = append(strs, xml.PathXML())
-		start = xml.Startpoint()
+		start = xml.Endpoint()
 	}
 	return strings.Join(strs, " ")
 }
@@ -88,6 +88,10 @@ func (p Path) XML(color, width string) xmlwriter.Elem {
 			{
 				Name:  "stroke-width",
 				Value: width,
+			},
+			{ // FIXME: remove
+				Name:  "stroke-opacity",
+				Value: "0.5",
 			},
 		},
 	}

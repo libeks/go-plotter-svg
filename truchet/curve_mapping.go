@@ -1,6 +1,8 @@
 package truchet
 
 import (
+	"math"
+
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
@@ -181,6 +183,7 @@ func quarterCircleCircleMapper(c *Curve, curveType CurveType, tFrom, tTo float64
 	}
 	// get the center
 	var center primitives.Point
+	var startRad, endRad float64
 	switch curveType {
 	// if diagonal does from top left to bottom right
 	case ClockNE, CClockEN:
@@ -194,14 +197,36 @@ func quarterCircleCircleMapper(c *Curve, curveType CurveType, tFrom, tTo float64
 	default:
 		panic("Unexpected case")
 	}
-	return lines.CircleArcChunk{
-		Radius:      radius,
-		Center:      center,
-		IsClockwise: clockwise, // Truchet circle arcs swing the other direction from winding
-		IsLong:      false,
-		End:         endPoint,
-		Start:       startPoint,
+	switch curveType {
+	case ClockNE:
+		startRad = math.Pi
+		endRad = math.Pi / 2
+	case CClockEN:
+		endRad = math.Pi
+		startRad = math.Pi / 2
+	case ClockES:
+		startRad = 3 * math.Pi / 2
+		endRad = math.Pi
+	case CClockSE:
+		endRad = 3 * math.Pi / 2
+		startRad = math.Pi
+	case ClockSW:
+		startRad = 0
+		endRad = 3 * math.Pi / 2
+	case CClockWS:
+		endRad = 0
+		startRad = 3 * math.Pi / 2
+	case ClockWN:
+		startRad = math.Pi / 2
+		endRad = 0
+	case CClockNW:
+		endRad = math.Pi / 2
+		startRad = 0
+	default:
+		panic("Unexpected case")
 	}
+	cb := lines.CircleArcChunk(center, radius, startRad, endRad, clockwise)
+	return cb
 }
 
 func quarterCircleBezLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
