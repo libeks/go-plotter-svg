@@ -39,3 +39,10 @@ func (c LineChunk) OffsetLeft(distance float64) PathChunk {
 	v := c.End.Subtract(c.Start).Perp().Unit().Mult(distance)
 	return LineChunk{Start: c.Start.Add(v), End: c.End.Add(v)}
 }
+
+func (c LineChunk) Reverse() PathChunk {
+	return LineChunk{
+		Start: c.End,
+		End:   c.Start,
+	}
+}
