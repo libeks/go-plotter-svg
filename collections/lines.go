@@ -236,6 +236,16 @@ func filterToRange(vals []float64, min, max float64) []float64 {
 	return rets
 }
 
+func ConcentricCirclesInCircle(circle objects.Circle, spacing float64) []lines.LineLike {
+	lns := []lines.LineLike{}
+	nLines := circle.Radius / spacing
+	for i := range int(nLines) {
+		radius := (float64(i) + 0.5) * spacing
+		lns = append(lns, lines.FullCircle(circle.Center, radius))
+	}
+	return lns
+}
+
 func CircleArc(circle objects.Circle, t1 float64, t2 float64) lines.Path {
 	p1 := circle.At(t1)
 	path := lines.NewPath(p1).AddPathChunk(lines.CircleArcChunk(circle.Center, circle.Radius, t1, t2, false))
