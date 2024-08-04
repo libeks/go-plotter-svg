@@ -5,6 +5,7 @@ import (
 
 	"github.com/shabbyrobe/xmlwriter"
 
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -115,4 +116,17 @@ func (l LineSegment) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 func (l LineSegment) OffsetLeft(distance float64) LineLike {
 	v := l.P2.Subtract(l.P1).Perp().Unit().Mult(distance)
 	return LineSegment{P1: l.P1.Add(v), P2: l.P2.Add(v)}
+}
+
+func (l LineSegment) Bisect(t float64) (LineLike, LineLike) {
+	midX := maths.Interpolate(l.P1.X, l.P2.X, t)
+	midY := maths.Interpolate(l.P1.Y, l.P2.Y, t)
+	midpoint := primitives.Point{X: midX, Y: midY}
+	return LineSegment{
+			P1: l.P1,
+			P2: midpoint,
+		}, LineSegment{
+			P1: midpoint,
+			P2: l.P2,
+		}
 }

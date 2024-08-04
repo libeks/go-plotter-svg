@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -66,7 +67,7 @@ func (c circleArcChunk) PathXML() string {
 	return fmt.Sprintf("A %.1f %.1f 0 %d %d %.1f %.1f", c.radius, c.radius, long, clockwise, endpoint.X, endpoint.Y)
 }
 
-func (c circleArcChunk) Length(start primitives.Point) float64 {
+func (c circleArcChunk) Length() float64 {
 	angle := c.Angle()
 	if c.IsLong() {
 		return 2 * (math.Pi - angle) * c.radius
@@ -113,81 +114,103 @@ func (c circleArcChunk) Reverse() PathChunk {
 	}
 }
 
-type CircleArcChunkLegacy struct {
-	// TODO: refactor to not require all of these fields
-	Radius      float64
-	Center      primitives.Point
-	Start       primitives.Point // could be replaced with startT
-	End         primitives.Point // could be replaced with endT
-	IsLong      bool             // could be removed altogether
-	IsClockwise bool             // could be removed altogether
-}
-
-func (c CircleArcChunkLegacy) String() string {
-	return fmt.Sprintf("CircleArcChunk: center %s, radius %.1f with start %s, end %s", c.Center, c.Radius, c.Start, c.End)
-}
-
-func (c CircleArcChunkLegacy) PathXML() string {
-	long := 0
-	if c.IsLong {
-		long = 1
+func (c circleArcChunk) Bisect(t float64) (PathChunk, PathChunk) {
+	var midT float64
+	if c.isClockwise {
+		midT = maths.Interpolate(c.startRad, c.endRad, t)
+	} else {
+		midT = maths.Interpolate(c.endRad, c.startRad, t)
 	}
-	clockwise := 0
-	if c.IsClockwise {
-		clockwise = 1
-	}
-	return fmt.Sprintf("A %.1f %.1f 0 %d %d %.1f %.1f", c.Radius, c.Radius, long, clockwise, c.End.X, c.End.Y)
+	return circleArcChunk{
+			radius:      c.radius,
+			center:      c.center,
+			startRad:    c.startRad,
+			endRad:      midT,
+			isClockwise: c.isClockwise,
+		}, circleArcChunk{
+			radius:      c.radius,
+			center:      c.center,
+			startRad:    midT,
+			endRad:      c.endRad,
+			isClockwise: c.isClockwise,
+		}
 }
 
-func (c CircleArcChunkLegacy) Length(start primitives.Point) float64 {
-	dv := start.Subtract(c.End)
-	distance := dv.Len()
-	angle := math.Asin(distance / (2 * c.Radius))
-	if c.IsLong {
-		return 2 * (math.Pi - angle) * c.Radius
-	}
-	return 2 * angle * c.Radius
-}
+// type CircleArcChunkLegacy struct {
+// 	// TODO: refactor to not require all of these fields
+// 	Radius      float64
+// 	Center      primitives.Point
+// 	Start       primitives.Point // could be replaced with startT
+// 	End         primitives.Point // could be replaced with endT
+// 	IsLong      bool             // could be removed altogether
+// 	IsClockwise bool             // could be removed altogether
+// }
 
-func (c CircleArcChunkLegacy) Endpoint() primitives.Point {
-	return c.End
-}
+// func (c CircleArcChunkLegacy) String() string {
+// 	return fmt.Sprintf("CircleArcChunk: center %s, radius %.1f with start %s, end %s", c.Center, c.Radius, c.Start, c.End)
+// }
 
-func (c CircleArcChunkLegacy) Startpoint() primitives.Point {
-	return c.Start
-}
+// func (c CircleArcChunkLegacy) PathXML() string {
+// 	long := 0
+// 	if c.IsLong {
+// 		long = 1
+// 	}
+// 	clockwise := 0
+// 	if c.IsClockwise {
+// 		clockwise = 1
+// 	}
+// 	return fmt.Sprintf("A %.1f %.1f 0 %d %d %.1f %.1f", c.Radius, c.Radius, long, clockwise, c.End.X, c.End.Y)
+// }
 
-func (c CircleArcChunkLegacy) ControlLines() string {
-	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
-}
+// func (c CircleArcChunkLegacy) Length(start primitives.Point) float64 {
+// 	dv := start.Subtract(c.End)
+// 	distance := dv.Len()
+// 	angle := math.Asin(distance / (2 * c.Radius))
+// 	if c.IsLong {
+// 		return 2 * (math.Pi - angle) * c.Radius
+// 	}
+// 	return 2 * angle * c.Radius
+// }
 
-func (c CircleArcChunkLegacy) OffsetLeft(distance float64) PathChunk {
-	fmt.Printf("offsetting left %s\n", c)
-	// left is counterClockwise
-	if c.IsClockwise {
-		distance *= -1
-	}
-	newRadius := c.Radius + distance
-	radiusRatio := newRadius / c.Radius
-	sv := c.Start.Subtract(c.Center).Mult(radiusRatio)
-	ev := c.End.Subtract(c.Center).Mult(radiusRatio)
-	return CircleArcChunkLegacy{
-		Radius:      newRadius,
-		Center:      c.Center,
-		Start:       c.Center.Add(sv),
-		End:         c.Center.Add(ev), // need to know the center here...
-		IsLong:      c.IsLong,
-		IsClockwise: c.IsClockwise,
-	}
-}
+// func (c CircleArcChunkLegacy) Endpoint() primitives.Point {
+// 	return c.End
+// }
 
-func (c CircleArcChunkLegacy) Reverse() PathChunk {
-	return CircleArcChunkLegacy{
-		Radius:      c.Radius,
-		Center:      c.Center,
-		Start:       c.End,
-		End:         c.Start,
-		IsLong:      c.IsLong,
-		IsClockwise: !c.IsClockwise,
-	}
-}
+// func (c CircleArcChunkLegacy) Startpoint() primitives.Point {
+// 	return c.Start
+// }
+
+// func (c CircleArcChunkLegacy) ControlLines() string {
+// 	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
+// }
+
+// func (c CircleArcChunkLegacy) OffsetLeft(distance float64) PathChunk {
+// 	fmt.Printf("offsetting left %s\n", c)
+// 	// left is counterClockwise
+// 	if c.IsClockwise {
+// 		distance *= -1
+// 	}
+// 	newRadius := c.Radius + distance
+// 	radiusRatio := newRadius / c.Radius
+// 	sv := c.Start.Subtract(c.Center).Mult(radiusRatio)
+// 	ev := c.End.Subtract(c.Center).Mult(radiusRatio)
+// 	return CircleArcChunkLegacy{
+// 		Radius:      newRadius,
+// 		Center:      c.Center,
+// 		Start:       c.Center.Add(sv),
+// 		End:         c.Center.Add(ev), // need to know the center here...
+// 		IsLong:      c.IsLong,
+// 		IsClockwise: c.IsClockwise,
+// 	}
+// }
+
+// func (c CircleArcChunkLegacy) Reverse() PathChunk {
+// 	return CircleArcChunkLegacy{
+// 		Radius:      c.Radius,
+// 		Center:      c.Center,
+// 		Start:       c.End,
+// 		End:         c.Start,
+// 		IsLong:      c.IsLong,
+// 		IsClockwise: !c.IsClockwise,
+// 	}
+// }

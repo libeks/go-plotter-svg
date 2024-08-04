@@ -17,6 +17,7 @@ type LineLike interface {
 	ControlLineXML(color, width string) xmlwriter.Elem
 	OffsetLeft(distance float64) LineLike
 	Reverse() LineLike
+	Bisect(t float64) (LineLike, LineLike)
 }
 
 // implemented by LineChunk, QuadraticBezierChunk, CubicBezierChunk, LineGapChunk
@@ -24,11 +25,12 @@ type PathChunk interface {
 	PathXML() string // returns the XML of this chunk, assuming that the starting point is the endpoint of the
 	// previous chunk
 
-	Length(start primitives.Point) float64
+	Length() float64
 	Startpoint() primitives.Point
 	Endpoint() primitives.Point
 
 	ControlLines() string
 	OffsetLeft(distance float64) PathChunk
 	Reverse() PathChunk
+	Bisect(t float64) (PathChunk, PathChunk)
 }

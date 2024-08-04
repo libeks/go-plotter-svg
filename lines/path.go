@@ -30,11 +30,8 @@ func (p Path) AddPathChunk(chunk PathChunk) Path {
 
 func (p Path) Len() float64 {
 	total := 0.0
-	start := p.start
 	for _, chunk := range p.chunks {
-		total += chunk.Length(start)
-
-		start = chunk.Endpoint()
+		total += chunk.Length()
 	}
 	return total
 }
@@ -154,4 +151,34 @@ func (p Path) Reverse() LineLike {
 		start:  chunks[0].Startpoint(),
 		chunks: chunks,
 	}
+}
+
+func (p Path) Bisect(t float64) (LineLike, LineLike) {
+	if t < 0 || t > 1 {
+		panic("invalid t parameter")
+	}
+	if len(p.chunks) == 0 {
+		return p, p // noop
+	}
+	l := p.Len()
+	targetLength := l * t
+	var leftChunks, rightChunks []PathChunk
+	var cumLen float64
+	for i, chunk := range p.chunks {
+		chunkLen := chunk.Length()
+		if cumLen+chunkLen > targetLength {
+			tStart := cumLen / l
+			tEnd := (cumLen + chunkLen) / l
+			localT := (t - tStart) / (tEnd - tStart)
+			left, right := chunk.Bisect(localT) // FIXME: figure out new t
+			leftChunks = append(leftChunks, left)
+			rightChunks = append(rightChunks, right)
+			rightChunks = append(rightChunks, p.chunks[i+1:]...)
+			break
+		} else {
+			leftChunks = append(leftChunks, chunk)
+			cumLen += chunk.Length()
+		}
+	}
+	return Path{start: p.start, chunks: leftChunks}, Path{start: rightChunks[0].Startpoint(), chunks: rightChunks}
 }
