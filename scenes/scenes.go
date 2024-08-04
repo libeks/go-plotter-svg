@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	BrushBackForthScene    = func(b box.Box) Scene { return getBrushBackForthScene(b) }
-	CurlyScene             = func(b box.Box) Scene { return getCurlyScene(b) }
+	// BrushBackForthScene    = func(b box.Box) Scene { return getBrushBackForthScene(b) }
+	// CurlyScene             = func(b box.Box) Scene { return getCurlyScene(b) }
 	LinesInsideBoxScene    = func(b box.Box) Scene { return getLinesInsideScene(b, 1000) }
 	LineFieldScene         = func(b box.Box) Scene { return getLineFieldInObjects(b) }
 	RadialBoxScene         = func(b box.Box) Scene { return radialBoxScene(b) }
@@ -294,60 +294,60 @@ func radialBoxWithCircleExclusion(container objects.Object, center primitives.Po
 	return segments
 }
 
-func getBrushBackForthScene(b box.Box) Scene {
-	horizontalColumns := &collections.StripImage{
-		Box:     b,
-		NGroups: 1,
-		NLines:  30,
-		Direction: collections.Direction{
-			CardinalDirection: collections.Horizontal,
-			StrokeDirection:   collections.AwayToHome,
-			OrderDirection:    collections.AwayToHome,
-			Connection:        collections.SameDirection,
-		},
-	}
-	verticalColumns := &collections.StripImage{
-		Box:     b,
-		NGroups: 1,
-		NLines:  30,
-		Direction: collections.Direction{
-			CardinalDirection: collections.Vertical,
-			StrokeDirection:   collections.AwayToHome,
-			OrderDirection:    collections.AwayToHome,
-			Connection:        collections.AlternatingDirection,
-		},
-	}
-	scene := Scene{}
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
-	for i, linelikes := range horizontalColumns.GetLineLikes() {
-		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Horizontal %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
-	}
+// func getBrushBackForthScene(b box.Box) Scene {
+// 	horizontalColumns := &collections.StripImage{
+// 		Box:     b,
+// 		NGroups: 1,
+// 		NLines:  30,
+// 		Direction: collections.Direction{
+// 			CardinalDirection: collections.Horizontal,
+// 			StrokeDirection:   collections.AwayToHome,
+// 			OrderDirection:    collections.AwayToHome,
+// 			Connection:        collections.SameDirection,
+// 		},
+// 	}
+// 	verticalColumns := &collections.StripImage{
+// 		Box:     b,
+// 		NGroups: 1,
+// 		NLines:  30,
+// 		Direction: collections.Direction{
+// 			CardinalDirection: collections.Vertical,
+// 			StrokeDirection:   collections.AwayToHome,
+// 			OrderDirection:    collections.AwayToHome,
+// 			Connection:        collections.AlternatingDirection,
+// 		},
+// 	}
+// 	scene := Scene{}
+// 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+// 	for i, linelikes := range horizontalColumns.GetLineLikes() {
+// 		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Horizontal %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
+// 	}
 
-	for i, linelikes := range verticalColumns.GetLineLikes() {
-		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Vertical %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
-	}
-	return scene
-}
+// 	for i, linelikes := range verticalColumns.GetLineLikes() {
+// 		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Vertical %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
+// 	}
+// 	return scene
+// }
 
-func getCurlyScene(b box.Box) Scene {
-	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
-	curlyBrush := getCurlyBrush(b, 400.0, math.Pi/4)
-	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curlyBrush).WithColor("red").WithWidth(10).WithOffset(-2, 40))
-	curlyBrush2 := getCurlyBrush(b, 300.0, math.Pi/3)
-	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
-	return scene
-}
+// func getCurlyScene(b box.Box) Scene {
+// 	scene := Scene{}.WithGuides()
+// 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+// 	curlyBrush := getCurlyBrush(b, 400.0, math.Pi/4)
+// 	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curlyBrush).WithColor("red").WithWidth(10).WithOffset(-2, 40))
+// 	curlyBrush2 := getCurlyBrush(b, 300.0, math.Pi/3)
+// 	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
+// 	return scene
+// }
 
-func getCurlyBrush(b box.Box, width, angle float64) []lines.LineLike {
-	brushWidth := width
-	path := collections.CurlyFill{
-		Box:     b.WithPadding(brushWidth),
-		Angle:   angle,
-		Spacing: float64(brushWidth),
-	}
-	return []lines.LineLike{path.GetPath()}
-}
+// func getCurlyBrush(b box.Box, width, angle float64) []lines.LineLike {
+// 	brushWidth := width
+// 	path := collections.CurlyFill{
+// 		Box:     b.WithPadding(brushWidth),
+// 		Angle:   angle,
+// 		Spacing: float64(brushWidth),
+// 	}
+// 	return []lines.LineLike{path.GetPath()}
+// }
 
 func getTruchetScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()

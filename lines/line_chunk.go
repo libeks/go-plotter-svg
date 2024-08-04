@@ -11,12 +11,16 @@ type LineChunk struct {
 	End   primitives.Point
 }
 
+func (c LineChunk) String() string {
+	return fmt.Sprintf("LineChunk %s %s", c.Start, c.End)
+}
+
 func (c LineChunk) PathXML() string {
 	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
 }
 
-func (c LineChunk) Length(start primitives.Point) float64 {
-	return start.Subtract(c.End).Len()
+func (c LineChunk) Length() float64 {
+	return c.Start.Subtract(c.End).Len()
 }
 
 func (l LineChunk) ControlLines() string {
@@ -45,4 +49,15 @@ func (c LineChunk) Reverse() PathChunk {
 		Start: c.End,
 		End:   c.Start,
 	}
+}
+
+func (c LineChunk) Bisect(t float64) (PathChunk, PathChunk) {
+	midpoint := c.At(t)
+	return LineChunk{
+			Start: c.Start,
+			End:   midpoint,
+		}, LineChunk{
+			Start: midpoint,
+			End:   c.End,
+		}
 }

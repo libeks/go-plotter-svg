@@ -36,11 +36,11 @@ func (c QuadraticBezierChunk) BBox() primitives.BBox {
 	return primitives.BBoxAroundPoints(c.Start, c.P1, c.End)
 }
 
-func (c QuadraticBezierChunk) Length(start primitives.Point) float64 {
+func (c QuadraticBezierChunk) Length() float64 {
 	return estimateLength(c, lengthEstimateAccuracy)
 }
 
-func (c QuadraticBezierChunk) Bisect(t float64) (QuadraticBezierChunk, QuadraticBezierChunk) {
+func (c QuadraticBezierChunk) bisect(t float64) (QuadraticBezierChunk, QuadraticBezierChunk) {
 	p0 := c.Start
 	p1 := c.End
 	a1 := LineChunk{Start: c.Start, End: c.P1}.At(t)
@@ -74,6 +74,10 @@ func (c QuadraticBezierChunk) Reverse() PathChunk {
 	}
 }
 
+func (c QuadraticBezierChunk) Bisect(t float64) (PathChunk, PathChunk) {
+	return c.bisect(t)
+}
+
 type CubicBezierChunk struct {
 	Start primitives.Point
 	P1    primitives.Point
@@ -99,7 +103,7 @@ func (c CubicBezierChunk) At(t float64) primitives.Point {
 	return LineChunk{Start: b1, End: b2}.At(t)
 }
 
-func (c CubicBezierChunk) Bisect(t float64) (CubicBezierChunk, CubicBezierChunk) {
+func (c CubicBezierChunk) bisect(t float64) (CubicBezierChunk, CubicBezierChunk) {
 	p0 := c.Start
 	p1 := c.End
 	a1 := LineChunk{Start: c.Start, End: c.P1}.At(t)
@@ -115,7 +119,7 @@ func (c CubicBezierChunk) BBox() primitives.BBox {
 	return primitives.BBoxAroundPoints(c.Start, c.P1, c.P2, c.End)
 }
 
-func (c CubicBezierChunk) Length(start primitives.Point) float64 {
+func (c CubicBezierChunk) Length() float64 {
 	return estimateLength(c, lengthEstimateAccuracy)
 }
 
@@ -144,4 +148,8 @@ func (c CubicBezierChunk) Reverse() PathChunk {
 		P2:    c.P1,
 		End:   c.Start,
 	}
+}
+
+func (c CubicBezierChunk) Bisect(t float64) (PathChunk, PathChunk) {
+	return c.bisect(t)
 }

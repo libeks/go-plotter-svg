@@ -52,6 +52,11 @@ func (l Layer) String() string {
 	return fmt.Sprintf("Layer %s %v", l.name, l.linelikes)
 }
 
+// func (l Layer) MinimizePath(allowReverse bool) Layer {
+// 	lns := make([]lines.LineLike, len(l.linelikes))
+
+// }
+
 func (l Layer) XML(i int) xmlwriter.Elem {
 	color := "black"
 	if l.color != "" {
