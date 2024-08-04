@@ -18,7 +18,7 @@ func (l LineSegment) String() string {
 	return fmt.Sprintf("LineSegment (%s) -> (%s)", l.P1, l.P2)
 }
 
-func (l LineSegment) Reverse() LineSegment {
+func (l LineSegment) Reverse() LineLike {
 	return LineSegment{l.P2, l.P1}
 }
 
@@ -115,5 +115,4 @@ func (l LineSegment) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 func (l LineSegment) OffsetLeft(distance float64) LineLike {
 	v := l.P2.Subtract(l.P1).Perp().Unit().Mult(distance)
 	return LineSegment{P1: l.P1.Add(v), P2: l.P2.Add(v)}
-
 }

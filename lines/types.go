@@ -16,6 +16,7 @@ type LineLike interface {
 	End() primitives.Point
 	ControlLineXML(color, width string) xmlwriter.Elem
 	OffsetLeft(distance float64) LineLike
+	Reverse() LineLike
 }
 
 // implemented by LineChunk, QuadraticBezierChunk, CubicBezierChunk, LineGapChunk
@@ -29,4 +30,5 @@ type PathChunk interface {
 
 	ControlLines() string
 	OffsetLeft(distance float64) PathChunk
+	Reverse() PathChunk
 }

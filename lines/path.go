@@ -11,6 +11,7 @@ import (
 
 const pathThreshold = 0.1
 
+// TODO: don't take start as parameter for NewPath, infer it from chunks
 func NewPath(start primitives.Point) Path {
 	return Path{
 		start: start,
@@ -57,9 +58,9 @@ func (p Path) pathString() string {
 	start := p.start
 	strs := []string{fmt.Sprintf("M %.1f %.1f", start.X, start.Y)}
 	for _, xml := range p.chunks {
-		// if xml.Startpoint().Subtract(start).Len() > pathThreshold {
-		// 	panic(fmt.Errorf("path chunks are too far apart (%.1f): %s ", xml.Startpoint().Subtract(start).Len(), xml))
-		// }
+		if xml.Startpoint().Subtract(start).Len() > pathThreshold {
+			panic(fmt.Errorf("path chunks are too far apart (%.1f): %s ", xml.Startpoint().Subtract(start).Len(), xml))
+		}
 		strs = append(strs, xml.PathXML())
 		start = xml.Endpoint()
 	}
@@ -135,6 +136,20 @@ func (p Path) OffsetLeft(distance float64) LineLike {
 		chunks[i] = chunk.OffsetLeft(distance)
 	}
 	fmt.Printf("new chunks %v\n", chunks)
+	return Path{
+		start:  chunks[0].Startpoint(),
+		chunks: chunks,
+	}
+}
+
+func (p Path) Reverse() LineLike {
+	if len(p.chunks) == 0 {
+		return p // noop, nothing to reverse
+	}
+	chunks := make([]PathChunk, len(p.chunks))
+	for i := range len(p.chunks) {
+		chunks[i] = p.chunks[len(p.chunks)-i-1].Reverse()
+	}
 	return Path{
 		start:  chunks[0].Startpoint(),
 		chunks: chunks,

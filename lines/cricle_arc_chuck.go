@@ -103,6 +103,16 @@ func (c circleArcChunk) OffsetLeft(distance float64) PathChunk {
 	}
 }
 
+func (c circleArcChunk) Reverse() PathChunk {
+	return circleArcChunk{
+		radius:      c.radius,
+		center:      c.center,
+		startRad:    c.endRad,
+		endRad:      c.startRad,
+		isClockwise: !c.isClockwise,
+	}
+}
+
 type CircleArcChunkLegacy struct {
 	// TODO: refactor to not require all of these fields
 	Radius      float64
@@ -168,5 +178,16 @@ func (c CircleArcChunkLegacy) OffsetLeft(distance float64) PathChunk {
 		End:         c.Center.Add(ev), // need to know the center here...
 		IsLong:      c.IsLong,
 		IsClockwise: c.IsClockwise,
+	}
+}
+
+func (c CircleArcChunkLegacy) Reverse() PathChunk {
+	return CircleArcChunkLegacy{
+		Radius:      c.Radius,
+		Center:      c.Center,
+		Start:       c.End,
+		End:         c.Start,
+		IsLong:      c.IsLong,
+		IsClockwise: !c.IsClockwise,
 	}
 }

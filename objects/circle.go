@@ -169,3 +169,7 @@ func (c Circle) OffsetLeft(distance float64) lines.LineLike {
 		Radius: newRadius,
 	}
 }
+
+func (c Circle) Reverse() lines.LineLike {
+	return c // noop, a reverse circle looks exactly the same
+}
