@@ -15,7 +15,11 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * Come up with a solution for object-to-curve intersection
   * The current appraoch only works for lines and circle segments, but does not for Beziers. To generalize, I'll have to step through each line iteratively, though the question is, how densely should I sample for each object? Is there some easy way to find out the "depth" of a point, both inside and outside?
 * Allow for curve rearranging, including reversing a curve
-* Fix circle arc abstraction, move to take in circle and t-values instead of the current implementation
+* Investigate whether stroke speed has an impact on pen performance
+* Implement closed-curve startpoint shuffling
+  * Requires a way to arbitrarily subdivide a linelike
+* Use Marching Squares off of an object-distance measure field
+* make sense of what counts as clockwise w.r.t. circle arc angles. Is the angle measures CCW? it doesn't make sense now. Maybe vectors.RotateCCW is wrong?
 
 # Plot ideas
 

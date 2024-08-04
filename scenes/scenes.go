@@ -28,6 +28,7 @@ var (
 	TestDensityScene       = func(b box.Box) Scene { return testDensityScene(b) }
 	TruchetScene           = func(b box.Box) Scene { return getTruchetScene(b) }
 	SweepTruchetScene      = func(b box.Box) Scene { return getSweepTruchet(b) }
+	RisingSunScene         = func(b box.Box) Scene { return getRisingSun(b) }
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -406,6 +407,29 @@ func getSweepTruchet(b box.Box) Scene {
 	scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithLineLike(getOffsetForCurves(curves1, distance, 10)).WithColor("red").WithWidth(distance))
 	scene = scene.AddLayer(NewLayer("truchet_offsets_2").WithLineLike(getOffsetForCurves(curves2, distance, 7)).WithColor("green").WithWidth(distance))
 	scene = scene.AddLayer(NewLayer("truchet_offsets_3").WithLineLike(getOffsetForCurves(curves3, distance, 5)).WithColor("blue").WithWidth(distance))
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	return scene
+}
+
+func getRisingSun(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	sun := objects.Circle{
+		Radius: 1000,
+		Center: primitives.Point{X: 5000, Y: 3000},
+	}
+	sunHuggers := collections.RisingSun{
+		BaselineY:       8000,
+		LineSpacing:     20,
+		MinTurnRadius:   500,
+		NLines:          30,
+		Sun:             sun,
+		SunPadding:      100,
+		NLinesAroundSun: 15,
+	}
+
+	scene = scene.AddLayer(NewLayer("sun_huggers").WithLineLike(sunHuggers.Render(b)).WithColor("black").WithWidth(20))
+	scene = scene.AddLayer(NewLayer("sun").WithLineLike(collections.ConcentricCirclesInCircle(sun, 20)).WithColor("red").WithWidth(20))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }

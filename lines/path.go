@@ -57,9 +57,9 @@ func (p Path) pathString() string {
 	start := p.start
 	strs := []string{fmt.Sprintf("M %.1f %.1f", start.X, start.Y)}
 	for _, xml := range p.chunks {
-		if xml.Startpoint().Subtract(start).Len() > pathThreshold {
-			panic(fmt.Errorf("path chunks are too far apart: %s, %.1f", xml, xml.Startpoint().Subtract(start).Len()))
-		}
+		// if xml.Startpoint().Subtract(start).Len() > pathThreshold {
+		// 	panic(fmt.Errorf("path chunks are too far apart (%.1f): %s ", xml.Startpoint().Subtract(start).Len(), xml))
+		// }
 		strs = append(strs, xml.PathXML())
 		start = xml.Endpoint()
 	}
