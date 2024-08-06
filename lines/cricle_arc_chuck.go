@@ -69,9 +69,6 @@ func (c circleArcChunk) PathXML() string {
 
 func (c circleArcChunk) Length() float64 {
 	angle := c.Angle()
-	if c.IsLong() {
-		return 2 * (math.Pi - angle) * c.radius
-	}
 	return 2 * angle * c.radius
 }
 

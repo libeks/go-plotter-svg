@@ -420,16 +420,16 @@ func getRisingSun(b box.Box) Scene {
 	}
 	sunHuggers := collections.RisingSun{
 		BaselineY:       8000,
-		LineSpacing:     15,
+		LineSpacing:     10,
 		MinTurnRadius:   500,
-		NLines:          60,
+		NLines:          90,
 		Sun:             sun,
 		SunPadding:      200,
-		NLinesAroundSun: 30,
+		NLinesAroundSun: 45,
 	}
 
-	scene = scene.AddLayer(NewLayer("sun_huggers").WithLineLike(sunHuggers.Render(b)).WithColor("black").WithWidth(20))
-	scene = scene.AddLayer(NewLayer("sun").WithLineLike(collections.ConcentricCirclesInCircle(sun, 15)).WithColor("red").WithWidth(20))
+	scene = scene.AddLayer(NewLayer("sun_huggers").WithLineLike(sunHuggers.Render(b)).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("sun").WithLineLike(collections.ConcentricCirclesInCircle(sun, 10)).WithColor("red").WithWidth(20).RandomizedClosedCurves())
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }
