@@ -153,7 +153,7 @@ func (p Path) Reverse() LineLike {
 	}
 }
 
-func (p Path) Bisect(t float64) (LineLike, LineLike) {
+func (p Path) Bisect(t float64) (Path, Path) {
 	if t < 0 || t > 1 {
 		panic("invalid t parameter")
 	}
@@ -181,4 +181,14 @@ func (p Path) Bisect(t float64) (LineLike, LineLike) {
 		}
 	}
 	return Path{start: p.start, chunks: leftChunks}, Path{start: rightChunks[0].Startpoint(), chunks: rightChunks}
+}
+
+func (p Path) Join(q Path) Path {
+	if p.End().Subtract(q.Start()).Len() > 0.1 {
+		panic("the two paths don't join at the ends")
+	}
+	return Path{
+		start:  p.start,
+		chunks: append(p.chunks, q.chunks...),
+	}
 }

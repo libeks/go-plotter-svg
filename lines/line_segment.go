@@ -118,15 +118,15 @@ func (l LineSegment) OffsetLeft(distance float64) LineLike {
 	return LineSegment{P1: l.P1.Add(v), P2: l.P2.Add(v)}
 }
 
-func (l LineSegment) Bisect(t float64) (LineLike, LineLike) {
+func (l LineSegment) Bisect(t float64) (Path, Path) {
 	midX := maths.Interpolate(l.P1.X, l.P2.X, t)
 	midY := maths.Interpolate(l.P1.Y, l.P2.Y, t)
 	midpoint := primitives.Point{X: midX, Y: midY}
-	return LineSegment{
-			P1: l.P1,
-			P2: midpoint,
-		}, LineSegment{
-			P1: midpoint,
-			P2: l.P2,
-		}
+	return NewPath(l.P1).AddPathChunk(LineChunk{
+			Start: l.P1,
+			End:   midpoint,
+		}), NewPath(l.P1).AddPathChunk(LineChunk{
+			Start: midpoint,
+			End:   l.P2,
+		})
 }

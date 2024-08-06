@@ -174,7 +174,7 @@ func (c Circle) Reverse() lines.LineLike {
 	return c // noop, a reverse circle looks exactly the same
 }
 
-func (c Circle) Bisect(t float64) (lines.LineLike, lines.LineLike) {
+func (c Circle) Bisect(t float64) (lines.Path, lines.Path) {
 	tRad := 2 * t * math.Pi
 	return lines.NewPath(c.At(0.0)).AddPathChunk(lines.CircleArcChunk(c.Center, c.Radius, 0, tRad, true)),
 		lines.NewPath(c.At(tRad)).AddPathChunk(lines.CircleArcChunk(c.Center, c.Radius, tRad, 2*math.Pi, true))

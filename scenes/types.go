@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/libeks/go-plotter-svg/lines"
-	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -93,24 +92,25 @@ func (s Scene) CalculateStatistics() {
 
 	fmt.Printf("Scene has %d layers, %s guides\n", len(s.Layers), yesGuides)
 	for i, layer := range s.Layers {
-		lengths := []float64{}
-		upDistances := []float64{}
-		start := primitives.Origin
-		for _, linelike := range layer.linelikes {
-			// fmt.Printf("line %s has len %.1f\n", linelike, linelike.Len())
-			lengths = append(lengths, linelike.Len())
-			end := linelike.End()
-			upDistances = append(upDistances, end.Subtract(start).Len())
-			start = end
-		}
-		end := primitives.Origin
-		upDistances = append(upDistances, end.Subtract(start).Len())
-		downLen := imageSpaceToMeters(maths.SumFloats(lengths))
-		upLen := imageSpaceToMeters(maths.SumFloats(upDistances))
-		totalDistance := downLen + upLen
-		timeEstimate := metersToTime(totalDistance)
-		fmt.Printf("layer %d has %d curves, down distance %.1fm, up distance %.1fm, total %.1fm traveled\n", i, len(layer.linelikes), downLen, upLen, totalDistance)
-		fmt.Printf("Would take about %s to plot\n", timeToMinSec(timeEstimate))
+		// lengths := []float64{}
+		// upDistances := []float64{}
+		// start := primitives.Origin
+		// for _, linelike := range layer.linelikes {
+		// 	// fmt.Printf("line %s has len %.1f\n", linelike, linelike.Len())
+		// 	lengths = append(lengths, linelike.Len())
+		// 	end := linelike.End()
+		// 	upDistances = append(upDistances, end.Subtract(start).Len())
+		// 	start = end
+		// }
+		// end := primitives.Origin
+		// upDistances = append(upDistances, end.Subtract(start).Len())
+		// downLen := imageSpaceToMeters(maths.SumFloats(lengths))
+		// upLen := imageSpaceToMeters(maths.SumFloats(upDistances))
+		// totalDistance := downLen + upLen
+		// timeEstimate := metersToTime(totalDistance)
+		fmt.Printf("layer %d has %s\n", i, layer.Statistics())
+		// fmt.Printf("layer %d has %d curves, down distance %.1fm, up distance %.1fm, total %.1fm traveled\n", i, len(layer.linelikes), downLen, upLen, totalDistance)
+		// fmt.Printf("Would take about %s to plot\n", timeToMinSec(timeEstimate))
 	}
 }
 

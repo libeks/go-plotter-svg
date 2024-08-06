@@ -17,7 +17,7 @@ type LineLike interface {
 	ControlLineXML(color, width string) xmlwriter.Elem
 	OffsetLeft(distance float64) LineLike
 	Reverse() LineLike
-	Bisect(t float64) (LineLike, LineLike)
+	Bisect(t float64) (Path, Path)
 }
 
 // implemented by LineChunk, QuadraticBezierChunk, CubicBezierChunk, LineGapChunk
