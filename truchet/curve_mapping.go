@@ -38,7 +38,20 @@ var (
 		quarterBezLineMapper,
 		loopbackLineMapper,
 	}
+
+	MapStraightLines = CurveMapper{
+		straightMapper,
+		straightMapper,
+		straightMapper,
+	}
 )
+
+func straightMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
+	return lines.LineChunk{
+		Start: startPoint,
+		End:   endPoint,
+	}
+}
 
 func straightLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
 	if tFrom == tTo {

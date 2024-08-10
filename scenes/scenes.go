@@ -29,6 +29,7 @@ var (
 	TruchetScene           = func(b box.Box) Scene { return getTruchetScene(b) }
 	SweepTruchetScene      = func(b box.Box) Scene { return getSweepTruchet(b) }
 	RisingSunScene         = func(b box.Box) Scene { return getRisingSun(b) }
+	CCircleLineSegments    = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -430,6 +431,57 @@ func getRisingSun(b box.Box) Scene {
 
 	scene = scene.AddLayer(NewLayer("sun_huggers").WithLineLike(sunHuggers.Render(b)).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("sun").WithLineLike(collections.ConcentricCirclesInCircle(sun, 10)).WithColor("red").WithWidth(20).RandomizedClosedCurves())
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	return scene
+}
+
+func getCirlceLineSegmentScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	blacks := []lines.LineLike{}
+	reds := []lines.LineLike{}
+	radiusBool := samplers.ConcentricCircleBoolean{
+		Center: primitives.Origin,
+		Radii:  []float64{0.2, 0.4, 0.6, 0.8},
+	}
+
+	nx := 50
+	boxes := b.PartitionIntoSquares(nx)
+	for _, box := range boxes {
+		relativeCenter := box.Box.RelativeMinusPlusOneCenter(b)
+		boxCircle := box.Box.CircleInsideBox()
+		if radiusBool.GetBool(relativeCenter) {
+			angle := samplers.AngleFromCenter{
+				Center: box.Box.Center(),
+			}.GetValue(relativeCenter)
+			line := lines.Line{
+				P: box.Box.Center(),
+				V: primitives.UnitRight.RotateCCW(angle),
+			}
+			segments := collections.ClipLineToObject(line, boxCircle)
+			if len(segments) != 1 {
+				panic(fmt.Errorf("wrong number of segments: %v", segments))
+			}
+			reds = append(reds, segments[0])
+		} else {
+			angle := samplers.TurnAngleByRightAngle{
+				Center: box.Box.Center(),
+			}.GetValue(relativeCenter)
+			line := lines.Line{
+				P: box.Box.Center(),
+				V: primitives.UnitRight.RotateCCW(angle),
+			}
+			segments := collections.ClipLineToObject(line, boxCircle)
+			if len(segments) != 1 {
+				panic(fmt.Errorf("wrong number of segments: %v", segments))
+			}
+			blacks = append(blacks, segments[0])
+		}
+	}
+
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }

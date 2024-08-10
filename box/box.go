@@ -41,6 +41,22 @@ func (b Box) Corners() []primitives.Point {
 	}
 }
 
+func (b Box) NWCorner() primitives.Point {
+	return primitives.Point{X: b.X, Y: b.Y}
+}
+
+func (b Box) NECorner() primitives.Point {
+	return primitives.Point{X: b.X, Y: b.YEnd}
+}
+
+func (b Box) SWCorner() primitives.Point {
+	return primitives.Point{X: b.XEnd, Y: b.Y}
+}
+
+func (b Box) SECorner() primitives.Point {
+	return primitives.Point{X: b.XEnd, Y: b.YEnd}
+}
+
 func (b Box) ClipLineToBox(l lines.Line) *lines.LineSegment {
 	ls := []lines.LineSegment{
 		{P1: primitives.Point{X: b.X, Y: b.Y}, P2: primitives.Point{X: b.X, Y: b.YEnd}},
@@ -79,6 +95,15 @@ func (b Box) Center() primitives.Point {
 	return primitives.Point{X: b.X + (b.XEnd-b.X)/2, Y: b.Y + (b.YEnd-b.Y)/2}
 }
 
+func (b Box) RelativeMinusPlusOneCenter(parentBox Box) primitives.Point {
+	center := b.Center()
+	parentCenter := parentBox.Center()
+	return primitives.Point{
+		X: 2 * (center.X - parentCenter.X) / parentBox.Width(),
+		Y: 2 * (center.Y - parentCenter.Y) / parentBox.Height(),
+	}
+}
+
 func getRelativeAroundCenter(v float64) float64 {
 	relative := (v) / 10_000
 	return 2*relative - 1
@@ -100,6 +125,13 @@ func (b Box) Height() float64 {
 func (b Box) AsPolygon() objects.Object {
 	return objects.Polygon{
 		Points: b.Corners(),
+	}
+}
+
+func (b Box) CircleInsideBox() objects.Circle {
+	return objects.Circle{
+		Center: b.Center(),
+		Radius: b.Width() / 2,
 	}
 }
 
