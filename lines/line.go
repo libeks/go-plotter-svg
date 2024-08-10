@@ -83,14 +83,12 @@ func (l Line) IntersectTU(l2 Line) (*float64, *float64) {
 	}
 	t := (x1x3*y3y4 - y1y3*x3x4) / divisor
 	u := (x1x2*y1y3 - y1y2*x1x3) / -divisor // note the divisor is negative here. I initially missed that.
-	// fmt.Printf("t:%.3f, u: %.3f\n", t, u)
 	return &t, &u
 }
 
 func (l Line) IntersectLineSegmentT(ls2 LineSegment) *float64 {
 	l2 := ls2.Line()
 	t, u := l.IntersectTU(l2)
-	// fmt.Printf("Intersecting %s with %s, got t: %+v, u: %+v\n", l, ls2, t, u)
 	if t == nil || u == nil {
 		return nil
 	}

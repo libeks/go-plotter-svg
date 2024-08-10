@@ -24,7 +24,8 @@ func main() {
 	// scene := scenes.TestDensityScene(innerBox)
 	// scene := scenes.TruchetScene(innerBox)
 	// scene := scenes.SweepTruchetScene(innerBox)
-	scene := scenes.RisingSunScene(innerBox)
+	// scene := scenes.RisingSunScene(innerBox)
+	scene := scenes.CCircleLineSegments(innerBox)
 	flipCurves := false
 	scene.OptimizeLines(flipCurves)
 	scene.CalculateStatistics()

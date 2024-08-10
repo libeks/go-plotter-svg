@@ -98,3 +98,41 @@ type RandomChooser struct {
 func (s RandomChooser) GetValue(p primitives.Point) float64 {
 	return s.Values[rand.Intn(len(s.Values))]
 }
+
+type CircleRadius struct {
+	Center primitives.Point
+}
+
+// assumes that point will be from a point in the bounding box -1..1
+func (c CircleRadius) GetValue(p primitives.Point) float64 {
+	return p.Subtract(primitives.Origin).Len()
+}
+
+type BooleanSwitcher struct {
+	BooleanSource Booleaner
+	WhenTrue      DataSource
+	WhenFalse     DataSource
+}
+
+func (s BooleanSwitcher) GetValue(p primitives.Point) float64 {
+	if s.BooleanSource.GetBool(p) {
+		return s.WhenTrue.GetValue(p)
+	}
+	return s.WhenFalse.GetValue(p)
+}
+
+type AngleFromCenter struct {
+	Center primitives.Point
+}
+
+func (c AngleFromCenter) GetValue(p primitives.Point) float64 {
+	return primitives.Origin.Subtract(p).Atan()
+}
+
+type TurnAngleByRightAngle struct {
+	Center primitives.Point
+}
+
+func (c TurnAngleByRightAngle) GetValue(p primitives.Point) float64 {
+	return primitives.Origin.Subtract(p).Perp().Atan()
+}

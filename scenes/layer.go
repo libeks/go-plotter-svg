@@ -71,7 +71,7 @@ func (l Layer) Statistics() string {
 	downLen := imageSpaceToMeters(maths.SumFloats(lengths))
 	upLen := imageSpaceToMeters(maths.SumFloats(upDistances))
 	totalDistance := downLen + upLen
-	timeEstimate := metersToTime(totalDistance)
+	timeEstimate := metersToTime(totalDistance) + upDownEstimate(len(l.linelikes))
 	return fmt.Sprintf("%d curves, down distance %.1fm, up distance %.1fm, total %.1fm traveled\nWould take about %s to plot", len(l.linelikes), downLen, upLen, totalDistance, timeToMinSec(timeEstimate))
 }
 
