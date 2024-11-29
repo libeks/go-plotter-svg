@@ -105,7 +105,7 @@ type CircleRadius struct {
 
 // assumes that point will be from a point in the bounding box -1..1
 func (c CircleRadius) GetValue(p primitives.Point) float64 {
-	return p.Subtract(primitives.Origin).Len()
+	return p.Subtract(c.Center).Len()
 }
 
 type BooleanSwitcher struct {
@@ -126,7 +126,7 @@ type AngleFromCenter struct {
 }
 
 func (c AngleFromCenter) GetValue(p primitives.Point) float64 {
-	return primitives.Origin.Subtract(p).Atan()
+	return c.Center.Subtract(p).Atan()
 }
 
 type TurnAngleByRightAngle struct {
@@ -134,5 +134,5 @@ type TurnAngleByRightAngle struct {
 }
 
 func (c TurnAngleByRightAngle) GetValue(p primitives.Point) float64 {
-	return primitives.Origin.Subtract(p).Perp().Atan()
+	return c.Center.Subtract(p).Perp().Atan()
 }

@@ -26,3 +26,4 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * Halftone circles in different colors
 * Marching squares
 * Concentric circles around several points, all clipped to the respective Voronoi diagram
+* Font rendering

@@ -441,19 +441,27 @@ func getCirlceLineSegmentScene(b box.Box) Scene {
 
 	blacks := []lines.LineLike{}
 	reds := []lines.LineLike{}
-	radiusBool := samplers.ConcentricCircleBoolean{
-		Center: primitives.Origin,
-		Radii:  []float64{0.2, 0.4, 0.6, 0.8},
+	center1 := primitives.Point{X: -0.6, Y: -0.3}
+	center2 := primitives.Point{X: 0.3, Y: 0.1}
+	radiusBool := samplers.Xor{
+		P1: samplers.ConcentricCircleBoolean{
+			Center: center1,
+			Radii:  []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2},
+		},
+		P2: samplers.ConcentricCircleBoolean{
+			Center: center2,
+			Radii:  []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2},
+		},
 	}
 
-	nx := 50
+	nx := 70
 	boxes := b.PartitionIntoSquares(nx)
 	for _, box := range boxes {
 		relativeCenter := box.Box.RelativeMinusPlusOneCenter(b)
 		boxCircle := box.Box.CircleInsideBox()
 		if radiusBool.GetBool(relativeCenter) {
 			angle := samplers.AngleFromCenter{
-				Center: box.Box.Center(),
+				Center: center2,
 			}.GetValue(relativeCenter)
 			line := lines.Line{
 				P: box.Box.Center(),
@@ -466,7 +474,7 @@ func getCirlceLineSegmentScene(b box.Box) Scene {
 			reds = append(reds, segments[0])
 		} else {
 			angle := samplers.TurnAngleByRightAngle{
-				Center: box.Box.Center(),
+				Center: center2,
 			}.GetValue(relativeCenter)
 			line := lines.Line{
 				P: box.Box.Center(),
