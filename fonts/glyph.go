@@ -2,25 +2,16 @@ package fonts
 
 import (
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/kintar/etxt/efixed"
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
-	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
 
-type Font struct {
-	*truetype.Font
-}
-
 type Glyph struct {
-	// contours [][]truetype.Point
-	// bounds   fixed.Rectangle26_6
 	glyph truetype.GlyphBuf
 }
 
@@ -51,10 +42,7 @@ func (g Glyph) GetControlPoints(b box.Box) []ControlPoint {
 	pts := []ControlPoint{}
 	for _, pt := range g.glyph.Points {
 		pts = append(pts, ControlPoint{
-			Point: primitives.Point{
-				X: b.X + r*efixed.ToFloat64(pt.X),
-				Y: b.YEnd - r*efixed.ToFloat64(pt.Y),
-			}, OnLine: isPointOnLine(pt),
+			Point: convertPoint(b, pt, r), OnLine: isPointOnLine(pt),
 		})
 	}
 	return pts
@@ -116,9 +104,13 @@ func (g Glyph) GetCurves(b box.Box) []lines.LineLike {
 				onCurve = false
 				start = cp
 			} else {
+				// current point is a control point
 				if onCurve {
+					// previous point was also a control point, so we need to chain points correctly
 					// get midpoint between successive bezier control points
 					c := primitives.Midpoint(midpoint, cp)
+					fmt.Printf("Midpoint between %v and %v is %v\n", midpoint, cp, c)
+
 					l = l.AddPathChunk(lines.QuadraticBezierChunk{Start: start, P1: midpoint, End: c})
 					start = c
 					midpoint = cp
@@ -141,60 +133,3 @@ func (g Glyph) GetCurves(b box.Box) []lines.LineLike {
 }
 
 // Explanation of why fixed-point 26.6 is used for fonts: https://github.com/Kintar/etxt/blob/main/docs/fixed-26-6.md
-
-func LoadFont(filename string) (*Font, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	bytes, err := io.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-	font, err := truetype.Parse(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return &Font{
-		Font: font,
-	}, nil
-}
-
-func (f *Font) LoadGlyph(r rune) (Glyph, error) {
-	index := f.Index(r)
-	glyph := truetype.GlyphBuf{}
-	a, _ := efixed.FromFloat64(6000)
-	err := glyph.Load(f.Font, a, index, font.HintingNone)
-	if err != nil {
-		return Glyph{}, err
-	}
-	fmt.Printf("Glyph %s\n", string(r))
-	fmt.Printf("bounds %v\n", glyph.Bounds)
-	fmt.Printf("Points %d, ends %d\n", len(glyph.Points), len(glyph.Ends))
-
-	// nPoints := len(glyph.Points)
-	for i, end := range glyph.Ends {
-		fmt.Printf("Countour %d, %v\n", i, end)
-
-		// for j :=
-		// for _, point := range glypy.Points
-	}
-	// contours := partitionIntoContours(glyph.Ends, glyph.Points)
-
-	return Glyph{
-		glyph: glyph,
-		// contours: contours,
-		// bounds:   glyph.Bounds,
-	}, nil
-}
-
-func partitionIntoContours(ends []int, points []truetype.Point) [][]truetype.Point {
-	start := 0
-	retlist := make([][]truetype.Point, len(ends))
-	for i, end := range ends {
-		retlist[i] = points[start:end]
-		start = end + 1
-	}
-	return retlist
-}
