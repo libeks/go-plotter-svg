@@ -22,3 +22,10 @@ func (p Point) Add(v Vector) Point {
 func (p Point) Subtract(p2 Point) Vector {
 	return Vector{p.X - p2.X, p.Y - p2.Y}
 }
+
+func Midpoint(p1 Point, p2 Point) Point {
+	return Point{
+		X: p1.X/2 + p2.X,
+		Y: p2.Y/2 + p2.Y,
+	}
+}

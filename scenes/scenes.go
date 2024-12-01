@@ -7,6 +7,7 @@ import (
 
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/collections"
+	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/objects"
@@ -30,6 +31,7 @@ var (
 	SweepTruchetScene      = func(b box.Box) Scene { return getSweepTruchet(b) }
 	RisingSunScene         = func(b box.Box) Scene { return getRisingSun(b) }
 	CCircleLineSegments    = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
+	Font                   = fontScene
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -487,6 +489,91 @@ func getCirlceLineSegmentScene(b box.Box) Scene {
 			blacks = append(blacks, segments[0])
 		}
 	}
+
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	return scene
+}
+
+func fontScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	font, err := fonts.LoadFont("C:/Windows/Fonts/BIZ-UDMinchoM.ttc")
+	if err != nil {
+		panic(err)
+	}
+	// r := 'ア'
+	// r := 'a'
+	// r := '類'
+	r := 'を'
+	glyph, err := font.LoadGlyph(r)
+	if err != nil {
+		panic(err)
+	}
+
+	blacks := []lines.LineLike{}
+	for _, pt := range glyph.GetControlPoints(b.WithPadding(2000)) {
+		// fmt.Printf("pt %v\n", pt)
+		if pt.OnLine {
+			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 30})
+		} else {
+			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 15})
+		}
+
+	}
+
+	reds := []lines.LineLike{}
+	for _, ln := range glyph.GetCurves(b.WithPadding(2000)) {
+		reds = append(reds, ln)
+	}
+	// center1 := primitives.Point{X: -0.6, Y: -0.3}
+	// center2 := primitives.Point{X: 0.3, Y: 0.1}
+	// radiusBool := samplers.Xor{
+	// 	P1: samplers.ConcentricCircleBoolean{
+	// 		Center: center1,
+	// 		Radii:  []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2},
+	// 	},
+	// 	P2: samplers.ConcentricCircleBoolean{
+	// 		Center: center2,
+	// 		Radii:  []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2},
+	// 	},
+	// }
+
+	// nx := 70
+	// boxes := b.PartitionIntoSquares(nx)
+	// for _, box := range boxes {
+	// 	relativeCenter := box.Box.RelativeMinusPlusOneCenter(b)
+	// 	boxCircle := box.Box.CircleInsideBox()
+	// 	if radiusBool.GetBool(relativeCenter) {
+	// 		angle := samplers.AngleFromCenter{
+	// 			Center: center2,
+	// 		}.GetValue(relativeCenter)
+	// 		line := lines.Line{
+	// 			P: box.Box.Center(),
+	// 			V: primitives.UnitRight.RotateCCW(angle),
+	// 		}
+	// 		segments := collections.ClipLineToObject(line, boxCircle)
+	// 		if len(segments) != 1 {
+	// 			panic(fmt.Errorf("wrong number of segments: %v", segments))
+	// 		}
+	// 		reds = append(reds, segments[0])
+	// 	} else {
+	// 		angle := samplers.TurnAngleByRightAngle{
+	// 			Center: center2,
+	// 		}.GetValue(relativeCenter)
+	// 		line := lines.Line{
+	// 			P: box.Box.Center(),
+	// 			V: primitives.UnitRight.RotateCCW(angle),
+	// 		}
+	// 		segments := collections.ClipLineToObject(line, boxCircle)
+	// 		if len(segments) != 1 {
+	// 			panic(fmt.Errorf("wrong number of segments: %v", segments))
+	// 		}
+	// 		blacks = append(blacks, segments[0])
+	// 	}
+	// }
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
