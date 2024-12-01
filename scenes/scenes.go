@@ -513,9 +513,9 @@ func fontScene(b box.Box) Scene {
 		panic(err)
 	}
 
+	b = b.WithPadding(1000)
 	blacks := []lines.LineLike{}
-	for _, pt := range glyph.GetControlPoints(b.WithPadding(2000)) {
-		// fmt.Printf("pt %v\n", pt)
+	for _, pt := range glyph.GetControlPoints(b) {
 		if pt.OnLine {
 			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 30})
 		} else {
@@ -525,55 +525,9 @@ func fontScene(b box.Box) Scene {
 	}
 
 	reds := []lines.LineLike{}
-	for _, ln := range glyph.GetCurves(b.WithPadding(2000)) {
+	for _, ln := range glyph.GetCurves(b) {
 		reds = append(reds, ln)
 	}
-	// center1 := primitives.Point{X: -0.6, Y: -0.3}
-	// center2 := primitives.Point{X: 0.3, Y: 0.1}
-	// radiusBool := samplers.Xor{
-	// 	P1: samplers.ConcentricCircleBoolean{
-	// 		Center: center1,
-	// 		Radii:  []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2},
-	// 	},
-	// 	P2: samplers.ConcentricCircleBoolean{
-	// 		Center: center2,
-	// 		Radii:  []float64{0.2, 0.4, 0.6, 0.8, 1.0, 1.2},
-	// 	},
-	// }
-
-	// nx := 70
-	// boxes := b.PartitionIntoSquares(nx)
-	// for _, box := range boxes {
-	// 	relativeCenter := box.Box.RelativeMinusPlusOneCenter(b)
-	// 	boxCircle := box.Box.CircleInsideBox()
-	// 	if radiusBool.GetBool(relativeCenter) {
-	// 		angle := samplers.AngleFromCenter{
-	// 			Center: center2,
-	// 		}.GetValue(relativeCenter)
-	// 		line := lines.Line{
-	// 			P: box.Box.Center(),
-	// 			V: primitives.UnitRight.RotateCCW(angle),
-	// 		}
-	// 		segments := collections.ClipLineToObject(line, boxCircle)
-	// 		if len(segments) != 1 {
-	// 			panic(fmt.Errorf("wrong number of segments: %v", segments))
-	// 		}
-	// 		reds = append(reds, segments[0])
-	// 	} else {
-	// 		angle := samplers.TurnAngleByRightAngle{
-	// 			Center: center2,
-	// 		}.GetValue(relativeCenter)
-	// 		line := lines.Line{
-	// 			P: box.Box.Center(),
-	// 			V: primitives.UnitRight.RotateCCW(angle),
-	// 		}
-	// 		segments := collections.ClipLineToObject(line, boxCircle)
-	// 		if len(segments) != 1 {
-	// 			panic(fmt.Errorf("wrong number of segments: %v", segments))
-	// 		}
-	// 		blacks = append(blacks, segments[0])
-	// 	}
-	// }
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
