@@ -30,9 +30,17 @@ func (b BBox) IsEmpty() bool {
 	return false
 }
 
+func (b BBox) Width() float64 {
+	return max(b.LowerRight.X-b.UpperLeft.X, 0.0)
+}
+
+func (b BBox) Height() float64 {
+	return max(b.LowerRight.Y-b.UpperLeft.Y, 0.0)
+}
+
 func (b BBox) Area() float64 {
 	// clamp both coords to 0.0 in case the order of the points is inverted
-	return max(b.LowerRight.X-b.UpperLeft.X, 0.0) * max(b.LowerRight.Y-b.UpperLeft.Y, 0.0)
+	return b.Width() * b.Height()
 }
 
 func (b BBox) Add(c BBox) BBox {

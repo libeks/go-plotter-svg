@@ -25,7 +25,8 @@ func main() {
 	// scene := scenes.TruchetScene(innerBox)
 	// scene := scenes.SweepTruchetScene(innerBox)
 	// scene := scenes.RisingSunScene(innerBox)
-	scene := scenes.CCircleLineSegments(innerBox)
+	// scene := scenes.CCircleLineSegments(innerBox)
+	scene := scenes.Font(innerBox)
 	flipCurves := false
 	scene.OptimizeLines(flipCurves)
 	scene.CalculateStatistics()
