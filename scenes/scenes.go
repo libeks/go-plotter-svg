@@ -500,14 +500,16 @@ func fontScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 
-	font, err := fonts.LoadFont("C:/Windows/Fonts/BIZ-UDMinchoM.ttc")
+	fname := "C:/Windows/Fonts/bahnschrift.ttf"
+	// fname:= "C:/Windows/Fonts/BIZ-UDMinchoM.ttc"
+	font, err := fonts.LoadFont(fname)
 	if err != nil {
 		panic(err)
 	}
 	// r := 'ア'
-	// r := 'a'
+	r := 'a'
 	// r := '類'
-	r := 'を'
+	// r := 'を'
 	glyph, err := font.LoadGlyph(r)
 	if err != nil {
 		panic(err)
@@ -525,9 +527,7 @@ func fontScene(b box.Box) Scene {
 	}
 
 	reds := []lines.LineLike{}
-	for _, ln := range glyph.GetCurves(b) {
-		reds = append(reds, ln)
-	}
+	reds = append(reds, glyph.GetCurves(b)...)
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
