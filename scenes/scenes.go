@@ -7,6 +7,7 @@ import (
 
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/collections"
+	"github.com/libeks/go-plotter-svg/foldable"
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
@@ -32,6 +33,7 @@ var (
 	RisingSunScene         = func(b box.Box) Scene { return getRisingSun(b) }
 	CCircleLineSegments    = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
+	FoldableCube           = foldableCubeScene
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -531,6 +533,19 @@ func fontScene(b box.Box) Scene {
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	return scene
+}
+
+func foldableCubeScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	b = b.WithPadding(1000)
+	blacks := foldable.Cube(b, 1500)
+
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	// scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }

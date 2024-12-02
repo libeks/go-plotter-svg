@@ -5,10 +5,11 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	"github.com/kintar/etxt/efixed"
+	"golang.org/x/image/math/fixed"
+
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
-	"golang.org/x/image/math/fixed"
 )
 
 type Glyph struct {
@@ -42,7 +43,8 @@ func (g Glyph) GetControlPoints(b box.Box) []ControlPoint {
 	pts := []ControlPoint{}
 	for _, pt := range g.glyph.Points {
 		pts = append(pts, ControlPoint{
-			Point: convertPoint(b, pt, r), OnLine: isPointOnLine(pt),
+			Point:  convertPoint(b, pt, r),
+			OnLine: isPointOnLine(pt),
 		})
 	}
 	return pts
