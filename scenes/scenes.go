@@ -11,6 +11,7 @@ import (
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
+	"github.com/libeks/go-plotter-svg/maze"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
@@ -34,6 +35,7 @@ var (
 	CCircleLineSegments    = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
 	FoldableCube           = foldableCubeScene
+	MazeScene              = mazeScene
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -533,7 +535,6 @@ func fontScene(b box.Box) Scene {
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
-	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }
 
@@ -541,11 +542,28 @@ func foldableCubeScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 
-	b = b.WithPadding(1000)
-	blacks := foldable.Cube(b, 1500)
+	foldableBase := 1500.0
+	// b = b.WithPadding(1000)
+	// blacks := foldable.CutCube(b, foldableBase, 0.75)
+	// blacks := foldable.RightTrianglePrism(b, foldableBase, foldableBase, foldableBase)
+	// blacks2 := foldable.CutCube(b, 1500, 0.75)
+	blacks := foldable.Rhombicuboctahedron(b, foldableBase)
+	// fmt.Printf("Blacks %v\n", blacks)
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
-	// scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
-	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks2).WithColor("black").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func mazeScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	maze := maze.NewMaze(30)
+	mazeLines := maze.Render(b)
+	// blacks := foldable.CutCube(b, foldableBase, 0.75)
+
+	scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("walls").WithLineLike(mazeLines.Walls).WithColor("black").WithWidth(20).MinimizePath(true))
 	return scene
 }
