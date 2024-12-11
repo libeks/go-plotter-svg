@@ -27,8 +27,8 @@ func main() {
 	// scene := scenes.RisingSunScene(innerBox)
 	// scene := scenes.CCircleLineSegments(innerBox)
 	// scene := scenes.Font(innerBox)
-	// scene := scenes.FoldableCube(innerBox)
-	scene := scenes.MazeScene(innerBox)
+	scene := scenes.FoldableCube(innerBox)
+	// scene := scenes.MazeScene(innerBox)
 	flipCurves := false
 	scene.OptimizeLines(flipCurves)
 	scene.CalculateStatistics()
