@@ -81,6 +81,19 @@ func RightTrianglePrism(b box.Box, height, leg1, leg2 float64) []lines.LineLike 
 	return c.Render(primitives.Point{X: b.X, Y: b.Y + leg1}, 0)
 }
 
+func ShapeTester(b box.Box, side float64) []lines.LineLike {
+	sq := Square(side)
+	tri := EquiTriangle(side)
+
+	c := NewFace(sq).WithFlap(3).
+		WithFace(
+			0,
+			NewFace(tri).WithFlap(0).WithFace(1, NewFace(sq).WithFlap(3).WithFace(0, NewFace(tri).WithFlap(1), 0), 2),
+			2,
+		)
+	return c.Render(primitives.Point{X: b.X, Y: b.Y + side*2}, 0)
+}
+
 func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
 	sq := Square(side)
 	tri := EquiTriangle(side)
@@ -88,11 +101,12 @@ func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
 	c := NewFace(sq).WithFlap(3).
 		WithFace( // #0
 			0,
-			NewFace(sq).WithFace( // #1
-				0,
-				NewFace(sq).WithFlap(1).WithFlap(3), // #2
-				2,
-			),
+			NewFace(sq).WithSmallFlap(1).
+				WithFace( // #1
+					0,
+					NewFace(sq).WithFlap(1).WithFlap(3), // #2
+					2,
+				),
 			2,
 		).
 		WithFace(
@@ -107,14 +121,111 @@ func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
 		).WithFace(
 		1,
 		NewFace(sq).
-			WithFace(0, NewFace(tri).WithFlap(1), 2),
-		3,
-	).WithFace(
-		2,
-		NewFace(tri).WithFlap(2),
-		1,
-	)
-	return c.Render(primitives.Point{X: b.X, Y: b.Y + side*2}, 0)
+			WithFace(
+				0,
+				NewFace(tri).WithSmallFlap(1),
+				2,
+			).
+			WithFace(
+				2,
+				NewFace(tri).WithSmallFlap(1),
+				0,
+			).
+			WithFace(
+				1,
+				NewFace(sq).
+					WithFace(
+						0,
+						NewFace(sq).WithSmallFlap(1),
+						2,
+					).
+					WithFace(
+						2,
+						NewFace(sq).WithSmallFlap(1),
+						0,
+					).
+					WithFace(
+						1,
+						NewFace(sq).
+							WithFace(
+								0,
+								NewFace(tri).WithSmallFlap(1),
+								2,
+							).
+							WithFace(
+								2,
+								NewFace(tri).WithSmallFlap(1),
+								0,
+							).
+							WithFace(
+								1,
+								NewFace(sq).
+									WithFace(
+										0,
+										NewFace(sq).WithFlap(0).WithSmallFlap(1),
+										2,
+									).
+									WithFace(
+										2,
+										NewFace(sq).WithFlap(2).WithSmallFlap(1),
+										0).
+									WithFace(
+										1,
+										NewFace(sq).
+											WithFace(
+												0,
+												NewFace(tri).WithSmallFlap(1),
+												2,
+											).
+											WithFace(
+												2,
+												NewFace(tri).WithSmallFlap(1),
+												0,
+											).
+											WithFace(
+												1,
+												NewFace(sq).
+													WithFace(
+														0,
+														NewFace(sq).WithSmallFlap(1),
+														2,
+													).
+													WithFace(
+														2,
+														NewFace(sq).WithSmallFlap(1),
+														0,
+													).
+													WithFace(
+														1,
+														NewFace(sq).WithFlap(1).
+															WithFace(
+																0,
+																NewFace(tri).WithSmallFlap(1),
+																2,
+															).
+															WithFace(
+																2,
+																NewFace(tri).WithSmallFlap(1),
+																0,
+															),
+														3),
+												3),
+										3),
+								3),
+						3),
+				3),
+		3).
+		WithFace(
+			2,
+			NewFace(sq).WithSmallFlap(1).
+				WithFace(
+					2,
+					NewFace(sq).WithFlap(1).WithFlap(3),
+					0,
+				),
+			0,
+		)
+	return c.Render(primitives.Point{X: b.X - 2_000, Y: b.Y + side*2}, 0)
 }
 
 // CutCube is a cube with a triangular prism missing.

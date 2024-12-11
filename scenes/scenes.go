@@ -546,8 +546,9 @@ func foldableCubeScene(b box.Box) Scene {
 	// b = b.WithPadding(1000)
 	// blacks := foldable.CutCube(b, foldableBase, 0.75)
 	// blacks := foldable.RightTrianglePrism(b, foldableBase, foldableBase, foldableBase)
-	// blacks2 := foldable.CutCube(b, 1500, 0.75)
+	// blacks2 := foldable.CutCube(b, foldableBase, 0.75)
 	blacks := foldable.Rhombicuboctahedron(b, foldableBase)
+	// blacks := foldable.ShapeTester(b, foldableBase)
 	// fmt.Printf("Blacks %v\n", blacks)
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
