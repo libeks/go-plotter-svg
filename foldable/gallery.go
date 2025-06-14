@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/libeks/go-plotter-svg/box"
+	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
@@ -226,6 +227,143 @@ func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
 			0,
 		)
 	return c.Render(primitives.Point{X: b.X - 2_000, Y: b.Y + side*2}, 0)
+}
+
+func RhombicuboctahedronWithoutCorners(b box.Box, side float64) FoldablePattern {
+	sq := Square(side)
+	// tri := EquiTriangle(side)
+
+	c := NewFace(sq).WithFlap(3).
+		WithFace( // #0
+			0,
+			NewFace(sq).WithSmallFlap(1).
+				WithFace( // #1
+					0,
+					NewFace(sq).WithFlap(1).WithFlap(3), // #2
+					2,
+				),
+			2,
+		).
+		WithFace(
+			2,
+			NewFace(sq).
+				WithFace(
+					2,
+					NewFace(sq).WithFlap(1).WithFlap(3),
+					0,
+				),
+			0,
+		).WithFace(
+		1,
+		NewFace(sq).
+			// WithFace(
+			// 	0,
+			// 	NewFace(tri).WithSmallFlap(1),
+			// 	2,
+			// ).
+			// WithFace(
+			// 	2,
+			// 	NewFace(tri).WithSmallFlap(1),
+			// 	0,
+			// ).
+			WithFace(
+				1,
+				NewFace(sq).
+					WithFace(
+						0,
+						NewFace(sq).WithSmallFlap(1),
+						2,
+					).
+					WithFace(
+						2,
+						NewFace(sq).WithSmallFlap(1),
+						0,
+					).
+					WithFace(
+						1,
+						NewFace(sq).
+							// WithFace(
+							// 	0,
+							// 	NewFace(tri).WithSmallFlap(1),
+							// 	2,
+							// ).
+							// WithFace(
+							// 	2,
+							// 	NewFace(tri).WithSmallFlap(1),
+							// 	0,
+							// ).
+							WithFace(
+								1,
+								NewFace(sq).
+									WithFace(
+										0,
+										NewFace(sq).WithFlap(0).WithSmallFlap(1),
+										2,
+									).
+									WithFace(
+										2,
+										NewFace(sq).WithFlap(2).WithSmallFlap(1),
+										0).
+									WithFace(
+										1,
+										NewFace(sq).
+											// WithFace(
+											// 	0,
+											// 	NewFace(tri).WithSmallFlap(1),
+											// 	2,
+											// ).
+											// WithFace(
+											// 	2,
+											// 	NewFace(tri).WithSmallFlap(1),
+											// 	0,
+											// ).
+											WithFace(
+												1,
+												NewFace(sq).
+													WithFace(
+														0,
+														NewFace(sq).WithSmallFlap(1),
+														2,
+													).
+													WithFace(
+														2,
+														NewFace(sq).WithSmallFlap(1),
+														0,
+													).
+													WithFace(
+														1,
+														NewFace(sq).WithFlap(1),
+														// WithFace(
+														// 	0,
+														// 	NewFace(tri).WithSmallFlap(1),
+														// 	2,
+														// ).
+														// WithFace(
+														// 	2,
+														// 	NewFace(tri).WithSmallFlap(1),
+														// 	0,
+														// ),
+														3),
+												3),
+										3),
+								3),
+						3),
+				3),
+		3).
+		WithFace(
+			2,
+			NewFace(sq).WithSmallFlap(1).
+				WithFace(
+					2,
+					NewFace(sq).WithFlap(1).WithFlap(3),
+					0,
+				),
+			0,
+		)
+	return FoldablePattern{
+		Edges:       c.Render(primitives.Point{X: b.X - 2_000, Y: b.Y + side*2}, 0),
+		Annotations: fonts.RenderText(b, "123"),
+	}
 }
 
 // CutCube is a cube with a triangular prism missing.

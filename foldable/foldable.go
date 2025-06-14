@@ -14,6 +14,12 @@ const (
 	deg45     = math.Pi / 4
 )
 
+type FoldablePattern struct {
+	Edges       []lines.LineLike
+	Fill        []lines.LineLike
+	Annotations []lines.LineLike
+}
+
 type Edge struct {
 	// todo: add support for curves
 	primitives.Vector
@@ -82,7 +88,6 @@ func (f Face) Render(start primitives.Point, angle float64) []lines.LineLike {
 				fmt.Printf("childAngle %f, diff %v\n", childAngle, diff)
 				edgeAngle := edge.Atan() + angle
 				newAngle := -childAngle + edgeAngle + math.Pi
-				// newAngle := childAngle - math.Pi
 				fmt.Printf("start %v\n", start)
 				newStartpoint := start.Add(diff.RotateCCW(newAngle).Mult(-1))
 				fmt.Printf("Attaching face at angle %f and at %v\n", newAngle, newStartpoint)
@@ -100,11 +105,11 @@ func (f Face) Render(start primitives.Point, angle float64) []lines.LineLike {
 		start = end
 
 	}
-	// fmt.Printf("lns %v\n", lns)
 	lns = append(lns, l)
 	return lns
 }
 
+// WithFlap adds a standard flap on edge i
 func (f Face) WithFlap(i int) Face {
 	if i >= len(f.Edges) {
 		panic("Not enough edges")
@@ -113,6 +118,7 @@ func (f Face) WithFlap(i int) Face {
 	return f
 }
 
+// WithSmallFlap adds a smaller flap if there is not enough space
 func (f Face) WithSmallFlap(i int) Face {
 	if i >= len(f.Edges) {
 		panic("Not enough edges")
@@ -121,6 +127,7 @@ func (f Face) WithSmallFlap(i int) Face {
 	return f
 }
 
+// WithFace adds another face, with this face's edge i connecting to f2's face f2_i
 func (f Face) WithFace(i int, f2 Face, f2_i int) Face {
 	if i >= len(f.Edges) {
 		panic("Not enough edges")
