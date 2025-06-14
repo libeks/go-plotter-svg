@@ -21,21 +21,22 @@ import (
 var (
 	// BrushBackForthScene    = func(b box.Box) Scene { return getBrushBackForthScene(b) }
 	// CurlyScene             = func(b box.Box) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene    = func(b box.Box) Scene { return getLinesInsideScene(b, 1000) }
-	LineFieldScene         = func(b box.Box) Scene { return getLineFieldInObjects(b) }
-	RadialBoxScene         = func(b box.Box) Scene { return radialBoxScene(b) }
-	ParallelBoxScene       = func(b box.Box) Scene { return parallelBoxScene(b) }
-	ParallelSineFieldScene = func(b box.Box) Scene { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene  = func(b box.Box) Scene { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene   = func(b box.Box) Scene { return circlesInSquareScene(b) }
-	TestDensityScene       = func(b box.Box) Scene { return testDensityScene(b) }
-	TruchetScene           = func(b box.Box) Scene { return getTruchetScene(b) }
-	SweepTruchetScene      = func(b box.Box) Scene { return getSweepTruchet(b) }
-	RisingSunScene         = func(b box.Box) Scene { return getRisingSun(b) }
-	CCircleLineSegments    = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
-	Font                   = fontScene
-	FoldableCube           = foldableCubeScene
-	MazeScene              = mazeScene
+	LinesInsideBoxScene         = func(b box.Box) Scene { return getLinesInsideScene(b, 1000) }
+	LineFieldScene              = func(b box.Box) Scene { return getLineFieldInObjects(b) }
+	RadialBoxScene              = func(b box.Box) Scene { return radialBoxScene(b) }
+	ParallelBoxScene            = func(b box.Box) Scene { return parallelBoxScene(b) }
+	ParallelSineFieldScene      = func(b box.Box) Scene { return parallelSineFieldsScene(b) }
+	ParallelCoherentScene       = func(b box.Box) Scene { return parallelCoherentSineFieldsScene(b) }
+	CirclesInSquareScene        = func(b box.Box) Scene { return circlesInSquareScene(b) }
+	TestDensityScene            = func(b box.Box) Scene { return testDensityScene(b) }
+	TruchetScene                = func(b box.Box) Scene { return getTruchetScene(b) }
+	SweepTruchetScene           = func(b box.Box) Scene { return getSweepTruchet(b) }
+	RisingSunScene              = func(b box.Box) Scene { return getRisingSun(b) }
+	CCircleLineSegments         = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
+	Font                        = fontScene
+	FoldableRhombicuboctahedron = foldableRhombicuboctahedronScene
+	FoldableRhombiSansCorner    = foldableRhombicuboctahedronSansCornersScene
+	MazeScene                   = mazeScene
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -538,7 +539,7 @@ func fontScene(b box.Box) Scene {
 	return scene
 }
 
-func foldableCubeScene(b box.Box) Scene {
+func foldableRhombicuboctahedronScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 
@@ -552,6 +553,25 @@ func foldableCubeScene(b box.Box) Scene {
 	// fmt.Printf("Blacks %v\n", blacks)
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks2).WithColor("black").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func foldableRhombicuboctahedronSansCornersScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	foldableBase := 1500.0
+	// b = b.WithPadding(1000)
+	// blacks := foldable.CutCube(b, foldableBase, 0.75)
+	// blacks := foldable.RightTrianglePrism(b, foldableBase, foldableBase, foldableBase)
+	// blacks2 := foldable.CutCube(b, foldableBase, 0.75)
+	pattern := foldable.RhombicuboctahedronWithoutCorners(b, foldableBase)
+	// blacks := foldable.ShapeTester(b, foldableBase)
+	// fmt.Printf("Blacks %v\n", blacks)
+
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("blue").WithLineLike(pattern.Annotations).WithColor("blue").WithWidth(20).MinimizePath(true))
 	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks2).WithColor("black").WithWidth(20).MinimizePath(true))
 	return scene
 }

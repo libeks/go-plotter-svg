@@ -1,6 +1,7 @@
 package svg
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/shabbyrobe/xmlwriter"
@@ -48,4 +49,5 @@ func (s SVG) WriteSVG() {
 		}),
 		w.EndAllFlush(),
 	)
+	fmt.Printf("Finished rendering to file %s\n", s.Fname)
 }
