@@ -1,6 +1,7 @@
 package foldable
 
 type CutOut struct {
+	//
 	Faces       []Face
 	Connections map[int]Connection
 }

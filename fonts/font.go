@@ -36,7 +36,7 @@ func LoadFont(filename string) (*Font, error) {
 func (f *Font) LoadGlyph(r rune) (Glyph, error) {
 	index := f.Index(r)
 	glyph := truetype.GlyphBuf{}
-	a, _ := efixed.FromFloat64(6000)
+	a, _ := efixed.FromFloat64(10) // 6000
 	err := glyph.Load(f.Font, a, index, font.HintingNone)
 	if err != nil {
 		return Glyph{}, err

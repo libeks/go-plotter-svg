@@ -26,9 +26,9 @@ func main() {
 	// scene := scenes.SweepTruchetScene(innerBox)
 	// scene := scenes.RisingSunScene(innerBox)
 	// scene := scenes.CCircleLineSegments(innerBox)
-	// scene := scenes.Font(innerBox)
+	scene := scenes.Font(innerBox)
 	// scene := scenes.FoldableRhombicuboctahedron(innerBox)
-	scene := scenes.FoldableRhombiSansCorner(innerBox)
+	// scene := scenes.FoldableRhombiSansCorner(innerBox)
 	// scene := scenes.MazeScene(innerBox)
 	flipCurves := false
 	scene.OptimizeLines(flipCurves)
