@@ -534,8 +534,11 @@ func fontScene(b box.Box) Scene {
 	reds := []lines.LineLike{}
 	reds = append(reds, glyph.GetCurves(b)...)
 
+	greens := b.Lines()
+
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("green").WithLineLike(greens).WithColor("green").WithWidth(20).MinimizePath(true))
 	return scene
 }
 

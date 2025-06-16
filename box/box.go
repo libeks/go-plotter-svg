@@ -122,7 +122,7 @@ func (b Box) Height() float64 {
 	return b.YEnd - b.Y
 }
 
-func (b Box) AsPolygon() objects.Object {
+func (b Box) AsPolygon() objects.Polygon {
 	return objects.Polygon{
 		Points: b.Corners(),
 	}
