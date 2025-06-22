@@ -549,8 +549,8 @@ func textScene(b box.Box) Scene {
 
 	// b = b.WithPadding(1000)
 	blacks := []lines.LineLike{}
-	text := fonts.RenderText(b, "The quick brown fox jumps")
-	// text := fonts.RenderText(b, "The", fonts.WithSize(2000))
+	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
+	text := fonts.RenderText(b, "fi", fonts.WithSize(2000))
 
 	// fmt.Printf("Char Points %v\n", text.CharPoints)
 	for _, pt := range text.CharPoints {

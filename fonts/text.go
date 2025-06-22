@@ -89,10 +89,6 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	for _, opt := range textOptions {
 		o = opt(o)
 	}
-	// size := 1000.0
-	// if o.size > 0 {
-	// 	size = o.size
-	// }
 	f, err := LoadFont(o.fontFile)
 	if err != nil {
 		panic(err)

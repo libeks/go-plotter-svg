@@ -22,13 +22,12 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#distinguishing
 * For font families, consider this library:
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
-* RenderText - add proper spacing between characters
-
 * Foldables:
   * Refactor to be easier to specify
     * Something like: Here are the numbered faces, here are where they are connected with each other, here are where we have flaps, etc
   * Add rendering of face numbers
   * Properly render the rectangle around what can be plotted
+* Figure out a distinction between box.Box and primitives.Bbox. It's very confusing
 
 # Plot ideas
 
