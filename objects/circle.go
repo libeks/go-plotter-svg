@@ -170,6 +170,11 @@ func (c Circle) OffsetLeft(distance float64) lines.LineLike {
 	}
 }
 
+func (c Circle) Translate(v primitives.Vector) lines.LineLike {
+	c.Center = c.Center.Add(v)
+	return c
+}
+
 func (c Circle) Reverse() lines.LineLike {
 	return c // noop, a reverse circle looks exactly the same
 }

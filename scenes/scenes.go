@@ -34,6 +34,7 @@ var (
 	RisingSunScene              = func(b box.Box) Scene { return getRisingSun(b) }
 	CCircleLineSegments         = func(b box.Box) Scene { return getCirlceLineSegmentScene(b) }
 	Font                        = fontScene
+	Text                        = textScene
 	FoldableRhombicuboctahedron = foldableRhombicuboctahedronScene
 	FoldableRhombiSansCorner    = foldableRhombicuboctahedronSansCornersScene
 	MazeScene                   = mazeScene
@@ -539,6 +540,50 @@ func fontScene(b box.Box) Scene {
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("green").WithLineLike(greens).WithColor("green").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func textScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	// b = b.WithPadding(1000)
+	blacks := []lines.LineLike{}
+	text := fonts.RenderText(b, "The quick brown fox jumps")
+	// text := fonts.RenderText(b, "The", fonts.WithSize(2000))
+
+	// fmt.Printf("Char Points %v\n", text.CharPoints)
+	for _, pt := range text.CharPoints {
+		if pt.OnLine {
+			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 30})
+		} else {
+			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 15})
+		}
+
+	}
+
+	reds := text.CharCurves
+	yellows := []lines.LineLike{}
+	for _, box := range text.CharBoxes {
+		yellows = append(yellows, box.Lines()...)
+	}
+
+	greens := b.Lines()
+
+	purples := text.BoundingBox().Lines()
+
+	renderPoints := false
+	renderBoxes := false
+
+	if renderPoints {
+		scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	}
+	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("green").WithLineLike(greens).WithColor("green").WithWidth(20).MinimizePath(true))
+	if renderBoxes {
+		scene = scene.AddLayer(NewLayer("yellow").WithLineLike(yellows).WithColor("orange").WithWidth(20).MinimizePath(true))
+		scene = scene.AddLayer(NewLayer("purple").WithLineLike(purples).WithColor("purple").WithWidth(20).MinimizePath(true))
+	}
 	return scene
 }
 

@@ -34,6 +34,19 @@ func (b Box) Lines() []lines.LineLike {
 	}
 }
 
+func (b Box) BBox() primitives.BBox {
+	return primitives.BBox{
+		UpperLeft: primitives.Point{
+			X: b.X,
+			Y: b.Y,
+		},
+		LowerRight: primitives.Point{
+			X: b.XEnd,
+			Y: b.YEnd,
+		},
+	}
+}
+
 func (b Box) Corners() []primitives.Point {
 	return []primitives.Point{
 		{X: b.X, Y: b.Y}, {X: b.X, Y: b.YEnd},
@@ -87,6 +100,15 @@ func (b Box) WithPadding(pad float64) Box {
 		b.Y + pad,
 		b.XEnd - pad,
 		b.YEnd - pad,
+	}
+}
+
+func (b Box) Translate(v primitives.Vector) Box {
+	return Box{
+		b.X + v.X,
+		b.Y + v.Y,
+		b.XEnd + v.X,
+		b.YEnd + v.Y,
 	}
 }
 

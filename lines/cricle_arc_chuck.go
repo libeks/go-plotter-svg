@@ -101,6 +101,11 @@ func (c circleArcChunk) OffsetLeft(distance float64) PathChunk {
 	}
 }
 
+func (c circleArcChunk) Translate(v primitives.Vector) PathChunk {
+	c.center = c.center.Add(v)
+	return c
+}
+
 func (c circleArcChunk) Reverse() PathChunk {
 	return circleArcChunk{
 		radius:      c.radius,

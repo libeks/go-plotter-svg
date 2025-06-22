@@ -66,6 +66,14 @@ func (c QuadraticBezierChunk) OffsetLeft(distance float64) PathChunk {
 	panic("unimplemented")
 }
 
+func (c QuadraticBezierChunk) Translate(v primitives.Vector) PathChunk {
+	return QuadraticBezierChunk{
+		Start: c.Start.Add(v),
+		P1:    c.P1.Add(v),
+		End:   c.End.Add(v),
+	}
+}
+
 func (c QuadraticBezierChunk) Reverse() PathChunk {
 	return QuadraticBezierChunk{
 		Start: c.End,
@@ -139,6 +147,15 @@ func (c CubicBezierChunk) OffsetLeft(distance float64) PathChunk {
 	// TODO: actually implement
 	fmt.Printf("%s\n", c)
 	panic("unimplemented")
+}
+
+func (c CubicBezierChunk) Translate(v primitives.Vector) PathChunk {
+	return CubicBezierChunk{
+		Start: c.Start.Add(v),
+		P1:    c.P1.Add(v),
+		P2:    c.P2.Add(v),
+		End:   c.End.Add(v),
+	}
 }
 
 func (c CubicBezierChunk) Reverse() PathChunk {

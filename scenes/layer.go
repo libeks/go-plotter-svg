@@ -90,7 +90,7 @@ func (l Layer) RandomizedClosedCurves() Layer {
 }
 
 func (l Layer) MinimizePath(allowReverse bool) Layer {
-	// fmt.Printf("Layer before %s\n", l.Statistics())
+	fmt.Printf("Layer before %s\n", l.Statistics())
 	if len(l.linelikes) == 0 {
 		return l
 	}

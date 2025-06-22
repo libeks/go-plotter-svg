@@ -43,8 +43,15 @@ func (b BBox) Area() float64 {
 	return b.Width() * b.Height()
 }
 
+// Add combines two bounding boxes and returns a box that contains both
 func (b BBox) Add(c BBox) BBox {
 	return BBoxAroundPoints(b.UpperLeft, b.LowerRight, c.UpperLeft, c.LowerRight)
+}
+
+func (b BBox) Translate(v Vector) BBox {
+	b.UpperLeft = b.UpperLeft.Add(v)
+	b.LowerRight = b.LowerRight.Add(v)
+	return b
 }
 
 func (b BBox) Intersect(c BBox) (BBox, bool) {

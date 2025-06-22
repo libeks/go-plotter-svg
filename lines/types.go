@@ -17,6 +17,7 @@ type LineLike interface {
 	ControlLineXML(color, width string) xmlwriter.Elem
 	OffsetLeft(distance float64) LineLike
 	Reverse() LineLike
+	Translate(primitives.Vector) LineLike
 	Bisect(t float64) (Path, Path)
 }
 
@@ -31,6 +32,7 @@ type PathChunk interface {
 
 	ControlLines() string
 	OffsetLeft(distance float64) PathChunk
+	Translate(primitives.Vector) PathChunk
 	Reverse() PathChunk
 	Bisect(t float64) (PathChunk, PathChunk)
 }
