@@ -12,8 +12,39 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
+// Glyph is the abstract glyph form for a specific pixel height
 type Glyph struct {
-	glyph truetype.GlyphBuf
+	Rune    rune
+	glyph   truetype.GlyphBuf
+	bounds  fixed.Rectangle26_6
+	advance fixed.Int26_6
+}
+
+// Char is a character rendered at a specific height to the page
+type Char struct {
+	Rune         rune
+	Curves       []lines.LineLike
+	Points       []ControlPoint
+	BoundingBox  box.Box
+	AdvanceWidth float64
+}
+
+func (c Char) Translate(v primitives.Vector) Char {
+	newCurves := make([]lines.LineLike, len(c.Curves))
+	for i, c := range c.Curves {
+		newCurves[i] = c.Translate(v)
+	}
+	newPoints := make([]ControlPoint, len(c.Points))
+	for i, c := range c.Points {
+		newPoints[i] = c.Translate(v)
+	}
+	return Char{
+		Rune:         c.Rune,
+		Curves:       newCurves,
+		Points:       newPoints,
+		BoundingBox:  c.BoundingBox.Translate(v),
+		AdvanceWidth: c.AdvanceWidth,
+	}
 }
 
 func (g Glyph) Contours() [][]truetype.Point {
@@ -36,9 +67,15 @@ type ControlPoint struct {
 	OnLine bool
 }
 
+func (c ControlPoint) Translate(v primitives.Vector) ControlPoint {
+	c.Point = c.Point.Add(v)
+	return c
+}
+
 func (g Glyph) GetControlPoints(b box.Box) []ControlPoint {
 	w, h := getWidthHeight(g.glyph.Bounds)
 	wRatio, hRatio := b.Width()/w, b.Height()/h
+	fmt.Printf("wRatio %f, hRatio %f\n", wRatio, hRatio)
 	r := min(wRatio, hRatio)
 	pts := []ControlPoint{}
 	for _, pt := range g.glyph.Points {
@@ -52,10 +89,22 @@ func (g Glyph) GetControlPoints(b box.Box) []ControlPoint {
 
 // positions the point relative to the box and the scaling factor r
 func convertPoint(b box.Box, pt truetype.Point, r float64) primitives.Point {
-	return primitives.Point{
+	res := primitives.Point{
 		X: b.X + r*efixed.ToFloat64(pt.X),
 		Y: b.YEnd - r*efixed.ToFloat64(pt.Y),
 	}
+	// fmt.Printf("x %f y %f -> X %f, Y %f\n", efixed.ToFloat64(pt.X), efixed.ToFloat64(pt.Y), res.X, res.Y)
+	return res
+}
+
+// positions the point relative to scaling factor r, in abstract space
+func convertStaticPoint(pt truetype.Point, r float64) primitives.Point {
+	res := primitives.Point{
+		X: r * efixed.ToFloat64(pt.X),
+		Y: -r * efixed.ToFloat64(pt.Y),
+	}
+	// fmt.Printf("x %f y %f -> X %f, Y %f\n", efixed.ToFloat64(pt.X), efixed.ToFloat64(pt.Y), res.X, res.Y)
+	return res
 }
 
 func isPointOnLine(pt truetype.Point) bool {
@@ -72,6 +121,94 @@ func optimizeContour(pts []truetype.Point) []truetype.Point {
 		}
 	}
 	return append(pts[idx:], pts[:idx]...)
+}
+
+func (g Glyph) GetHeightCurves(h float64) Char {
+	r := h / fontHeight
+	lns := []lines.LineLike{}
+	for _, contour := range g.Contours() {
+		contour = optimizeContour(contour)
+		if len(contour) == 0 {
+			fmt.Printf("Encountered empty contour!")
+			continue
+		}
+		// is point on line?
+		if !isPointOnLine(contour[0]) {
+			panic("First point on contour is not on line")
+		}
+		start := convertStaticPoint(contour[0], r)
+		midpoint := primitives.Point{}
+		l := lines.NewPath(start)
+		onCurve := false
+		idx := 1
+		for idx < len(contour) {
+			pt := contour[idx]
+			cp := convertStaticPoint(pt, r)
+			if isPointOnLine(pt) {
+				if !onCurve {
+					l = l.AddPathChunk(lines.LineChunk{Start: start, End: cp})
+				} else {
+					l = l.AddPathChunk(lines.QuadraticBezierChunk{Start: start, P1: midpoint, End: cp})
+				}
+				onCurve = false
+				start = cp
+			} else {
+				// current point is a control point
+				if onCurve {
+					// previous point was also a control point, so we need to chain points correctly
+					// get midpoint between successive bezier control points
+					c := primitives.Midpoint(midpoint, cp)
+					// fmt.Printf("Midpoint between %v and %v is %v\n", midpoint, cp, c)
+
+					l = l.AddPathChunk(lines.QuadraticBezierChunk{Start: start, P1: midpoint, End: c})
+					start = c
+					midpoint = cp
+				} else {
+					midpoint = convertStaticPoint(pt, r)
+				}
+				onCurve = true
+			}
+			idx += 1
+			if idx == len(contour) {
+				idx = 0
+			}
+			if idx == 1 {
+				break
+			}
+		}
+		lns = append(lns, l)
+	}
+	minPoint := truetype.Point{
+		X: g.bounds.Min.X,
+		Y: g.bounds.Min.Y,
+	}
+	maxPoint := truetype.Point{
+		X: g.bounds.Max.X,
+		Y: g.bounds.Max.Y,
+	}
+	minP := convertStaticPoint(minPoint, r)
+	maxP := convertStaticPoint(maxPoint, r)
+	bbox := box.Box{
+		X:    minP.X,
+		Y:    minP.Y,
+		XEnd: maxP.X,
+		YEnd: maxP.Y,
+	}
+	pts := []ControlPoint{}
+	for _, pt := range g.glyph.Points {
+		pts = append(pts, ControlPoint{
+			Point:  convertStaticPoint(pt, r),
+			OnLine: isPointOnLine(pt),
+		})
+	}
+	fmt.Printf("Advanced With Glyph %f\n", r*efixed.ToFloat64(g.advance))
+	return Char{
+		Rune:         g.Rune,
+		Curves:       lns,
+		Points:       pts,
+		BoundingBox:  bbox,
+		AdvanceWidth: r * efixed.ToFloat64(g.advance),
+	}
 }
 
 func (g Glyph) GetCurves(b box.Box) []lines.LineLike {
@@ -111,7 +248,7 @@ func (g Glyph) GetCurves(b box.Box) []lines.LineLike {
 					// previous point was also a control point, so we need to chain points correctly
 					// get midpoint between successive bezier control points
 					c := primitives.Midpoint(midpoint, cp)
-					fmt.Printf("Midpoint between %v and %v is %v\n", midpoint, cp, c)
+					// fmt.Printf("Midpoint between %v and %v is %v\n", midpoint, cp, c)
 
 					l = l.AddPathChunk(lines.QuadraticBezierChunk{Start: start, P1: midpoint, End: c})
 					start = c

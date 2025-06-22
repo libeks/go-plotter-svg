@@ -118,6 +118,10 @@ func (l LineSegment) OffsetLeft(distance float64) LineLike {
 	return LineSegment{P1: l.P1.Add(v), P2: l.P2.Add(v)}
 }
 
+func (l LineSegment) Translate(v primitives.Vector) LineLike {
+	return LineSegment{P1: l.P1.Add(v), P2: l.P2.Add(v)}
+}
+
 func (l LineSegment) Bisect(t float64) (Path, Path) {
 	midX := maths.Interpolate(l.P1.X, l.P2.X, t)
 	midY := maths.Interpolate(l.P1.Y, l.P2.Y, t)
