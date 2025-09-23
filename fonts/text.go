@@ -2,6 +2,7 @@ package fonts
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
@@ -81,9 +82,17 @@ func WithSize(size float64) textOption {
 }
 
 func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
+	var fontFile string
+	if runtime.GOOS == "windows" {
+		fontFile = "C:/Windows/Fonts/seguihis.ttf"
+		// fontFile="C:/Windows/Fonts/bahnschrift.ttf"
+	} else {
+		// MacOS
+		fontFile = "/System/Library/Fonts/Palatino.ttc"
+	}
 	o := option{
-		// fontFile: "C:/Windows/Fonts/bahnschrift.ttf",
-		fontFile: "C:/Windows/Fonts/seguihis.ttf",
+
+		fontFile: fontFile,
 		size:     1000.0,
 	}
 	for _, opt := range textOptions {
