@@ -93,7 +93,6 @@ func convertPoint(b box.Box, pt truetype.Point, r float64) primitives.Point {
 		X: b.X + r*efixed.ToFloat64(pt.X),
 		Y: b.YEnd - r*efixed.ToFloat64(pt.Y),
 	}
-	// fmt.Printf("x %f y %f -> X %f, Y %f\n", efixed.ToFloat64(pt.X), efixed.ToFloat64(pt.Y), res.X, res.Y)
 	return res
 }
 
@@ -103,7 +102,6 @@ func convertStaticPoint(pt truetype.Point, r float64) primitives.Point {
 		X: r * efixed.ToFloat64(pt.X),
 		Y: -r * efixed.ToFloat64(pt.Y),
 	}
-	// fmt.Printf("x %f y %f -> X %f, Y %f\n", efixed.ToFloat64(pt.X), efixed.ToFloat64(pt.Y), res.X, res.Y)
 	return res
 }
 
@@ -158,7 +156,6 @@ func (g Glyph) GetHeightCurves(h float64) Char {
 					// previous point was also a control point, so we need to chain points correctly
 					// get midpoint between successive bezier control points
 					c := primitives.Midpoint(midpoint, cp)
-					// fmt.Printf("Midpoint between %v and %v is %v\n", midpoint, cp, c)
 
 					l = l.AddPathChunk(lines.QuadraticBezierChunk{Start: start, P1: midpoint, End: c})
 					start = c
@@ -248,7 +245,6 @@ func (g Glyph) GetCurves(b box.Box) []lines.LineLike {
 					// previous point was also a control point, so we need to chain points correctly
 					// get midpoint between successive bezier control points
 					c := primitives.Midpoint(midpoint, cp)
-					// fmt.Printf("Midpoint between %v and %v is %v\n", midpoint, cp, c)
 
 					l = l.AddPathChunk(lines.QuadraticBezierChunk{Start: start, P1: midpoint, End: c})
 					start = c
