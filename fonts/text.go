@@ -10,20 +10,22 @@ import (
 )
 
 type option struct {
-	fontFile   string
-	size       float64 // vertical height to render to, somewhat approximate
-	vAlignment string  // how the text is positioned inside the bounding box vertically, default to center
-	hAlignment string  // how the text is positioned inside the bounding box horizontally, default to center
+	fontFile string
+	size     float64 // vertical height to render to, somewhat approximate
+	// The following are currently unimplemented
+	vAlignment    string  // how the text is positioned inside the bounding box vertically, default to center
+	hAlignment    string  // how the text is positioned inside the bounding box horizontally, default to center
+	rotationAngle float64 // clock-wise, how much the text should be rotated around its center before positioning, in radians
 }
 
 // TextRenderer contains everything that you'd need to render text to a Scene
 type TextRender struct {
-	Text string
-	// BoundingBox box.Box
+	Text       string
 	CharBoxes  []box.Box
 	CharCurves []lines.LineLike
 	CharPoints []ControlPoint
-	Kernings   []float64 // the amount of kerning between every pair of characters
+	// The following is currently unimplemented
+	Kernings []float64 // the amount of kerning between every pair of characters
 }
 
 func (t TextRender) Translate(v primitives.Vector) TextRender {
@@ -40,12 +42,12 @@ func (t TextRender) Translate(v primitives.Vector) TextRender {
 		newPoints[i] = c.Translate(v)
 	}
 	return TextRender{
-		Text: t.Text,
-		// BoundingBox: t.BoundingBox.Translate(v),
+		Text:       t.Text,
 		CharBoxes:  newBoxes,
 		CharCurves: newCurves,
 		CharPoints: newPoints,
-		Kernings:   t.Kernings,
+		// The following are currently unimplemented
+		Kernings: t.Kernings,
 	}
 }
 
@@ -81,6 +83,8 @@ func WithSize(size float64) textOption {
 	}
 }
 
+// RenderText renders the specified text, with the specified options, in the middle of the bounding box
+// The text may span outside of the bounding box, i.e. RenderText currently doesn't resize to fit the box
 func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	var fontFile string
 	if runtime.GOOS == "windows" {
@@ -91,7 +95,6 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 		fontFile = "/System/Library/Fonts/Palatino.ttc"
 	}
 	o := option{
-
 		fontFile: fontFile,
 		size:     1000.0,
 	}
