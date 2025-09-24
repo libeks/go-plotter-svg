@@ -547,12 +547,10 @@ func textScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
 
-	// b = b.WithPadding(1000)
 	blacks := []lines.LineLike{}
 	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
 	text := fonts.RenderText(b, "fe fi fo fum", fonts.WithSize(2000))
 
-	// fmt.Printf("Char Points %v\n", text.CharPoints)
 	for _, pt := range text.CharPoints {
 		if pt.OnLine {
 			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 30})

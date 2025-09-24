@@ -75,7 +75,6 @@ func (c ControlPoint) Translate(v primitives.Vector) ControlPoint {
 func (g Glyph) GetControlPoints(b box.Box) []ControlPoint {
 	w, h := getWidthHeight(g.glyph.Bounds)
 	wRatio, hRatio := b.Width()/w, b.Height()/h
-	fmt.Printf("wRatio %f, hRatio %f\n", wRatio, hRatio)
 	r := min(wRatio, hRatio)
 	pts := []ControlPoint{}
 	for _, pt := range g.glyph.Points {
@@ -198,7 +197,6 @@ func (g Glyph) GetHeightCurves(h float64) Char {
 			OnLine: isPointOnLine(pt),
 		})
 	}
-	fmt.Printf("Advanced With Glyph %f\n", r*efixed.ToFloat64(g.advance))
 	return Char{
 		Rune:         g.Rune,
 		Curves:       lns,

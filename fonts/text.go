@@ -13,9 +13,9 @@ type option struct {
 	fontFile string
 	size     float64 // vertical height to render to, somewhat approximate
 	// The following are currently unimplemented
-	vAlignment    string  // how the text is positioned inside the bounding box vertically, default to center
-	hAlignment    string  // how the text is positioned inside the bounding box horizontally, default to center
-	rotationAngle float64 // clock-wise, how much the text should be rotated around its center before positioning, in radians
+	// vAlignment    string  // how the text is positioned inside the bounding box vertically, default to center
+	// hAlignment    string  // how the text is positioned inside the bounding box horizontally, default to center
+	// rotationAngle float64 // clock-wise, how much the text should be rotated around its center before positioning, in radians
 }
 
 // TextRenderer contains everything that you'd need to render text to a Scene
@@ -25,7 +25,7 @@ type TextRender struct {
 	CharCurves []lines.LineLike
 	CharPoints []ControlPoint
 	// The following is currently unimplemented
-	Kernings []float64 // the amount of kerning between every pair of characters
+	// Kernings []float64 // the amount of kerning between every pair of characters
 }
 
 func (t TextRender) Translate(v primitives.Vector) TextRender {
@@ -47,7 +47,7 @@ func (t TextRender) Translate(v primitives.Vector) TextRender {
 		CharCurves: newCurves,
 		CharPoints: newPoints,
 		// The following are currently unimplemented
-		Kernings: t.Kernings,
+		// Kernings: t.Kernings,
 	}
 }
 
@@ -114,7 +114,6 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	offsetX := 0.0
 	prevCh := ' '
 	for _, ch := range text {
-		fmt.Printf("offset %f\n", offsetX)
 		glyph, err := f.LoadGlyph(ch)
 		if err != nil {
 			panic(err)
@@ -123,9 +122,7 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 		c := glyph.GetHeightCurves(o.size)
 		c = c.Translate(primitives.Vector{X: offsetX, Y: 0})
 		offsetX += c.AdvanceWidth
-		fmt.Printf("Advacned Width %f\n", c.AdvanceWidth)
 		kern := f.Kerning(6000, prevCh, ch)
-		fmt.Printf("kerning %f\n", kern)
 		offsetX += kern
 		curves = append(curves, c.Curves...)
 		controlPoints = append(controlPoints, c.Points...)

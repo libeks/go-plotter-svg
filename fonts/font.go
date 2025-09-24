@@ -60,15 +60,15 @@ func (f *Font) LoadGlyph(r rune) (Glyph, error) {
 	// if !ok {
 	// 	return Glyph{}, fmt.Errorf("Couldn't get glyph bounds for rune '%v'", r)
 	// }
-	minP, maxP := convertBox(glyph.Bounds)
+	// minP, maxP := convertBox(glyph.Bounds)
 	fmt.Printf("Glyph '%s'\n", string(r))
-	fmt.Printf("bounds %v, %v\n", minP, maxP)
-	fmt.Printf("advance %v\n", efixed.ToFloat64(glyph.AdvanceWidth))
-	fmt.Printf("Points %d, ends %d\n", len(glyph.Points), len(glyph.Ends))
+	// fmt.Printf("bounds %v, %v\n", minP, maxP)
+	// fmt.Printf("advance %v\n", efixed.ToFloat64(glyph.AdvanceWidth))
+	// fmt.Printf("Points %d, ends %d\n", len(glyph.Points), len(glyph.Ends))
 
-	for i, end := range glyph.Ends {
-		fmt.Printf("Countour %d, %v\n", i, end)
-	}
+	// for i, end := range glyph.Ends {
+	// 	fmt.Printf("Countour %d, %v\n", i, end)
+	// }
 
 	return Glyph{
 		Rune:    r,
