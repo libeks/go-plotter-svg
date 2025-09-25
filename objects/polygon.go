@@ -64,7 +64,14 @@ func (p Polygon) BBox() primitives.BBox {
 	return primitives.BBoxAroundPoints(p.Points...)
 }
 
+// Find the largest axis-aligned square that can be inscribed in the polygon
 func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
+	// Current algo starts with the midpoint of all points and iteratively shrinks the square until it fits,
+	// but this is not nearly optimal. Other ideas:
+	//
+	// * find a square that fits, then try to wiggle it around and increase the side length
+	// * start by finding the midpoint of all angles (how does that work for non-triangles)
+	// Consider https://cgm.cs.mcgill.ca/~athens/cs507/Projects/2003/DanielSud/
 	var midpoint primitives.Point
 	for _, pt := range p.Points {
 		midpoint.X += pt.X / float64(len(p.Points))
