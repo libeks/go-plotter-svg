@@ -60,6 +60,38 @@ func (p Polygon) IntersectTs(line lines.Line) []float64 {
 	return ts
 }
 
+func (p Polygon) BBox() primitives.BBox {
+	return primitives.BBoxAroundPoints(p.Points...)
+}
+
+func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
+	var midpoint primitives.Point
+	for _, pt := range p.Points {
+		midpoint.X += pt.X / float64(len(p.Points))
+		midpoint.Y += pt.Y / float64(len(p.Points))
+	}
+	outsideBox := p.BBox()
+
+	size := max(outsideBox.Width(), outsideBox.Height())
+	var bbox primitives.BBox
+	// TODO: Do a binary search with a threshold instead
+	for {
+		bbox = primitives.BBox{
+			UpperLeft:  midpoint.Add(primitives.Vector{X: -math.Sqrt(2), Y: -math.Sqrt(2)}.Mult(size / 2)),
+			LowerRight: midpoint.Add(primitives.Vector{X: math.Sqrt(2), Y: math.Sqrt(2)}.Mult(size / 2)),
+		}
+		if p.bboxInside(bbox) {
+			return bbox
+		}
+
+		size = size * 0.95
+		if size < 1.0 {
+			panic("Bounding box too small")
+		}
+	}
+	// return bbox
+}
+
 // should return circle t-values
 func (p Polygon) IntersectCircleTs(circle Circle) []float64 {
 	ts := []float64{}
@@ -68,4 +100,19 @@ func (p Polygon) IntersectCircleTs(circle Circle) []float64 {
 		ts = append(ts, t...)
 	}
 	return ts
+}
+
+func (p Polygon) bboxInside(bbox primitives.BBox) bool {
+	pts := []primitives.Point{
+		bbox.UpperLeft,
+		bbox.LowerRight,
+		primitives.Point{X: bbox.UpperLeft.X, Y: bbox.LowerRight.Y},
+		primitives.Point{X: bbox.LowerRight.X, Y: bbox.UpperLeft.Y},
+	}
+	for _, pt := range pts {
+		if !p.Inside(pt) {
+			return false
+		}
+	}
+	return true
 }

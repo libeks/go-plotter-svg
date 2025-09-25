@@ -9,6 +9,7 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
+// Box is an axis-aligned box
 type Box struct {
 	X    float64
 	Y    float64
@@ -182,6 +183,15 @@ func (b Box) PartitionIntoSquares(nHorizontal int) []IndexedBox {
 		}
 	}
 	return boxes
+}
+
+func BoxFromBBox(b primitives.BBox) Box {
+	return Box{
+		X:    b.UpperLeft.X,
+		Y:    b.UpperLeft.Y,
+		XEnd: b.LowerRight.X,
+		YEnd: b.LowerRight.Y,
+	}
 }
 
 type IndexedBox struct {

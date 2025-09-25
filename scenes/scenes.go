@@ -38,6 +38,7 @@ var (
 	FoldableRhombicuboctahedron = foldableRhombicuboctahedronScene
 	FoldableRhombiSansCorner    = foldableRhombicuboctahedronSansCornersScene
 	MazeScene                   = mazeScene
+	PolygonBoxScene             = polygonScene
 )
 
 func getLineFieldInObjects(b box.Box) Scene {
@@ -585,6 +586,88 @@ func textScene(b box.Box) Scene {
 	return scene
 }
 
+func polygonScene(b box.Box) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+
+	polygons := []objects.Polygon{
+		{
+			Points: []primitives.Point{
+				{X: 400, Y: 3400},
+				{X: 2400, Y: 3400},
+				{X: 1200, Y: 1400},
+			},
+		},
+		{
+			Points: []primitives.Point{
+				{X: 2600, Y: 3400},
+				{X: 4600, Y: 3400},
+				{X: 2400, Y: 1400},
+			},
+		},
+		{
+			Points: []primitives.Point{
+				{X: 5000, Y: 3400},
+				{X: 5000, Y: 1400},
+				{X: 5600, Y: 3400},
+			},
+		},
+		{ // tall trapezoid
+			Points: []primitives.Point{
+				{X: 800, Y: 4000},
+				{X: 2000, Y: 4000},
+				{X: 1800, Y: 5400},
+				{X: 1000, Y: 5400},
+			},
+		},
+		{ // wide trapezoid
+			Points: []primitives.Point{
+				{X: 3800, Y: 4000},
+				{X: 6000, Y: 4000},
+				{X: 5800, Y: 5400},
+				{X: 4000, Y: 5400},
+			},
+		},
+		{ // penatgon
+			Points: []primitives.Point{
+				primitives.Point{X: 7500, Y: 5000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(0)),
+				primitives.Point{X: 7500, Y: 5000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(2 * math.Pi / 5)),
+				primitives.Point{X: 7500, Y: 5000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(4 * math.Pi / 5)),
+				primitives.Point{X: 7500, Y: 5000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(6 * math.Pi / 5)),
+				primitives.Point{X: 7500, Y: 5000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(8 * math.Pi / 5)),
+			},
+		},
+		{ // penatgon
+			Points: []primitives.Point{
+				primitives.Point{X: 1500, Y: 7000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(1 * math.Pi / 10)),
+				primitives.Point{X: 1500, Y: 7000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(5 * math.Pi / 10)),
+				primitives.Point{X: 1500, Y: 7000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(9 * math.Pi / 10)),
+				primitives.Point{X: 1500, Y: 7000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(13 * math.Pi / 10)),
+				primitives.Point{X: 1500, Y: 7000}.Add(primitives.UnitRight.Mult(1000).RotateCCW(17 * math.Pi / 10)),
+			},
+		},
+	}
+
+	blacks := []lines.LineLike{}
+	reds := []lines.LineLike{}
+	greens := []lines.LineLike{}
+	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
+	// text := fonts.RenderText(b, "fe fi fo fum", fonts.WithSize(2000))
+
+	for _, poly := range polygons {
+		blacks = append(blacks, segmentsToLineLikes(poly.EdgeLines())...)
+		bbox := poly.LargestContainedSquareBBox()
+		boxx := box.BoxFromBBox(bbox)
+		reds = append(reds, boxx.Lines()...)
+		greens = append(greens, fonts.RenderText(boxx, "A", fonts.WithSize(2000)).CharCurves...)
+	}
+
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("green").WithLineLike(greens).WithColor("green").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
 func foldableRhombicuboctahedronScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
@@ -614,7 +697,6 @@ func foldableRhombicuboctahedronSansCornersScene(b box.Box) Scene {
 	// blacks2 := foldable.CutCube(b, foldableBase, 0.75)
 	pattern := foldable.RhombicuboctahedronWithoutCorners(b, foldableBase)
 	// blacks := foldable.ShapeTester(b, foldableBase)
-	// fmt.Printf("Blacks %v\n", blacks)
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("blue").WithLineLike(pattern.Annotations).WithColor("blue").WithWidth(20).MinimizePath(true))
