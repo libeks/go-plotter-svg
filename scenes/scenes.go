@@ -654,12 +654,14 @@ func polygonScene(b box.Box) Scene {
 	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
 	// text := fonts.RenderText(b, "fe fi fo fum", fonts.WithSize(2000))
 
-	for _, poly := range polygons {
+	chars := []string{"A", "B", "C", "D", "E", "F", "G", "H"}
+
+	for i, poly := range polygons {
 		blacks = append(blacks, segmentsToLineLikes(poly.EdgeLines())...)
 		bbox := poly.LargestContainedSquareBBox()
 		boxx := box.BoxFromBBox(bbox)
 		reds = append(reds, boxx.Lines()...)
-		greens = append(greens, fonts.RenderText(boxx, "A", fonts.WithSize(2000)).CharCurves...)
+		greens = append(greens, fonts.RenderText(boxx, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
 	}
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))

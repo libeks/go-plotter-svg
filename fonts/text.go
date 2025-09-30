@@ -12,6 +12,8 @@ import (
 type option struct {
 	fontFile string
 	size     float64 // vertical height to render to, somewhat approximate
+	fitToBox bool    // fit the bounding box of the text inside of the provided box, this conflicts with the `size` parameter
+
 	// The following are currently unimplemented
 	// vAlignment    string  // how the text is positioned inside the bounding box vertically, default to center
 	// hAlignment    string  // how the text is positioned inside the bounding box horizontally, default to center
@@ -21,6 +23,7 @@ type option struct {
 // TextRenderer contains everything that you'd need to render text to a Scene
 type TextRender struct {
 	Text       string
+	Size       float64 // size at which text was rendered
 	CharBoxes  []box.Box
 	CharCurves []lines.LineLike
 	CharPoints []ControlPoint
@@ -46,6 +49,7 @@ func (t TextRender) Translate(v primitives.Vector) TextRender {
 		CharBoxes:  newBoxes,
 		CharCurves: newCurves,
 		CharPoints: newPoints,
+		Size:       t.Size,
 		// The following are currently unimplemented
 		// Kernings: t.Kernings,
 	}
@@ -83,8 +87,15 @@ func WithSize(size float64) textOption {
 	}
 }
 
+func WithFitToBox() textOption {
+	return func(o option) option {
+		o.fitToBox = true
+		return o
+	}
+}
+
 // RenderText renders the specified text, with the specified options, in the middle of the bounding box
-// The text may span outside of the bounding box, i.e. RenderText currently doesn't resize to fit the box
+// The text may span outside of the bounding box, unless WithFitToBox is used
 func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	var fontFile string
 	if runtime.GOOS == "windows" {
@@ -108,34 +119,54 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	fmt.Printf("Loaded font %s\n", f.Name(3)) // print "Unique subfamily identification"
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
 
-	controlPoints := []ControlPoint{}
-	curves := []lines.LineLike{}
-	charBoxes := []box.Box{}
-	offsetX := 0.0
-	prevCh := ' '
-	for _, ch := range text {
-		glyph, err := f.LoadGlyph(ch)
-		if err != nil {
-			panic(err)
+	size := o.size
+	for size > 1.0 { // loop until the size is too small to render
+		controlPoints := []ControlPoint{}
+		curves := []lines.LineLike{}
+		charBoxes := []box.Box{}
+		offsetX := 0.0
+		fmt.Printf("Size %f\n", size)
+		prevCh := ' '
+		for _, ch := range text {
+			glyph, err := f.LoadGlyph(ch)
+			if err != nil {
+				panic(err)
+			}
+
+			c := glyph.GetHeightCurves(size)
+			c = c.Translate(primitives.Vector{X: offsetX, Y: 0})
+			offsetX += c.AdvanceWidth
+			kern := f.Kerning(6000, prevCh, ch)
+			offsetX += kern
+			curves = append(curves, c.Curves...)
+			controlPoints = append(controlPoints, c.Points...)
+			charBoxes = append(charBoxes, c.BoundingBox)
+			prevCh = ch
 		}
 
-		c := glyph.GetHeightCurves(o.size)
-		c = c.Translate(primitives.Vector{X: offsetX, Y: 0})
-		offsetX += c.AdvanceWidth
-		kern := f.Kerning(6000, prevCh, ch)
-		offsetX += kern
-		curves = append(curves, c.Curves...)
-		controlPoints = append(controlPoints, c.Points...)
-		charBoxes = append(charBoxes, c.BoundingBox)
-		prevCh = ch
-	}
+		render := TextRender{
+			Text:       text,
+			CharCurves: curves,
+			CharPoints: controlPoints,
+			CharBoxes:  charBoxes,
+			Size:       size,
+		}
+		v := b.Center().Subtract(render.BoundingBox().Center()) // center within the bounding box
+		textBox := render.Translate(v)
 
-	render := TextRender{
-		Text:       text,
-		CharCurves: curves,
-		CharPoints: controlPoints,
-		CharBoxes:  charBoxes,
+		boundingBox := textBox.BoundingBox()
+		fmt.Printf("bbox %v\n", boundingBox)
+		fmt.Printf("width %f vs %f\n", boundingBox.Width(), b.Width())
+		fmt.Printf("height %f vs %f\n", boundingBox.Height(), b.Height())
+		hRatio := boundingBox.Width() / b.Width()
+		vRatio := boundingBox.Height() / b.Height()
+		fmt.Printf("hratio %f vratio %f\n", hRatio, vRatio)
+		if !o.fitToBox || (hRatio <= 1.0 && vRatio <= 1.0) || size < 100 {
+			fmt.Printf("Rendered at size %f\n", size)
+			return textBox
+		}
+		size = size / max(hRatio, vRatio)
 	}
-	v := b.Center().Subtract(render.BoundingBox().Center()) // center within the bounding box
-	return render.Translate(v)
+	fmt.Printf("Box is too small to render text\n")
+	return TextRender{}
 }

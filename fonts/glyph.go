@@ -186,9 +186,9 @@ func (g Glyph) GetHeightCurves(h float64) Char {
 	maxP := convertStaticPoint(maxPoint, r)
 	bbox := box.Box{
 		X:    minP.X,
-		Y:    minP.Y,
+		Y:    maxP.Y,
 		XEnd: maxP.X,
-		YEnd: maxP.Y,
+		YEnd: minP.Y,
 	}
 	pts := []ControlPoint{}
 	for _, pt := range g.glyph.Points {
