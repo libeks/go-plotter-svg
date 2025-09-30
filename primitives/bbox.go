@@ -1,6 +1,8 @@
 package primitives
 
 import (
+	"fmt"
+	"math"
 	"slices"
 )
 
@@ -52,6 +54,19 @@ func (b BBox) Translate(v Vector) BBox {
 	b.UpperLeft = b.UpperLeft.Add(v)
 	b.LowerRight = b.LowerRight.Add(v)
 	return b
+}
+
+// Scale the box around the centerpoint by ratio r
+// It does so by moving the two corners in the right direction
+func (b BBox) Scale(r float64) BBox {
+	size := (r - 1) * b.Width()
+	upperLeft := UnitRight.RotateCCW((5.0 / 4.0) * math.Pi).Mult(size)
+	lowerRight := UnitRight.RotateCCW((1.0 / 4.0) * math.Pi).Mult(size)
+	fmt.Printf("ul %v, lr %v\n", upperLeft, lowerRight)
+	return BBox{
+		UpperLeft:  b.UpperLeft.Add(upperLeft),
+		LowerRight: b.LowerRight.Add(lowerRight),
+	}
 }
 
 func (b BBox) Intersect(c BBox) (BBox, bool) {
