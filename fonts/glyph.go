@@ -186,7 +186,7 @@ func (g Glyph) GetHeightCurves(h float64) Char {
 	maxP := convertStaticPoint(maxPoint, r)
 	bbox := box.Box{
 		X:    minP.X,
-		Y:    maxP.Y,
+		Y:    maxP.Y, // this ensures that the box is the right way up
 		XEnd: maxP.X,
 		YEnd: minP.Y,
 	}

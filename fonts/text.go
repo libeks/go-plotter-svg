@@ -120,12 +120,11 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
 
 	size := o.size
-	for size > 1.0 { // loop until the size is too small to render
+	for size > 1.0 { // loop until the text is inside the box or the size is too small to render
 		controlPoints := []ControlPoint{}
 		curves := []lines.LineLike{}
 		charBoxes := []box.Box{}
 		offsetX := 0.0
-		fmt.Printf("Size %f\n", size)
 		prevCh := ' '
 		for _, ch := range text {
 			glyph, err := f.LoadGlyph(ch)
@@ -155,13 +154,10 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 		textBox := render.Translate(v)
 
 		boundingBox := textBox.BoundingBox()
-		fmt.Printf("bbox %v\n", boundingBox)
-		fmt.Printf("width %f vs %f\n", boundingBox.Width(), b.Width())
-		fmt.Printf("height %f vs %f\n", boundingBox.Height(), b.Height())
 		hRatio := boundingBox.Width() / b.Width()
 		vRatio := boundingBox.Height() / b.Height()
-		fmt.Printf("hratio %f vratio %f\n", hRatio, vRatio)
-		if !o.fitToBox || (hRatio <= 1.0 && vRatio <= 1.0) || size < 100 {
+		if !o.fitToBox || (hRatio <= 1.0 && vRatio <= 1.0) {
+			// if need to fit the box and the character is bigger than the box, scale down, otherwise return
 			fmt.Printf("Rendered at size %f\n", size)
 			return textBox
 		}
