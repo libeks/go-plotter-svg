@@ -89,8 +89,8 @@ func (g Glyph) GetControlPoints(b box.Box) []ControlPoint {
 // positions the point relative to the box and the scaling factor r
 func convertPoint(b box.Box, pt truetype.Point, r float64) primitives.Point {
 	res := primitives.Point{
-		X: b.X + r*efixed.ToFloat64(pt.X),
-		Y: b.YEnd - r*efixed.ToFloat64(pt.Y),
+		X: b.UpperLeft.X + r*efixed.ToFloat64(pt.X),
+		Y: b.LowerRight.Y - r*efixed.ToFloat64(pt.Y),
 	}
 	return res
 }
@@ -185,10 +185,16 @@ func (g Glyph) GetHeightCurves(h float64) Char {
 	minP := convertStaticPoint(minPoint, r)
 	maxP := convertStaticPoint(maxPoint, r)
 	bbox := box.Box{
-		X:    minP.X,
-		Y:    maxP.Y, // this ensures that the box is the right way up
-		XEnd: maxP.X,
-		YEnd: minP.Y,
+		BBox: primitives.BBox{
+			UpperLeft: primitives.Point{
+				X: minP.X,
+				Y: maxP.Y,
+			},
+			LowerRight: primitives.Point{
+				X: maxP.X,
+				Y: minP.Y,
+			},
+		},
 	}
 	pts := []ControlPoint{}
 	for _, pt := range g.glyph.Points {

@@ -33,7 +33,7 @@ func Cube(b box.Box, side float64) []lines.LineLike {
 		),
 		3,
 	)
-	return c.Render(primitives.Point{X: b.X, Y: b.Y + side}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0)
 }
 
 func RightTrianglePrism(b box.Box, height, leg1, leg2 float64) []lines.LineLike {
@@ -79,7 +79,7 @@ func RightTrianglePrism(b box.Box, height, leg1, leg2 float64) []lines.LineLike 
 		),
 		3,
 	)
-	return c.Render(primitives.Point{X: b.X, Y: b.Y + leg1}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + leg1}, 0)
 }
 
 func ShapeTester(b box.Box, side float64) []lines.LineLike {
@@ -92,7 +92,7 @@ func ShapeTester(b box.Box, side float64) []lines.LineLike {
 			NewFace(tri).WithFlap(0).WithFace(1, NewFace(sq).WithFlap(3).WithFace(0, NewFace(tri).WithFlap(1), 0), 2),
 			2,
 		)
-	return c.Render(primitives.Point{X: b.X, Y: b.Y + side*2}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}, 0)
 }
 
 func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
@@ -226,7 +226,7 @@ func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
 				),
 			0,
 		)
-	return c.Render(primitives.Point{X: b.X - 2_000, Y: b.Y + side*2}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0)
 }
 
 func RhombicuboctahedronWithoutCorners(b box.Box, side float64) FoldablePattern {
@@ -361,7 +361,7 @@ func RhombicuboctahedronWithoutCorners(b box.Box, side float64) FoldablePattern 
 			0,
 		)
 	return FoldablePattern{
-		Edges:       c.Render(primitives.Point{X: b.X - 2_000, Y: b.Y + side*2}, 0),
+		Edges:       c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0),
 		Annotations: fonts.RenderText(b, "ABC").CharCurves,
 	}
 }
@@ -451,12 +451,12 @@ func CutCube(b box.Box, side float64, cutRatio float64) []lines.LineLike {
 		),
 		3,
 	)
-	return c.Render(primitives.Point{X: b.X, Y: b.Y + side}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0)
 }
 
 // ManualCube is deprecated, use Cube instead, it's more generic
 func ManualCube(b box.Box, side float64) []lines.LineLike {
-	start := primitives.Point{X: b.X, Y: b.Y + side}
+	start := primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}
 	lns := []lines.LineLike{}
 	// draws the cube as follows:
 	//
@@ -481,7 +481,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// face 1
-	start = primitives.Point{X: b.X + side, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: side, Y: 0})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -492,7 +492,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// face 2
-	start = primitives.Point{X: b.X + side*2, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side*2, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: side, Y: 0})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -503,7 +503,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// face 3
-	start = primitives.Point{X: b.X + side*3, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side*3, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: side, Y: 0})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -514,7 +514,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// face 4
-	start = primitives.Point{X: b.X + side, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: 0, Y: -side})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -525,7 +525,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// face 5
-	start = primitives.Point{X: b.X + side, Y: b.Y + side*2}
+	start = primitives.Point{X: b.UpperLeft.X + side, Y: b.UpperLeft.Y + side*2}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: 0, Y: side})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -536,7 +536,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 04
-	start = primitives.Point{X: b.X, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -547,7 +547,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 24
-	start = primitives.Point{X: b.X + side*2, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side*2, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -558,7 +558,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 34
-	start = primitives.Point{X: b.X + side*3, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side*3, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -569,7 +569,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 05
-	start = primitives.Point{X: b.X, Y: b.Y + side*2}
+	start = primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -580,7 +580,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 25
-	start = primitives.Point{X: b.X + side*2, Y: b.Y + side*2}
+	start = primitives.Point{X: b.UpperLeft.X + side*2, Y: b.UpperLeft.Y + side*2}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -591,7 +591,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 35
-	start = primitives.Point{X: b.X + side*3, Y: b.Y + side*2}
+	start = primitives.Point{X: b.UpperLeft.X + side*3, Y: b.UpperLeft.Y + side*2}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
@@ -602,7 +602,7 @@ func ManualCube(b box.Box, side float64) []lines.LineLike {
 	lns = append(lns, l)
 
 	// flap 30
-	start = primitives.Point{X: b.X + side*4, Y: b.Y + side}
+	start = primitives.Point{X: b.UpperLeft.X + side*4, Y: b.UpperLeft.Y + side}
 	l = lines.NewPath(start)
 	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
 	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})

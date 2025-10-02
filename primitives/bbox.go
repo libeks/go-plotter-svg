@@ -56,6 +56,13 @@ func (b BBox) Translate(v Vector) BBox {
 	return b
 }
 
+func (b BBox) WithPadding(pad float64) BBox {
+	return BBox{
+		UpperLeft:  Point{X: b.UpperLeft.X + pad, Y: b.UpperLeft.Y + pad},
+		LowerRight: Point{X: b.LowerRight.X - pad, Y: b.LowerRight.Y - pad},
+	}
+}
+
 // Scale the box around the centerpoint by ratio r
 // It does so by moving the two corners in the right direction
 func (b BBox) Scale(r float64) BBox {

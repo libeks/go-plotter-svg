@@ -25,8 +25,8 @@ func (s *RisingSun) Render(b box.Box) []lines.LineLike {
 	for i := range nStraightLines {
 		ii := float64(i)
 		baselineY := s.BaselineY - ii*s.LineSpacing
-		start := primitives.Point{X: b.X, Y: baselineY}
-		end := primitives.Point{X: b.XEnd, Y: baselineY}
+		start := primitives.Point{X: b.UpperLeft.X, Y: baselineY}
+		end := primitives.Point{X: b.LowerRight.X, Y: baselineY}
 		lns = append(lns, lines.NewPath(start).AddPathChunk(lines.LineChunk{Start: start, End: end}))
 	}
 	leftCenter := primitives.Point{
@@ -40,8 +40,8 @@ func (s *RisingSun) Render(b box.Box) []lines.LineLike {
 	for i := range s.NLinesAroundSun {
 		ii := float64(i)
 		baselineY := s.BaselineY - (ii+float64(nStraightLines))*s.LineSpacing
-		start := primitives.Point{X: b.X, Y: baselineY}
-		end := primitives.Point{X: b.XEnd, Y: baselineY}
+		start := primitives.Point{X: b.UpperLeft.X, Y: baselineY}
+		end := primitives.Point{X: b.LowerRight.X, Y: baselineY}
 		smallCircleRadius := s.MinTurnRadius + float64(s.NLinesAroundSun-i)*s.LineSpacing
 		sunRadius := s.Sun.Radius + s.SunPadding + ii*s.LineSpacing
 

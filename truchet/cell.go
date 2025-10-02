@@ -132,18 +132,20 @@ func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
 func (c *Cell) AtEdge(direction endPointTuple, t float64) primitives.Point {
 	switch direction.NWSE {
 	case North:
-		return primitives.Point{X: maths.Interpolate(c.Box.X, c.Box.XEnd, t), Y: c.Box.Y}
+		return primitives.Point{X: maths.Interpolate(c.Box.UpperLeft.X, c.Box.LowerRight.X, t), Y: c.Box.UpperLeft.Y}
 	case West:
-		return primitives.Point{X: c.Box.X, Y: maths.Interpolate(c.Box.Y, c.Box.YEnd, t)}
+		return primitives.Point{X: c.Box.UpperLeft.X, Y: maths.Interpolate(c.Box.UpperLeft.Y, c.Box.LowerRight.Y, t)}
 	case South:
-		return primitives.Point{X: maths.Interpolate(c.Box.X, c.Box.XEnd, t), Y: c.Box.YEnd}
+		return primitives.Point{X: maths.Interpolate(c.Box.UpperLeft.X, c.Box.LowerRight.X, t), Y: c.Box.LowerRight.Y}
 	case East:
-		return primitives.Point{X: c.Box.XEnd, Y: maths.Interpolate(c.Box.Y, c.Box.YEnd, t)}
+		return primitives.Point{X: c.Box.LowerRight.X, Y: maths.Interpolate(c.Box.UpperLeft.Y, c.Box.LowerRight.Y, t)}
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
 	}
 }
 
 func (c *Cell) At(horizontal, vertical float64) primitives.Point {
-	return primitives.Point{X: maths.Interpolate(c.Box.X, c.Box.XEnd, horizontal), Y: maths.Interpolate(c.Box.Y, c.Box.YEnd, vertical)}
+	return primitives.Point{
+		X: maths.Interpolate(c.Box.UpperLeft.X, c.Box.LowerRight.X, horizontal),
+		Y: maths.Interpolate(c.Box.UpperLeft.Y, c.Box.LowerRight.Y, vertical)}
 }

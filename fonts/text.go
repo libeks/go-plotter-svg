@@ -59,16 +59,11 @@ func (t TextRender) BoundingBox() box.Box {
 	if len(t.CharBoxes) == 0 {
 		return box.Box{}
 	}
-	b := t.CharBoxes[0].BBox()
+	b := t.CharBoxes[0].BBox
 	for _, newB := range t.CharBoxes[1:] {
-		b = b.Add(newB.BBox())
+		b = b.Add(newB.BBox)
 	}
-	return box.Box{
-		X:    b.UpperLeft.X,
-		Y:    b.UpperLeft.Y,
-		XEnd: b.LowerRight.X,
-		YEnd: b.LowerRight.Y,
-	}
+	return box.Box{BBox: b}
 }
 
 type textOption func(option) option

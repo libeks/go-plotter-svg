@@ -67,7 +67,7 @@ func ConcentricCircles(b box.Box, center primitives.Point, spacing float64) []ob
 func getLineIndexRange(b box.Box, perpVect primitives.Vector) (float64, float64) {
 	iSlice := []float64{}
 	wSq := perpVect.Dot(perpVect)
-	for _, point := range []primitives.Point{{X: b.X, Y: b.Y}, {X: b.X, Y: b.YEnd}, {X: b.XEnd, Y: b.Y}, {X: b.XEnd, Y: b.YEnd}} {
+	for _, point := range []primitives.Point{b.NWCorner(), b.NECorner(), b.SWCorner(), b.SECorner()} {
 		pVect := point.Subtract(primitives.Point{X: 0, Y: 0})
 		i := pVect.Dot(perpVect) / wSq
 		iSlice = append(iSlice, i)
@@ -141,14 +141,16 @@ func (h StrokeStrip) Lines() []lines.LineLike {
 		}
 		var line lines.LineSegment
 		if h.Direction.CardinalDirection == Horizontal {
+			vect := primitives.Vector{X: 0, Y: float64(j) * h.padding}
 			line = lines.LineSegment{
-				P1: primitives.Point{X: h.box.X, Y: h.box.Y + float64(j)*h.padding},
-				P2: primitives.Point{X: h.box.XEnd, Y: h.box.Y + float64(j)*h.padding},
+				P1: h.box.NWCorner().Add(vect),
+				P2: h.box.SWCorner().Add(vect),
 			}
 		} else {
+			vect := primitives.Vector{X: float64(j) * h.padding, Y: 0}
 			line = lines.LineSegment{
-				P1: primitives.Point{X: h.box.X + float64(j)*h.padding, Y: h.box.Y},
-				P2: primitives.Point{X: h.box.X + float64(j)*h.padding, Y: h.box.YEnd},
+				P1: h.box.NWCorner().Add(vect),
+				P2: h.box.NECorner().Add(vect),
 			}
 		}
 		if reverse {

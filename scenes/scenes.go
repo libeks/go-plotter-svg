@@ -277,8 +277,8 @@ func getLinesInsidePolygonScene(b box.Box, poly objects.Object, n int) Scene {
 		if len(ls) == n {
 			break
 		}
-		x := rand.Float64()*(b.XEnd-b.X) + b.X
-		y := rand.Float64()*(b.YEnd-b.Y) + b.Y
+		x := rand.Float64()*(b.Width()) + b.UpperLeft.X
+		y := rand.Float64()*(b.Height()) + b.UpperLeft.Y
 		if poly.Inside(primitives.Point{X: x, Y: y}) {
 			ls = append(ls, lines.LineSegment{P1: primitives.Point{X: x, Y: y}, P2: primitives.Point{X: x + 100, Y: y}})
 		}
@@ -659,7 +659,7 @@ func polygonScene(b box.Box) Scene {
 	for i, poly := range polygons {
 		blacks = append(blacks, segmentsToLineLikes(poly.EdgeLines())...)
 		bbox := poly.LargestContainedSquareBBox()
-		boxx := box.BoxFromBBox(bbox)
+		boxx := box.Box{BBox: bbox}
 		reds = append(reds, boxx.Lines()...)
 		boxx = boxx.WithPadding(100)
 		reds = append(reds, boxx.Lines()...)

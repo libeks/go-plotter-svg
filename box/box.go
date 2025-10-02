@@ -9,74 +9,58 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
-// Box is an axis-aligned box
+// Box is an axis-aligned box, a wrapper around primitives.BBox with more advanced actions
 type Box struct {
-	X    float64
-	Y    float64
-	XEnd float64
-	YEnd float64
+	primitives.BBox
 }
 
 func (b Box) String() string {
-	return fmt.Sprintf("Box (%.1f, %.1f) -> (%.1f, %.1f)", b.X, b.Y, b.XEnd, b.YEnd)
+	return fmt.Sprintf("Box (%.1f, %.1f) -> (%.1f, %.1f)", b.UpperLeft.X, b.UpperLeft.Y, b.LowerRight.X, b.LowerRight.Y)
 }
 
 func (b Box) Lines() []lines.LineLike {
-	path := lines.NewPath(primitives.Point{X: b.X, Y: b.Y})
+	path := lines.NewPath(b.NWCorner())
 	// find the starting point - extreme point of box in direction perpendicular to
 
-	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.X, Y: b.Y}, End: primitives.Point{X: b.X, Y: b.YEnd}})
-	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.X, Y: b.YEnd}, End: primitives.Point{X: b.XEnd, Y: b.YEnd}})
-	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.XEnd, Y: b.YEnd}, End: primitives.Point{X: b.XEnd, Y: b.Y}})
-	path = path.AddPathChunk(lines.LineChunk{Start: primitives.Point{X: b.XEnd, Y: b.Y}, End: primitives.Point{X: b.X, Y: b.Y}})
+	path = path.AddPathChunk(lines.LineChunk{Start: b.NWCorner(), End: b.NECorner()})
+	path = path.AddPathChunk(lines.LineChunk{Start: b.NECorner(), End: b.SECorner()})
+	path = path.AddPathChunk(lines.LineChunk{Start: b.SECorner(), End: b.SWCorner()})
+	path = path.AddPathChunk(lines.LineChunk{Start: b.SWCorner(), End: b.NWCorner()})
 
 	return []lines.LineLike{
 		path,
 	}
 }
 
-func (b Box) BBox() primitives.BBox {
-	return primitives.BBox{
-		UpperLeft: primitives.Point{
-			X: b.X,
-			Y: b.Y,
-		},
-		LowerRight: primitives.Point{
-			X: b.XEnd,
-			Y: b.YEnd,
-		},
-	}
-}
-
 func (b Box) Corners() []primitives.Point {
 	return []primitives.Point{
-		{X: b.X, Y: b.Y}, {X: b.X, Y: b.YEnd},
-		{X: b.XEnd, Y: b.YEnd}, {X: b.XEnd, Y: b.Y},
+		b.NWCorner(), b.NECorner(),
+		b.SWCorner(), b.SECorner(),
 	}
 }
 
 func (b Box) NWCorner() primitives.Point {
-	return primitives.Point{X: b.X, Y: b.Y}
+	return b.UpperLeft
 }
 
 func (b Box) NECorner() primitives.Point {
-	return primitives.Point{X: b.X, Y: b.YEnd}
+	return primitives.Point{X: b.UpperLeft.X, Y: b.LowerRight.Y}
 }
 
 func (b Box) SWCorner() primitives.Point {
-	return primitives.Point{X: b.XEnd, Y: b.Y}
+	return primitives.Point{X: b.LowerRight.X, Y: b.UpperLeft.Y}
 }
 
 func (b Box) SECorner() primitives.Point {
-	return primitives.Point{X: b.XEnd, Y: b.YEnd}
+	return b.LowerRight
 }
 
 func (b Box) ClipLineToBox(l lines.Line) *lines.LineSegment {
 	ls := []lines.LineSegment{
-		{P1: primitives.Point{X: b.X, Y: b.Y}, P2: primitives.Point{X: b.X, Y: b.YEnd}},
-		{P1: primitives.Point{X: b.X, Y: b.YEnd}, P2: primitives.Point{X: b.XEnd, Y: b.YEnd}},
-		{P1: primitives.Point{X: b.XEnd, Y: b.YEnd}, P2: primitives.Point{X: b.XEnd, Y: b.Y}},
-		{P1: primitives.Point{X: b.XEnd, Y: b.Y}, P2: primitives.Point{X: b.X, Y: b.Y}},
+		{P1: b.NWCorner(), P2: b.NECorner()},
+		{P1: b.NECorner(), P2: b.SECorner()},
+		{P1: b.SECorner(), P2: b.SWCorner()},
+		{P1: b.SWCorner(), P2: b.NWCorner()},
 	}
 	ts := []float64{}
 	for _, lineseg := range ls {
@@ -97,25 +81,25 @@ func (b Box) ClipLineToBox(l lines.Line) *lines.LineSegment {
 
 func (b Box) WithPadding(pad float64) Box {
 	return Box{
-		b.X + pad,
-		b.Y + pad,
-		b.XEnd - pad,
-		b.YEnd - pad,
+		BBox: b.BBox.WithPadding(pad),
 	}
 }
 
 func (b Box) Translate(v primitives.Vector) Box {
 	return Box{
-		b.X + v.X,
-		b.Y + v.Y,
-		b.XEnd + v.X,
-		b.YEnd + v.Y,
+		BBox: primitives.BBox{
+			UpperLeft:  b.BBox.UpperLeft.Add(v),
+			LowerRight: b.BBox.LowerRight.Add(v),
+		},
 	}
 }
 
 // center of the box in absolute coordinates [0, 10_000]
 func (b Box) Center() primitives.Point {
-	return primitives.Point{X: b.X + (b.XEnd-b.X)/2, Y: b.Y + (b.YEnd-b.Y)/2}
+	return primitives.Point{
+		X: b.UpperLeft.X + b.Width()/2,
+		Y: b.UpperLeft.Y + b.Height()/2,
+	}
 }
 
 func (b Box) RelativeMinusPlusOneCenter(parentBox Box) primitives.Point {
@@ -134,15 +118,10 @@ func getRelativeAroundCenter(v float64) float64 {
 
 // center of the box in relative coordinates [0.0, 1.0], assuming that the image is in the range [0, 10_000]
 func (b Box) RelativeCenter() primitives.Point {
-	return primitives.Point{X: getRelativeAroundCenter(b.X + (b.XEnd-b.X)/2), Y: getRelativeAroundCenter(b.Y + (b.YEnd-b.Y)/2)}
-}
-
-func (b Box) Width() float64 {
-	return b.XEnd - b.X
-}
-
-func (b Box) Height() float64 {
-	return b.YEnd - b.Y
+	return primitives.Point{
+		X: getRelativeAroundCenter(b.UpperLeft.X + (b.LowerRight.X-b.UpperLeft.X)/2),
+		Y: getRelativeAroundCenter(b.UpperLeft.Y + (b.LowerRight.Y-b.UpperLeft.Y)/2),
+	}
 }
 
 func (b Box) AsPolygon() objects.Polygon {
@@ -172,10 +151,16 @@ func (b Box) PartitionIntoSquares(nHorizontal int) []IndexedBox {
 			hh := float64(h)
 			boxes = append(boxes, IndexedBox{
 				Box: Box{
-					X:    hh*squareSide + b.X,
-					Y:    vv*squareSide + b.Y,
-					XEnd: (hh+1)*squareSide + b.X,
-					YEnd: (vv+1)*squareSide + b.Y,
+					BBox: primitives.BBox{
+						UpperLeft: primitives.Point{
+							X: hh*squareSide + b.UpperLeft.X,
+							Y: vv*squareSide + b.UpperLeft.Y,
+						},
+						LowerRight: primitives.Point{
+							X: (hh+1)*squareSide + b.UpperLeft.X,
+							Y: (vv+1)*squareSide + b.UpperLeft.Y,
+						},
+					},
 				},
 				I: h,
 				J: v,
@@ -183,15 +168,6 @@ func (b Box) PartitionIntoSquares(nHorizontal int) []IndexedBox {
 		}
 	}
 	return boxes
-}
-
-func BoxFromBBox(b primitives.BBox) Box {
-	return Box{
-		X:    b.UpperLeft.X,
-		Y:    b.UpperLeft.Y,
-		XEnd: b.LowerRight.X,
-		YEnd: b.LowerRight.Y,
-	}
 }
 
 type IndexedBox struct {
