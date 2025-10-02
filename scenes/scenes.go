@@ -661,6 +661,8 @@ func polygonScene(b box.Box) Scene {
 		bbox := poly.LargestContainedSquareBBox()
 		boxx := box.BoxFromBBox(bbox)
 		reds = append(reds, boxx.Lines()...)
+		boxx = boxx.WithPadding(100)
+		reds = append(reds, boxx.Lines()...)
 		greens = append(greens, fonts.RenderText(boxx, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
 	}
 
