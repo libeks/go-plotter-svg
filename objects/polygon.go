@@ -45,7 +45,7 @@ func (p Polygon) EdgeLines() []lines.LineSegment {
 	for i, p1 := range p.Points {
 		j := (i + 1) % len(p.Points)
 		p2 := p.Points[j]
-		segments = append(segments, lines.LineSegment{p1, p2})
+		segments = append(segments, lines.LineSegment{P1: p1, P2: p2})
 	}
 	return segments
 }
@@ -140,8 +140,8 @@ func (p Polygon) bboxInside(bbox primitives.BBox) bool {
 	pts := []primitives.Point{
 		bbox.UpperLeft,
 		bbox.LowerRight,
-		primitives.Point{X: bbox.UpperLeft.X, Y: bbox.LowerRight.Y},
-		primitives.Point{X: bbox.LowerRight.X, Y: bbox.UpperLeft.Y},
+		{X: bbox.UpperLeft.X, Y: bbox.LowerRight.Y},
+		{X: bbox.LowerRight.X, Y: bbox.UpperLeft.Y},
 	}
 	for _, pt := range pts {
 		if !p.Inside(pt) {
