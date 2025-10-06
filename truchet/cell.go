@@ -119,7 +119,7 @@ func (c *Cell) VisitFrom(direction endPointTuple) (*Curve, *Cell, *endPointTuple
 }
 
 func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
-	rand := dataSource.GetValue(box.Box{c.BBox}.RelativeCenter()) // evaluate dataSource in absolute image coordinates
+	rand := dataSource.GetValue(box.RelativeCenter(c.BBox)) // evaluate dataSource in absolute image coordinates
 	l := len(c.Grid.TruchetTileSet.Tiles)
 	n := int(rand * float64(l))
 	if n == l {
