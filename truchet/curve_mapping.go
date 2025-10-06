@@ -188,7 +188,7 @@ func quarterBezierLineMapper(c *Curve, curveType CurveType, tFrom, tTo float64, 
 }
 
 func quarterCircleCircleMapper(c *Curve, curveType CurveType, tFrom, tTo float64, startPoint, endPoint primitives.Point) lines.PathChunk {
-	radius := c.Box.Width() / 2
+	radius := c.BBox.Width() / 2
 	var clockwise bool
 	switch curveType {
 	case CClockEN, CClockNW, CClockWS, CClockSE:
@@ -200,13 +200,13 @@ func quarterCircleCircleMapper(c *Curve, curveType CurveType, tFrom, tTo float64
 	switch curveType {
 	// if diagonal does from top left to bottom right
 	case ClockNE, CClockEN:
-		center = c.Box.Center().Add(primitives.Vector{X: c.Box.Width() / 2, Y: -c.Box.Height() / 2})
+		center = c.BBox.Center().Add(primitives.Vector{X: c.BBox.Width() / 2, Y: -c.BBox.Height() / 2})
 	case ClockES, CClockSE:
-		center = c.Box.Center().Add(primitives.Vector{X: c.Box.Width() / 2, Y: c.Box.Height() / 2})
+		center = c.BBox.Center().Add(primitives.Vector{X: c.BBox.Width() / 2, Y: c.BBox.Height() / 2})
 	case ClockSW, CClockWS:
-		center = c.Box.Center().Add(primitives.Vector{X: -c.Box.Width() / 2, Y: c.Box.Height() / 2})
+		center = c.BBox.Center().Add(primitives.Vector{X: -c.BBox.Width() / 2, Y: c.BBox.Height() / 2})
 	case ClockWN, CClockNW:
-		center = c.Box.Center().Add(primitives.Vector{X: -c.Box.Width() / 2, Y: -c.Box.Height() / 2})
+		center = c.BBox.Center().Add(primitives.Vector{X: -c.BBox.Width() / 2, Y: -c.BBox.Height() / 2})
 	default:
 		panic("Unexpected case")
 	}

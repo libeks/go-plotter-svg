@@ -150,3 +150,9 @@ func (p Polygon) bboxInside(bbox primitives.BBox) bool {
 	}
 	return true
 }
+
+func PolygonFromBBox(b primitives.BBox) Polygon {
+	return Polygon{
+		Points: b.Corners(),
+	}
+}

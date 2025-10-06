@@ -3,14 +3,13 @@ package foldable
 import (
 	"math"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 // Cube does a cube with a certain side length.
-func Cube(b box.Box, side float64) []lines.LineLike {
+func Cube(b primitives.BBox, side float64) []lines.LineLike {
 	sq := Square(side)
 	c := NewFace(sq).WithFlap(3).WithFace( // #0
 		1,
@@ -36,7 +35,7 @@ func Cube(b box.Box, side float64) []lines.LineLike {
 	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0)
 }
 
-func RightTrianglePrism(b box.Box, height, leg1, leg2 float64) []lines.LineLike {
+func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.LineLike {
 	a := math.Sqrt(leg1*leg1 + leg2*leg2)
 	c := NewFace(Rectangle(leg1, height)).WithFlap(3).WithFace( // #0
 		1,
@@ -82,7 +81,7 @@ func RightTrianglePrism(b box.Box, height, leg1, leg2 float64) []lines.LineLike 
 	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + leg1}, 0)
 }
 
-func ShapeTester(b box.Box, side float64) []lines.LineLike {
+func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
 	sq := Square(side)
 	tri := EquiTriangle(side)
 
@@ -95,7 +94,7 @@ func ShapeTester(b box.Box, side float64) []lines.LineLike {
 	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}, 0)
 }
 
-func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
+func Rhombicuboctahedron(b primitives.BBox, side float64) []lines.LineLike {
 	sq := Square(side)
 	tri := EquiTriangle(side)
 
@@ -229,7 +228,7 @@ func Rhombicuboctahedron(b box.Box, side float64) []lines.LineLike {
 	return c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0)
 }
 
-func RhombicuboctahedronWithoutCorners(b box.Box, side float64) FoldablePattern {
+func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) FoldablePattern {
 	sq := Square(side)
 	// tri := EquiTriangle(side)
 
@@ -362,12 +361,12 @@ func RhombicuboctahedronWithoutCorners(b box.Box, side float64) FoldablePattern 
 		)
 	return FoldablePattern{
 		Edges:       c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0),
-		Annotations: fonts.RenderText(b.BBox, "ABC").CharCurves,
+		Annotations: fonts.RenderText(b, "ABC").CharCurves,
 	}
 }
 
 // CutCube is a cube with a triangular prism missing.
-func CutCube(b box.Box, side float64, cutRatio float64) []lines.LineLike {
+func CutCube(b primitives.BBox, side float64, cutRatio float64) []lines.LineLike {
 	sq := Square(side)
 	a := math.Sqrt(1 + cutRatio*cutRatio)
 	c := NewFace(sq).WithFlap(3).WithFace( // #0
@@ -455,7 +454,7 @@ func CutCube(b box.Box, side float64, cutRatio float64) []lines.LineLike {
 }
 
 // ManualCube is deprecated, use Cube instead, it's more generic
-func ManualCube(b box.Box, side float64) []lines.LineLike {
+func ManualCube(b primitives.BBox, side float64) []lines.LineLike {
 	start := primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}
 	lns := []lines.LineLike{}
 	// draws the cube as follows:

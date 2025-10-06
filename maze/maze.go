@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"slices"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
@@ -95,11 +94,11 @@ func (g *Grid) At(x, y int) *Cell {
 	}
 	return g.cells[x*g.size+y]
 }
-func (g *Grid) CellSideInBox(b box.Box) float64 {
+func (g *Grid) CellSideInBox(b primitives.BBox) float64 {
 	return float64(max(b.Width(), b.Height())) / float64(g.size)
 }
 
-func (g *Grid) CellCenterInBox(b box.Box, x, y int) primitives.Point {
+func (g *Grid) CellCenterInBox(b primitives.BBox, x, y int) primitives.Point {
 	edgeSize := g.CellSideInBox(b)
 	return b.NWCorner().Add(primitives.Vector{X: (float64(x) + 0.5) * edgeSize, Y: (float64(y) + 0.5) * edgeSize})
 }
@@ -149,7 +148,7 @@ type MazeRender struct {
 	Walls []lines.LineLike
 }
 
-func (m *Maze) Render(b box.Box) MazeRender {
+func (m *Maze) Render(b primitives.BBox) MazeRender {
 	start := m.Grid.At(0, 0)
 	stack := []*Cell{start}
 

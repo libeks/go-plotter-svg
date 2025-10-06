@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/scenes"
 	"github.com/libeks/go-plotter-svg/svg"
@@ -12,11 +11,9 @@ func main() {
 	sizePx := 10000.0
 	padding := 1000.0
 
-	outerBox := box.Box{
-		BBox: primitives.BBox{
-			UpperLeft:  primitives.Point{X: 0, Y: 0},
-			LowerRight: primitives.Point{X: sizePx, Y: sizePx},
-		},
+	outerBox := primitives.BBox{
+		UpperLeft:  primitives.Point{X: 0, Y: 0},
+		LowerRight: primitives.Point{X: sizePx, Y: sizePx},
 	}
 	innerBox := outerBox.WithPadding(padding)
 	// scene := scenes.getCurlyScene(outerBox)

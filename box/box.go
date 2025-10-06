@@ -80,7 +80,7 @@ func (b Box) Translate(v primitives.Vector) Box {
 	}
 }
 
-func (b Box) RelativeMinusPlusOneCenter(parentBox Box) primitives.Point {
+func RelativeMinusPlusOneCenter(b, parentBox primitives.BBox) primitives.Point {
 	center := b.Center()
 	parentCenter := parentBox.Center()
 	return primitives.Point{
@@ -97,25 +97,19 @@ func getRelativeAroundCenter(v float64) float64 {
 // center of the box in relative coordinates [0.0, 1.0], assuming that the image is in the range [0, 10_000]
 func (b Box) RelativeCenter() primitives.Point {
 	return primitives.Point{
-		X: getRelativeAroundCenter(b.UpperLeft.X + (b.LowerRight.X-b.UpperLeft.X)/2),
-		Y: getRelativeAroundCenter(b.UpperLeft.Y + (b.LowerRight.Y-b.UpperLeft.Y)/2),
+		X: getRelativeAroundCenter(b.UpperLeft.X + b.Width()/2.0),
+		Y: getRelativeAroundCenter(b.UpperLeft.Y + b.Height()/2.0),
 	}
 }
 
-func (b Box) AsPolygon() objects.Polygon {
-	return objects.Polygon{
-		Points: b.Corners(),
-	}
-}
-
-func (b Box) CircleInsideBox() objects.Circle {
+func CircleInsideBox(b primitives.BBox) objects.Circle {
 	return objects.Circle{
 		Center: b.Center(),
 		Radius: b.Width() / 2,
 	}
 }
 
-func (b Box) PartitionIntoSquares(nHorizontal int) []IndexedBox {
+func PartitionIntoSquares(b primitives.BBox, nHorizontal int) []IndexedBox {
 	width := b.Width()
 	squareSide := width / (float64(nHorizontal))
 	boxes := []IndexedBox{}
@@ -128,16 +122,14 @@ func (b Box) PartitionIntoSquares(nHorizontal int) []IndexedBox {
 		for h := range nHorizontal {
 			hh := float64(h)
 			boxes = append(boxes, IndexedBox{
-				Box: Box{
-					BBox: primitives.BBox{
-						UpperLeft: primitives.Point{
-							X: hh*squareSide + b.UpperLeft.X,
-							Y: vv*squareSide + b.UpperLeft.Y,
-						},
-						LowerRight: primitives.Point{
-							X: (hh+1)*squareSide + b.UpperLeft.X,
-							Y: (vv+1)*squareSide + b.UpperLeft.Y,
-						},
+				BBox: primitives.BBox{
+					UpperLeft: primitives.Point{
+						X: hh*squareSide + b.UpperLeft.X,
+						Y: vv*squareSide + b.UpperLeft.Y,
+					},
+					LowerRight: primitives.Point{
+						X: (hh+1)*squareSide + b.UpperLeft.X,
+						Y: (vv+1)*squareSide + b.UpperLeft.Y,
 					},
 				},
 				I: h,
@@ -149,7 +141,7 @@ func (b Box) PartitionIntoSquares(nHorizontal int) []IndexedBox {
 }
 
 type IndexedBox struct {
-	Box Box
-	I   int
-	J   int
+	primitives.BBox
+	I int
+	J int
 }

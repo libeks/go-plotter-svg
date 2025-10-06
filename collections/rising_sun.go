@@ -3,7 +3,6 @@ package collections
 import (
 	"math"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
@@ -19,7 +18,7 @@ type RisingSun struct {
 	NLinesAroundSun int
 }
 
-func (s *RisingSun) Render(b box.Box) []lines.LineLike {
+func (s *RisingSun) Render(b primitives.BBox) []lines.LineLike {
 	lns := []lines.LineLike{}
 	nStraightLines := s.NLines - s.NLinesAroundSun
 	for i := range nStraightLines {

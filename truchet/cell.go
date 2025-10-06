@@ -11,7 +11,7 @@ import (
 
 type Cell struct {
 	*Grid
-	box.Box
+	primitives.BBox
 	x int
 	y int
 	tile
@@ -119,7 +119,7 @@ func (c *Cell) VisitFrom(direction endPointTuple) (*Curve, *Cell, *endPointTuple
 }
 
 func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
-	rand := dataSource.GetValue(c.Box.RelativeCenter()) // evaluate dataSource in absolute image coordinates
+	rand := dataSource.GetValue(box.Box{c.BBox}.RelativeCenter()) // evaluate dataSource in absolute image coordinates
 	l := len(c.Grid.TruchetTileSet.Tiles)
 	n := int(rand * float64(l))
 	if n == l {
@@ -132,13 +132,13 @@ func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
 func (c *Cell) AtEdge(direction endPointTuple, t float64) primitives.Point {
 	switch direction.NWSE {
 	case North:
-		return primitives.Point{X: maths.Interpolate(c.Box.UpperLeft.X, c.Box.LowerRight.X, t), Y: c.Box.UpperLeft.Y}
+		return primitives.Point{X: maths.Interpolate(c.BBox.UpperLeft.X, c.BBox.LowerRight.X, t), Y: c.BBox.UpperLeft.Y}
 	case West:
-		return primitives.Point{X: c.Box.UpperLeft.X, Y: maths.Interpolate(c.Box.UpperLeft.Y, c.Box.LowerRight.Y, t)}
+		return primitives.Point{X: c.BBox.UpperLeft.X, Y: maths.Interpolate(c.BBox.UpperLeft.Y, c.BBox.LowerRight.Y, t)}
 	case South:
-		return primitives.Point{X: maths.Interpolate(c.Box.UpperLeft.X, c.Box.LowerRight.X, t), Y: c.Box.LowerRight.Y}
+		return primitives.Point{X: maths.Interpolate(c.BBox.UpperLeft.X, c.BBox.LowerRight.X, t), Y: c.BBox.LowerRight.Y}
 	case East:
-		return primitives.Point{X: c.Box.LowerRight.X, Y: maths.Interpolate(c.Box.UpperLeft.Y, c.Box.LowerRight.Y, t)}
+		return primitives.Point{X: c.BBox.LowerRight.X, Y: maths.Interpolate(c.BBox.UpperLeft.Y, c.BBox.LowerRight.Y, t)}
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
 	}
@@ -146,6 +146,6 @@ func (c *Cell) AtEdge(direction endPointTuple, t float64) primitives.Point {
 
 func (c *Cell) At(horizontal, vertical float64) primitives.Point {
 	return primitives.Point{
-		X: maths.Interpolate(c.Box.UpperLeft.X, c.Box.LowerRight.X, horizontal),
-		Y: maths.Interpolate(c.Box.UpperLeft.Y, c.Box.LowerRight.Y, vertical)}
+		X: maths.Interpolate(c.BBox.UpperLeft.X, c.BBox.LowerRight.X, horizontal),
+		Y: maths.Interpolate(c.BBox.UpperLeft.Y, c.BBox.LowerRight.Y, vertical)}
 }

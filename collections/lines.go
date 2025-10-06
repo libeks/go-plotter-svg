@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"slices"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/objects"
@@ -112,7 +111,7 @@ func LinearDensityLineField(b primitives.BBox, angle float64, densityFn func(flo
 }
 
 type StrokeStrip struct {
-	box     box.Box
+	box     primitives.BBox
 	padding float64
 	Direction
 }

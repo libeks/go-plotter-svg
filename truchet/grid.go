@@ -9,8 +9,8 @@ import (
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *Grid {
-	boxes := b.PartitionIntoSquares(nx)
+func NewGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *Grid {
+	boxes := box.PartitionIntoSquares(b, nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
 	grid := &Grid{
 		TruchetTileSet: tileSet,
@@ -40,7 +40,7 @@ func NewGrid(b box.Box, nx int, tileSet TruchetTileSet, tilePicker, edgeSource s
 	for _, childBox := range boxes {
 		cell := &Cell{
 			Grid: grid,
-			Box:  childBox.Box,
+			BBox: childBox.BBox,
 			x:    childBox.I,
 			y:    childBox.J,
 		}
