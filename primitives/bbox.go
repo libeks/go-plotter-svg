@@ -63,6 +63,37 @@ func (b BBox) WithPadding(pad float64) BBox {
 	}
 }
 
+// center of the box
+func (b BBox) Center() Point {
+	return Point{
+		X: b.UpperLeft.X + b.Width()/2,
+		Y: b.UpperLeft.Y + b.Height()/2,
+	}
+}
+
+func (b BBox) Corners() []Point {
+	return []Point{
+		b.NWCorner(), b.NECorner(),
+		b.SWCorner(), b.SECorner(),
+	}
+}
+
+func (b BBox) NWCorner() Point {
+	return b.UpperLeft
+}
+
+func (b BBox) NECorner() Point {
+	return Point{X: b.UpperLeft.X, Y: b.LowerRight.Y}
+}
+
+func (b BBox) SWCorner() Point {
+	return Point{X: b.LowerRight.X, Y: b.UpperLeft.Y}
+}
+
+func (b BBox) SECorner() Point {
+	return b.LowerRight
+}
+
 // Scale the box around the centerpoint by ratio r
 // It does so by moving the two corners in the right direction
 func (b BBox) Scale(r float64) BBox {

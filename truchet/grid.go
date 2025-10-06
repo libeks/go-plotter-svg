@@ -133,7 +133,7 @@ func (g Grid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike 
 func (g Grid) GetGridLines() []lines.LineLike {
 	ls := []lines.LineLike{}
 	for _, cell := range g.cells {
-		ls = append(ls, cell.Box.Lines()...)
+		ls = append(ls, lines.LinesFromBBox(cell.BBox)...)
 	}
 	return ls
 }

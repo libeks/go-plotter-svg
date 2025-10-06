@@ -362,7 +362,7 @@ func RhombicuboctahedronWithoutCorners(b box.Box, side float64) FoldablePattern 
 		)
 	return FoldablePattern{
 		Edges:       c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0),
-		Annotations: fonts.RenderText(b, "ABC").CharCurves,
+		Annotations: fonts.RenderText(b.BBox, "ABC").CharCurves,
 	}
 }
 

@@ -83,7 +83,7 @@ func getLineFieldInObjects(b box.Box) Scene {
 	lines2 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly2))
 	lines3 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly3))
 	lines4 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly4))
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(lines1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0).WithColor("blue"))
 	scene = scene.AddLayer(NewLayer("content3").WithLineLike(lines3).WithOffset(0, 0).WithColor("yellow"))
@@ -96,7 +96,7 @@ func parallelCoherentSineFieldsScene(b box.Box) Scene {
 	layer1 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
-				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
+				b.BBox, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
@@ -104,7 +104,7 @@ func parallelCoherentSineFieldsScene(b box.Box) Scene {
 	layer2 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
-				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.1}.Density,
+				b.BBox, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.1}.Density,
 			),
 			b.AsPolygon(),
 		),
@@ -112,12 +112,12 @@ func parallelCoherentSineFieldsScene(b box.Box) Scene {
 	layer3 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
-				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.2}.Density,
+				b.BBox, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.2}.Density,
 			),
 			b.AsPolygon(),
 		),
 	)
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
 	scene = scene.AddLayer(NewLayer("content3").WithLineLike(layer3).WithOffset(0, 0).WithColor("green"))
@@ -130,11 +130,11 @@ func circlesInSquareScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
 	layer1 := collections.LimitCirclesToShape(
 		collections.ConcentricCircles(
-			b, b.Center(), 100,
+			b.BBox, b.Center(), 100,
 		),
 		b.AsPolygon(),
 	)
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	return scene
 }
@@ -148,7 +148,7 @@ func testDensityScene(b box.Box) Scene {
 		"blue",
 		"orange",
 	}
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	for i, quarter := range quarters {
 		lineLikes := []lines.LineLike{}
 		quarterBox := quarter.Box.WithPadding(50)
@@ -164,7 +164,7 @@ func testDensityScene(b box.Box) Scene {
 				ls = segmentsToLineLikes(
 					collections.LimitLinesToShape(
 						collections.LinearLineField(
-							tboxx, ii*math.Pi/4, spacing,
+							tboxx.BBox, ii*math.Pi/4, spacing,
 						),
 						tboxx.AsPolygon(),
 					),
@@ -172,7 +172,7 @@ func testDensityScene(b box.Box) Scene {
 			} else {
 				ls = collections.LimitCirclesToShape(
 					collections.ConcentricCircles(
-						tboxx, tboxx.Center(), spacing,
+						tboxx.BBox, tboxx.Center(), spacing,
 					),
 					tboxx.AsPolygon(),
 				)
@@ -190,7 +190,7 @@ func parallelSineFieldsScene(b box.Box) Scene {
 	layer1 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
-				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 5, Offset: 0}.Density,
+				b.BBox, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 5, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
@@ -198,7 +198,7 @@ func parallelSineFieldsScene(b box.Box) Scene {
 	layer2 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
-				b, 0.6, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 3, Offset: 0}.Density,
+				b.BBox, 0.6, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 3, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
@@ -206,12 +206,12 @@ func parallelSineFieldsScene(b box.Box) Scene {
 	layer3 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
-				b, 2.0, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
+				b.BBox, 2.0, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
 			),
 			b.AsPolygon(),
 		),
 	)
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
 	scene = scene.AddLayer(NewLayer("content3").WithLineLike(layer3).WithOffset(0, 0).WithColor("green"))
@@ -230,12 +230,12 @@ func parallelBoxScene(b box.Box) Scene {
 	for _, minibox := range boxes {
 		spacing := maths.RandInRange(minLineWidth, maxLineWidth)
 		angle := maths.RandInRange(minAngle, maxAngle)
-		lines := collections.LinearLineField(minibox.Box, angle, spacing)
+		lines := collections.LinearLineField(minibox.Box.BBox, angle, spacing)
 		lineseg := collections.LimitLinesToShape(lines, minibox.Box.WithPadding(50).AsPolygon())
 		segments = append(segments, segmentsToLineLikes(lineseg))
 	}
 	layer1, layer2 := collections.RandomlyAllocateSegments(segments, 0.5)
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
 	return scene
@@ -264,7 +264,7 @@ func radialBoxScene(b box.Box) Scene {
 			layer2 = append(layer2, segs...)
 		}
 	}
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(layer2).WithOffset(0, 0).WithColor("blue"))
 	return scene
@@ -283,7 +283,7 @@ func getLinesInsidePolygonScene(b box.Box, poly objects.Object, n int) Scene {
 			ls = append(ls, lines.LineSegment{P1: primitives.Point{X: x, Y: y}, P2: primitives.Point{X: x + 100, Y: y}})
 		}
 	}
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(ls).WithOffset(0, 0))
 	return scene
 }
@@ -361,7 +361,7 @@ func radialBoxWithCircleExclusion(container objects.Object, center primitives.Po
 
 func getTruchetScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	tileSource := samplers.RandomDataSource{}
 	// tileSource := samplers.ConstantDataSource{0}
 	// tileSource := samplers.InsideCircleSubDataSource{
@@ -406,7 +406,7 @@ func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []line
 
 func getSweepTruchet(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	grid1 := truchet.NewGrid(b, 3, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
 	curves1 := grid1.GererateCurves()
 	curves2 := truchet.NewGrid(b, 6, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
@@ -423,7 +423,7 @@ func getSweepTruchet(b box.Box) Scene {
 
 func getRisingSun(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 	sun := objects.Circle{
 		Radius: 1500,
 		Center: primitives.Point{X: 5000, Y: 4000},
@@ -446,7 +446,7 @@ func getRisingSun(b box.Box) Scene {
 
 func getCirlceLineSegmentScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	blacks := []lines.LineLike{}
 	reds := []lines.LineLike{}
@@ -505,7 +505,7 @@ func getCirlceLineSegmentScene(b box.Box) Scene {
 
 func fontScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	fname := "C:/Windows/Fonts/bahnschrift.ttf"
 	// fname:= "C:/Windows/Fonts/BIZ-UDMinchoM.ttc"
@@ -524,7 +524,7 @@ func fontScene(b box.Box) Scene {
 
 	b = b.WithPadding(1000)
 	blacks := []lines.LineLike{}
-	for _, pt := range glyph.GetControlPoints(b) {
+	for _, pt := range glyph.GetControlPoints(b.BBox) {
 		if pt.OnLine {
 			blacks = append(blacks, objects.Circle{Center: pt.Point, Radius: 30})
 		} else {
@@ -534,9 +534,9 @@ func fontScene(b box.Box) Scene {
 	}
 
 	reds := []lines.LineLike{}
-	reds = append(reds, glyph.GetCurves(b)...)
+	reds = append(reds, glyph.GetCurves(b.BBox)...)
 
-	greens := b.Lines()
+	greens := lines.LinesFromBBox(b.BBox)
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
@@ -546,11 +546,11 @@ func fontScene(b box.Box) Scene {
 
 func textScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	blacks := []lines.LineLike{}
 	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
-	text := fonts.RenderText(b, "fe fi fo fum", fonts.WithSize(2000))
+	text := fonts.RenderText(b.BBox, "fe fi fo fum", fonts.WithSize(2000))
 
 	for _, pt := range text.CharPoints {
 		if pt.OnLine {
@@ -563,13 +563,13 @@ func textScene(b box.Box) Scene {
 
 	reds := text.CharCurves
 	yellows := []lines.LineLike{}
-	for _, box := range text.CharBoxes {
-		yellows = append(yellows, box.Lines()...)
+	for _, bbox := range text.CharBoxes {
+		yellows = append(yellows, lines.LinesFromBBox(bbox)...)
 	}
 
-	greens := b.Lines()
+	greens := lines.LinesFromBBox(b.BBox)
 
-	purples := text.BoundingBox().Lines()
+	purples := lines.LinesFromBBox(text.BoundingBox())
 
 	renderPoints := false
 	renderBoxes := false
@@ -588,7 +588,7 @@ func textScene(b box.Box) Scene {
 
 func polygonScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	polygons := []objects.Polygon{
 		{
@@ -659,11 +659,10 @@ func polygonScene(b box.Box) Scene {
 	for i, poly := range polygons {
 		blacks = append(blacks, segmentsToLineLikes(poly.EdgeLines())...)
 		bbox := poly.LargestContainedSquareBBox()
-		boxx := box.Box{BBox: bbox}
-		reds = append(reds, boxx.Lines()...)
-		boxx = boxx.WithPadding(100)
-		reds = append(reds, boxx.Lines()...)
-		greens = append(greens, fonts.RenderText(boxx, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
+		reds = append(reds, lines.LinesFromBBox(bbox)...)
+		bbox = bbox.WithPadding(100)
+		reds = append(reds, lines.LinesFromBBox(bbox)...)
+		greens = append(greens, fonts.RenderText(bbox, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
 	}
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
@@ -674,7 +673,7 @@ func polygonScene(b box.Box) Scene {
 
 func foldableRhombicuboctahedronScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
 	// b = b.WithPadding(1000)
@@ -692,7 +691,7 @@ func foldableRhombicuboctahedronScene(b box.Box) Scene {
 
 func foldableRhombicuboctahedronSansCornersScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
 	// b = b.WithPadding(1000)
@@ -710,7 +709,7 @@ func foldableRhombicuboctahedronSansCornersScene(b box.Box) Scene {
 
 func mazeScene(b box.Box) Scene {
 	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b.BBox)).WithOffset(0, 0))
 
 	maze := maze.NewMaze(30)
 	mazeLines := maze.Render(b)

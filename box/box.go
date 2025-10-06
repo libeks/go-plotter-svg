@@ -18,20 +18,6 @@ func (b Box) String() string {
 	return fmt.Sprintf("Box (%.1f, %.1f) -> (%.1f, %.1f)", b.UpperLeft.X, b.UpperLeft.Y, b.LowerRight.X, b.LowerRight.Y)
 }
 
-func (b Box) Lines() []lines.LineLike {
-	path := lines.NewPath(b.NWCorner())
-	// find the starting point - extreme point of box in direction perpendicular to
-
-	path = path.AddPathChunk(lines.LineChunk{Start: b.NWCorner(), End: b.NECorner()})
-	path = path.AddPathChunk(lines.LineChunk{Start: b.NECorner(), End: b.SECorner()})
-	path = path.AddPathChunk(lines.LineChunk{Start: b.SECorner(), End: b.SWCorner()})
-	path = path.AddPathChunk(lines.LineChunk{Start: b.SWCorner(), End: b.NWCorner()})
-
-	return []lines.LineLike{
-		path,
-	}
-}
-
 func (b Box) Corners() []primitives.Point {
 	return []primitives.Point{
 		b.NWCorner(), b.NECorner(),
@@ -91,14 +77,6 @@ func (b Box) Translate(v primitives.Vector) Box {
 			UpperLeft:  b.BBox.UpperLeft.Add(v),
 			LowerRight: b.BBox.LowerRight.Add(v),
 		},
-	}
-}
-
-// center of the box in absolute coordinates [0, 10_000]
-func (b Box) Center() primitives.Point {
-	return primitives.Point{
-		X: b.UpperLeft.X + b.Width()/2,
-		Y: b.UpperLeft.Y + b.Height()/2,
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
@@ -24,7 +23,7 @@ type option struct {
 type TextRender struct {
 	Text       string
 	Size       float64 // size at which text was rendered
-	CharBoxes  []box.Box
+	CharBoxes  []primitives.BBox
 	CharCurves []lines.LineLike
 	CharPoints []ControlPoint
 	// The following is currently unimplemented
@@ -32,7 +31,7 @@ type TextRender struct {
 }
 
 func (t TextRender) Translate(v primitives.Vector) TextRender {
-	newBoxes := make([]box.Box, len(t.CharBoxes))
+	newBoxes := make([]primitives.BBox, len(t.CharBoxes))
 	for i, b := range t.CharBoxes {
 		newBoxes[i] = b.Translate(v)
 	}
@@ -55,15 +54,15 @@ func (t TextRender) Translate(v primitives.Vector) TextRender {
 	}
 }
 
-func (t TextRender) BoundingBox() box.Box {
+func (t TextRender) BoundingBox() primitives.BBox {
 	if len(t.CharBoxes) == 0 {
-		return box.Box{}
+		return primitives.BBox{}
 	}
-	b := t.CharBoxes[0].BBox
+	b := t.CharBoxes[0]
 	for _, newB := range t.CharBoxes[1:] {
-		b = b.Add(newB.BBox)
+		b = b.Add(newB)
 	}
-	return box.Box{BBox: b}
+	return b
 }
 
 type textOption func(option) option
@@ -91,7 +90,7 @@ func WithFitToBox() textOption {
 
 // RenderText renders the specified text, with the specified options, in the middle of the bounding box
 // The text may span outside of the bounding box, unless WithFitToBox is used
-func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
+func RenderText(b primitives.BBox, text string, textOptions ...textOption) TextRender {
 	var fontFile string
 	if runtime.GOOS == "windows" {
 		fontFile = "C:/Windows/Fonts/seguihis.ttf"
@@ -118,7 +117,7 @@ func RenderText(b box.Box, text string, textOptions ...textOption) TextRender {
 	for size > 1.0 { // loop until the text is inside the box or the size is too small to render
 		controlPoints := []ControlPoint{}
 		curves := []lines.LineLike{}
-		charBoxes := []box.Box{}
+		charBoxes := []primitives.BBox{}
 		offsetX := 0.0
 		prevCh := ' '
 		for _, ch := range text {

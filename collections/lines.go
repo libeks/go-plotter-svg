@@ -44,7 +44,7 @@ func LimitCirclesToShape(circles []objects.Circle, shape objects.Object) []lines
 	return segments
 }
 
-func ConcentricCircles(b box.Box, center primitives.Point, spacing float64) []objects.Circle {
+func ConcentricCircles(b primitives.BBox, center primitives.Point, spacing float64) []objects.Circle {
 	// find out the maximum radius
 	maxDist := 0.0
 	for _, p := range b.Corners() {
@@ -64,7 +64,7 @@ func ConcentricCircles(b box.Box, center primitives.Point, spacing float64) []ob
 }
 
 // find out min and max line index. The 0th line goes through the origin (0,0)
-func getLineIndexRange(b box.Box, perpVect primitives.Vector) (float64, float64) {
+func getLineIndexRange(b primitives.BBox, perpVect primitives.Vector) (float64, float64) {
 	iSlice := []float64{}
 	wSq := perpVect.Dot(perpVect)
 	for _, point := range []primitives.Point{b.NWCorner(), b.NECorner(), b.SWCorner(), b.SECorner()} {
@@ -79,7 +79,7 @@ func getLineIndexRange(b box.Box, perpVect primitives.Vector) (float64, float64)
 
 // LinearLineField returns a set of parallel lines, all oriented in the direction of angle relative to 0x axis,
 // only returns the lines that would fall inside the box
-func LinearLineField(b box.Box, angle float64, spacing float64) []lines.Line {
+func LinearLineField(b primitives.BBox, angle float64, spacing float64) []lines.Line {
 	// find out min and max line index. The 0th line goes through the origin (0,0)
 	v := primitives.Vector{X: math.Cos(angle), Y: math.Sin(angle)}.Mult(spacing)
 	w := v.Perp()
@@ -95,7 +95,7 @@ func LinearLineField(b box.Box, angle float64, spacing float64) []lines.Line {
 // only returns the lines that would fall inside the box
 // densityFn takes input in the range [0;1] and outputs positive values denoting the spacing to respect
 // at every increment
-func LinearDensityLineField(b box.Box, angle float64, densityFn func(float64) float64) []lines.Line {
+func LinearDensityLineField(b primitives.BBox, angle float64, densityFn func(float64) float64) []lines.Line {
 	// find out min and max line index. The 0th line goes through the origin (0,0)
 	v := primitives.Vector{X: math.Cos(angle), Y: math.Sin(angle)}
 	w := v.Perp()
