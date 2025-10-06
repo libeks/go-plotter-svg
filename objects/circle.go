@@ -184,3 +184,10 @@ func (c Circle) Bisect(t float64) (lines.Path, lines.Path) {
 	return lines.NewPath(c.At(0.0)).AddPathChunk(lines.CircleArcChunk(c.Center, c.Radius, 0, tRad, true)),
 		lines.NewPath(c.At(tRad)).AddPathChunk(lines.CircleArcChunk(c.Center, c.Radius, tRad, 2*math.Pi, true))
 }
+
+func CircleInsideBox(b primitives.BBox) Circle {
+	return Circle{
+		Center: b.Center(),
+		Radius: b.Width() / 2,
+	}
+}

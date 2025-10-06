@@ -3,14 +3,13 @@ package truchet
 import (
 	"fmt"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
 func NewGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *Grid {
-	boxes := box.PartitionIntoSquares(b, nx)
+	boxes := primitives.PartitionIntoSquares(b, nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
 	grid := &Grid{
 		TruchetTileSet: tileSet,

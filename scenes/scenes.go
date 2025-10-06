@@ -141,7 +141,7 @@ func circlesInSquareScene(b primitives.BBox) Scene {
 
 func testDensityScene(b primitives.BBox) Scene {
 	scene := Scene{}.WithGuides()
-	quarters := box.PartitionIntoSquares(b, 2)
+	quarters := primitives.PartitionIntoSquares(b, 2)
 	colors := []string{
 		"red",
 		"green",
@@ -152,7 +152,7 @@ func testDensityScene(b primitives.BBox) Scene {
 	for i, quarter := range quarters {
 		lineLikes := []lines.LineLike{}
 		quarterBox := quarter.WithPadding(50)
-		testBoxes := box.PartitionIntoSquares(quarterBox, 5)
+		testBoxes := primitives.PartitionIntoSquares(quarterBox, 5)
 		fmt.Printf("got %d boxes\n", len(testBoxes))
 		for _, tbox := range testBoxes {
 			jj := float64(tbox.J)
@@ -226,7 +226,7 @@ func parallelBoxScene(b primitives.BBox) Scene {
 	// angle := math.Pi / 3
 	scene := Scene{}.WithGuides()
 	segments := [][]lines.LineLike{}
-	boxes := box.PartitionIntoSquares(b, 10)
+	boxes := primitives.PartitionIntoSquares(b, 10)
 	for _, minibox := range boxes {
 		spacing := maths.RandInRange(minLineWidth, maxLineWidth)
 		angle := maths.RandInRange(minAngle, maxAngle)
@@ -247,7 +247,7 @@ func radialBoxScene(b primitives.BBox) Scene {
 	wiggle := 200.0
 	scene := Scene{}.WithGuides()
 	segments := [][]lines.LineLike{}
-	boxes := box.PartitionIntoSquares(b, 10)
+	boxes := primitives.PartitionIntoSquares(b, 10)
 	for _, minibox := range boxes {
 		boxcenter := minibox.Center()
 		xwiggle := maths.RandRangeMinusPlusOne() * wiggle
@@ -464,10 +464,10 @@ func getCirlceLineSegmentScene(b primitives.BBox) Scene {
 	}
 
 	nx := 70
-	boxes := box.PartitionIntoSquares(b, nx)
+	boxes := primitives.PartitionIntoSquares(b, nx)
 	for _, tbox := range boxes {
 		relativeCenter := box.RelativeMinusPlusOneCenter(tbox.BBox, b)
-		boxCircle := box.CircleInsideBox(tbox.BBox)
+		boxCircle := objects.CircleInsideBox(tbox.BBox)
 		if radiusBool.GetBool(relativeCenter) {
 			angle := samplers.AngleFromCenter{
 				Center: center2,

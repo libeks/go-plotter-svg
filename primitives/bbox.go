@@ -139,3 +139,40 @@ func BBoxAroundPoints(pts ...Point) BBox {
 	maxY := slices.Max(ys)
 	return BBox{UpperLeft: Point{X: minX, Y: minY}, LowerRight: Point{X: maxX, Y: maxY}}
 }
+
+func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
+	width := b.Width()
+	squareSide := width / (float64(nHorizontal))
+	boxes := []IndexedBox{}
+	verticalIterations := int(b.Height() / float64(squareSide))
+	if verticalIterations < nHorizontal && math.Abs(b.Height()-(float64(nHorizontal)*float64(squareSide))) < 0.1 {
+		verticalIterations = nHorizontal
+	}
+	for v := range verticalIterations {
+		vv := float64(v)
+		for h := range nHorizontal {
+			hh := float64(h)
+			boxes = append(boxes, IndexedBox{
+				BBox: BBox{
+					UpperLeft: Point{
+						X: hh*squareSide + b.UpperLeft.X,
+						Y: vv*squareSide + b.UpperLeft.Y,
+					},
+					LowerRight: Point{
+						X: (hh+1)*squareSide + b.UpperLeft.X,
+						Y: (vv+1)*squareSide + b.UpperLeft.Y,
+					},
+				},
+				I: h,
+				J: v,
+			})
+		}
+	}
+	return boxes
+}
+
+type IndexedBox struct {
+	BBox
+	I int
+	J int
+}

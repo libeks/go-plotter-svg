@@ -3,7 +3,6 @@ package truchet
 import (
 	"fmt"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
@@ -118,8 +117,21 @@ func (c *Cell) VisitFrom(direction endPointTuple) (*Curve, *Cell, *endPointTuple
 	return nil, nil, nil
 }
 
+func getRelativeAroundCenter(v float64) float64 {
+	relative := (v) / 10_000
+	return 2*relative - 1
+}
+
+// center of the box in relative coordinates [0.0, 1.0], assuming that the image is in the range [0, 10_000]
+func relativeCenter(b primitives.BBox) primitives.Point {
+	return primitives.Point{
+		X: getRelativeAroundCenter(b.UpperLeft.X + b.Width()/2.0),
+		Y: getRelativeAroundCenter(b.UpperLeft.Y + b.Height()/2.0),
+	}
+}
+
 func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
-	rand := dataSource.GetValue(box.RelativeCenter(c.BBox)) // evaluate dataSource in absolute image coordinates
+	rand := dataSource.GetValue(relativeCenter(c.BBox)) // evaluate dataSource in absolute image coordinates
 	l := len(c.Grid.TruchetTileSet.Tiles)
 	n := int(rand * float64(l))
 	if n == l {
