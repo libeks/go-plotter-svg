@@ -25,7 +25,6 @@ func (b BBox) IsEmpty() bool {
 	}
 	// if the points are not ordered correctly, the bbox is empty
 	if b.UpperLeft.X > b.LowerRight.X || b.UpperLeft.Y > b.LowerRight.Y {
-		// fmt.Printf("bbox is empty due to border condition\n")
 		return true
 	}
 	// otherwise the area is 0, but the points are not the same
@@ -58,17 +57,19 @@ func (b BBox) Translate(v Vector) BBox {
 
 func (b BBox) WithPadding(pad float64) BBox {
 	return BBox{
-		UpperLeft:  Point{X: b.UpperLeft.X + pad, Y: b.UpperLeft.Y + pad},
-		LowerRight: Point{X: b.LowerRight.X - pad, Y: b.LowerRight.Y - pad},
+		UpperLeft:  b.UpperLeft.Add(Vector{1, 1}.Mult(pad)),    // towards center
+		LowerRight: b.LowerRight.Add(Vector{-1, -1}.Mult(pad)), // towards center
 	}
 }
 
 // center of the box
 func (b BBox) Center() Point {
-	return Point{
-		X: b.UpperLeft.X + b.Width()/2,
-		Y: b.UpperLeft.Y + b.Height()/2,
-	}
+	return b.UpperLeft.Add(
+		Vector{
+			X: b.Width() / 2,
+			Y: b.Height() / 2,
+		},
+	)
 }
 
 func (b BBox) Corners() []Point {
@@ -145,7 +146,7 @@ func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
 	squareSide := width / (float64(nHorizontal))
 	boxes := []IndexedBox{}
 	verticalIterations := int(b.Height() / float64(squareSide))
-	if verticalIterations < nHorizontal && math.Abs(b.Height()-(float64(nHorizontal)*float64(squareSide))) < 0.1 {
+	if verticalIterations < nHorizontal && math.Abs(b.Height()-(float64(nHorizontal)*squareSide)) < 0.1 {
 		verticalIterations = nHorizontal
 	}
 	for v := range verticalIterations {
@@ -154,14 +155,8 @@ func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
 			hh := float64(h)
 			boxes = append(boxes, IndexedBox{
 				BBox: BBox{
-					UpperLeft: Point{
-						X: hh*squareSide + b.UpperLeft.X,
-						Y: vv*squareSide + b.UpperLeft.Y,
-					},
-					LowerRight: Point{
-						X: (hh+1)*squareSide + b.UpperLeft.X,
-						Y: (vv+1)*squareSide + b.UpperLeft.Y,
-					},
+					UpperLeft:  b.UpperLeft.Add(Vector{hh, vv}.Mult(squareSide)),
+					LowerRight: b.UpperLeft.Add(Vector{hh + 1, vv + 1}.Mult(squareSide)),
 				},
 				I: h,
 				J: v,

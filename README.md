@@ -25,7 +25,6 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
     * Something like: Here are the numbered faces, here are where they are connected with each other, here are where we have flaps, etc
   * Add rendering of face numbers
   * Properly render the rectangle around what can be plotted
-* Completely remove box.Box struct
 
 # Plot ideas
 
