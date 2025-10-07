@@ -5,7 +5,6 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/libeks/go-plotter-svg/box"
 	"github.com/libeks/go-plotter-svg/collections"
 	"github.com/libeks/go-plotter-svg/foldable"
 	"github.com/libeks/go-plotter-svg/fonts"
@@ -444,6 +443,16 @@ func getRisingSun(b primitives.BBox) Scene {
 	return scene
 }
 
+// returns the relative [-1,1] range in which this box's center exists in the parent box
+func relativeMinusPlusOneCenter(b, parentBox primitives.BBox) primitives.Point {
+	center := b.Center()
+	parentCenter := parentBox.Center()
+	return primitives.Point{
+		X: 2 * (center.X - parentCenter.X) / parentBox.Width(),
+		Y: 2 * (center.Y - parentCenter.Y) / parentBox.Height(),
+	}
+}
+
 func getCirlceLineSegmentScene(b primitives.BBox) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
@@ -466,7 +475,7 @@ func getCirlceLineSegmentScene(b primitives.BBox) Scene {
 	nx := 70
 	boxes := primitives.PartitionIntoSquares(b, nx)
 	for _, tbox := range boxes {
-		relativeCenter := box.RelativeMinusPlusOneCenter(tbox.BBox, b)
+		relativeCenter := relativeMinusPlusOneCenter(tbox.BBox, b)
 		boxCircle := objects.CircleInsideBox(tbox.BBox)
 		if radiusBool.GetBool(relativeCenter) {
 			angle := samplers.AngleFromCenter{
