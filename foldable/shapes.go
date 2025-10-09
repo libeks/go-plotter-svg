@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
 type Shape struct {
-	// vectors in clockwise order describing the shape
+	// Shape is an abstract polygon without a positioning in space
+	// Vectors in clockwise order describing the shape
 	// by convention, the first vector should be horizontal
+	// by convention, edges should appear in clockwise order
 	Edges []Edge
 }
 
@@ -26,6 +29,7 @@ func (s Shape) Verify() bool {
 	return true
 }
 
+// GetEdgeAngle returns the angle that the i-th edge makes with the initial edge
 func (s Shape) GetEdgeAngle(i int) (float64, primitives.Vector) {
 	if i >= len(s.Edges) {
 		panic("edge index too high")
@@ -93,4 +97,16 @@ func EquiTriangle(side float64) Shape {
 			},
 		},
 	}
+}
+
+func PolygonToShape(p objects.Polygon) Shape {
+	edges := []Edge{}
+	for i, point := range p.Points {
+		if i == 0 {
+			continue
+		}
+		edges = append(edges, Edge{Vector: point.Subtract(p.Points[i-1])})
+	}
+	edges = append(edges, Edge{Vector: p.Points[0].Subtract(p.Points[len(p.Points)-1])})
+	return Shape{Edges: edges}
 }

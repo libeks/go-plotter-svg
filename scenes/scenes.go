@@ -36,6 +36,8 @@ var (
 	Text                        = textScene
 	FoldableRhombicuboctahedron = foldableRhombicuboctahedronScene
 	FoldableRhombiSansCorner    = foldableRhombicuboctahedronSansCornersScene
+	FoldableCubeScene           = foldableCubeScene
+	FoldableCubeIDScene         = foldableCubeIDScene
 	MazeScene                   = mazeScene
 	PolygonBoxScene             = polygonScene
 )
@@ -677,6 +679,26 @@ func polygonScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("green").WithLineLike(greens).WithColor("green").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func foldableCubeScene(b primitives.BBox) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+
+	foldableBase := 1500.0
+	blacks := foldable.Cube(b, foldableBase)
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func foldableCubeIDScene(b primitives.BBox) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+
+	foldableBase := 1500.0
+	blacks := foldable.CubeID(b, foldableBase)
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	return scene
 }
 

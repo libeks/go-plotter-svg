@@ -109,9 +109,9 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 		oldSize = bbox.Width()
 		for i := range 8 {
 			candidate := bbox.Translate(primitives.UnitRight.RotateCCW(math.Pi / 4.0 * float64(i)).Mult(bbox.Width() * 0.01))
-			fmt.Printf("Candidate %v\n", candidate)
+			// fmt.Printf("Candidate %v\n", candidate)
 			candidate = candidate.Scale(1.005)
-			fmt.Printf("Candidate2 %v\n", candidate)
+			// fmt.Printf("Candidate2 %v\n", candidate)
 			if math.Abs(1.0-candidate.Width()/candidate.Height()) > 0.001 {
 				fmt.Printf("width %f, height %f\n", candidate.Width(), candidate.Height())
 				panic("polygon is not a square")

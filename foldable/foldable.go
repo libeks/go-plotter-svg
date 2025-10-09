@@ -49,6 +49,7 @@ func NewFace(shape Shape) Face {
 
 type Face struct {
 	Shape
+	Name     string
 	Connects map[int]Connection
 }
 

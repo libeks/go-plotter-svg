@@ -1,6 +1,7 @@
 package foldable
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/fonts"
@@ -33,6 +34,85 @@ func Cube(b primitives.BBox, side float64) []lines.LineLike {
 		3,
 	)
 	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0)
+}
+
+func CubeID(b primitives.BBox, side float64) []lines.LineLike {
+	sq := Square(side)
+	c := NewCutOut(
+		[]FaceID{
+			{
+				Shape: sq,
+				Name:  "A",
+			},
+			{
+				Shape: sq,
+				Name:  "B",
+			},
+			{
+				Shape: sq,
+				Name:  "C",
+			},
+			{
+				Shape: sq,
+				Name:  "D",
+			},
+			{
+				Shape: sq,
+				Name:  "E",
+			},
+			{
+				Shape: sq,
+				Name:  "F",
+			},
+		},
+		[]ConnectionID{
+			{
+				FaceA:          "A",
+				FaceB:          "B",
+				EdgeAID:        1,
+				EdgeBID:        3,
+				ConnectionType: FaceConnection,
+			},
+			{
+				FaceA:          "B",
+				FaceB:          "C",
+				EdgeAID:        0,
+				EdgeBID:        2,
+				ConnectionType: FaceConnection,
+			},
+			{
+				FaceA:          "B",
+				FaceB:          "D",
+				EdgeAID:        2,
+				EdgeBID:        0,
+				ConnectionType: FaceConnection,
+			},
+			{
+				FaceA:          "B",
+				FaceB:          "E",
+				EdgeAID:        1,
+				EdgeBID:        3,
+				ConnectionType: FaceConnection,
+			},
+			{
+				FaceA:          "E",
+				FaceB:          "F",
+				EdgeAID:        1,
+				EdgeBID:        3,
+				ConnectionType: FaceConnection,
+			},
+			{
+				FaceA:          "A",
+				FaceB:          "F",
+				EdgeAID:        3,
+				EdgeBID:        1,
+				ConnectionType: FlapConnection,
+			},
+		},
+	)
+	fmt.Printf("Cube %v\n", c)
+	return c.Render(b)
+	// return nil
 }
 
 func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.LineLike {
@@ -78,7 +158,7 @@ func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.L
 		),
 		3,
 	)
-	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + leg1}, 0)
+	return c.Render(b.UpperLeft.Add(primitives.Vector{X: 0, Y: leg1}), 0)
 }
 
 func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
