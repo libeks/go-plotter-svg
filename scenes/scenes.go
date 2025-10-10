@@ -698,6 +698,8 @@ func foldableCubeIDScene(b primitives.BBox) Scene {
 
 	foldableBase := 1500.0
 	pattern := foldable.CubeID(b, foldableBase)
+	// center in bbox
+	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
 	polygons := []lines.LineLike{}
 	for _, poly := range pattern.Polygons {
 		polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)

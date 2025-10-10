@@ -21,9 +21,6 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * For font families, consider this library:
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
 * Foldables:
-  * Refactor to be easier to specify
-    * Something like: Here are the numbered faces, here are where they are connected with each other, here are where we have flaps, etc
-  * Add rendering of face numbers
   * Properly render the rectangle around what can be plotted
 
 # Plot ideas

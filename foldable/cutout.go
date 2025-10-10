@@ -97,13 +97,10 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 	}
 	// set the initial face
 	initialFace = faceByID[c.Connections[0].FaceA]
-	faceBundle := initialFace.Render(b.UpperLeft, 0.25)
-	fmt.Printf("FaceBundle map %v\n", faceBundle.FaceConfigs)
-	fmt.Printf("FacePolygons %v\n", faceBundle.FacePolygons)
+	faceBundle := initialFace.Render(b.UpperLeft, 0)
 	polygons := []objects.Polygon{}
 	annotations := []lines.LineLike{}
 	for key, polygon := range faceBundle.FacePolygons {
-		fmt.Printf("poly %s\n", key)
 		polygons = append(polygons, polygon)
 		bbox := polygon.LargestContainedSquareBBox()
 		bbox = bbox.WithPadding(100)

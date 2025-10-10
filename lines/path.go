@@ -149,6 +149,12 @@ func (p Path) OffsetLeft(distance float64) LineLike {
 }
 
 func (p Path) Translate(v primitives.Vector) LineLike {
+	if len(p.chunks) == 0 {
+		return Path{
+			start:  p.start.Add(v),
+			chunks: p.chunks,
+		}
+	}
 	chunks := make([]PathChunk, len(p.chunks))
 	for i, chunk := range p.chunks {
 		chunks[i] = chunk.Translate(v)
