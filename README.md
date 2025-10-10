@@ -21,6 +21,8 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * For font families, consider this library:
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
 * Properly set the global bounding box to what can be drawn on a single page
+* Foldable:
+  * Provide a way to fill a face
 
 # Plot ideas
 
