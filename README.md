@@ -20,8 +20,7 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#distinguishing
 * For font families, consider this library:
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
-* Foldables:
-  * Properly render the rectangle around what can be plotted
+* Properly set the global bounding box to what can be drawn on a single page
 
 # Plot ideas
 
