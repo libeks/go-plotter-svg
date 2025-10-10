@@ -22,6 +22,39 @@ type FoldablePattern struct {
 	Annotations []lines.LineLike          // contains face labels, etc. that won't always need to be plotted
 }
 
+func (p FoldablePattern) BBox() primitives.BBox {
+	box := primitives.BBox{}
+	for _, poly := range p.Polygons {
+		box = box.Add(poly.BBox())
+	}
+	return box
+}
+
+func (p FoldablePattern) Translate(v primitives.Vector) FoldablePattern {
+	edges := make([]lines.LineLike, len(p.Edges))
+	for i, edge := range p.Edges {
+		edges[i] = edge.Translate(v)
+	}
+	polygons := make([]objects.Polygon, len(p.Polygons))
+	for i, poly := range p.Polygons {
+		polygons[i] = poly.Translate(v)
+	}
+	fills := make(map[string]lines.LineLike, len(p.Fill))
+	for key, fill := range p.Fill {
+		fills[key] = fill.Translate(v)
+	}
+	annotations := make([]lines.LineLike, len(p.Annotations))
+	for i, annotation := range p.Annotations {
+		annotations[i] = annotation.Translate(v)
+	}
+	return FoldablePattern{
+		Edges:       edges,
+		Polygons:    polygons,
+		Fill:        fills,
+		Annotations: annotations,
+	}
+}
+
 type Edge struct {
 	// todo: add support for curves
 	primitives.Vector
@@ -55,7 +88,7 @@ type Face struct {
 	Connects map[int]Connection
 }
 
-func drawFlap(start primitives.Point, vector primitives.Vector, widthAngle float64) lines.LineLike {
+func drawFlap(start primitives.Point, vector primitives.Vector, widthAngle float64) lines.Path {
 	l := lines.NewPath(start)
 	s := start
 	// first leg is at 45° left of vector
@@ -76,6 +109,7 @@ type RenderBundle struct {
 	Lines        []lines.LineLike
 	FaceConfigs  map[string]FaceConfig
 	FacePolygons map[string]objects.Polygon
+	FlapPolygons []objects.Polygon
 }
 
 // Render draws this face, as well as any flaps and directly connected Faces.
@@ -90,6 +124,7 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 		Angle: angle,
 	}
 	facePolygons := map[string]objects.Polygon{}
+	flapPolygons := []objects.Polygon{}
 	facePoints := []primitives.Point{start}
 	for i, edge := range f.Shape.Edges {
 		drawEdge := true
@@ -97,10 +132,14 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 			switch c.Type {
 			case FlapConnection:
 				fmt.Printf("Attaching flap at angle %f\n", angle)
-				lns = append(lns, drawFlap(start, edge.Vector.RotateCCW(angle), deg45))
+				flap := drawFlap(start, edge.Vector.RotateCCW(angle), deg45)
+				flapPolygons = append(flapPolygons, objects.Polygon{Points: flap.Points()})
+				lns = append(lns, flap)
 			case FlapSmallConnection:
 				fmt.Printf("Attaching flap at angle %f\n", angle)
-				lns = append(lns, drawFlap(start, edge.Vector.RotateCCW(angle), deg30))
+				flap := drawFlap(start, edge.Vector.RotateCCW(angle), deg30)
+				flapPolygons = append(flapPolygons, objects.Polygon{Points: flap.Points()})
+				lns = append(lns, flap)
 			case FaceConnection:
 				nextFace := c.Face
 				if nextFace == nil {
@@ -141,6 +180,7 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 		Lines:        lns,
 		FaceConfigs:  faceConfigs,
 		FacePolygons: facePolygons,
+		FlapPolygons: flapPolygons,
 	}
 }
 

@@ -40,6 +40,16 @@ func (p Polygon) Inside(pt primitives.Point) bool {
 	panic(fmt.Errorf("not sure what to do with winding angle %.3f", totalAngle))
 }
 
+func (p Polygon) Translate(v primitives.Vector) Polygon {
+	points := make([]primitives.Point, len(p.Points))
+	for i, pt := range p.Points {
+		points[i] = pt.Add(v)
+	}
+	return Polygon{
+		Points: points,
+	}
+}
+
 func (p Polygon) EdgeLines() []lines.LineSegment {
 	segments := []lines.LineSegment{}
 	for i, p1 := range p.Points {

@@ -36,6 +36,15 @@ func (p Path) Len() float64 {
 	return total
 }
 
+// Return a list of all the control points of this path
+func (p Path) Points() []primitives.Point {
+	points := []primitives.Point{p.start}
+	for _, chunk := range p.chunks {
+		points = append(points, chunk.Endpoint())
+	}
+	return points
+}
+
 func (p Path) Start() primitives.Point {
 	return p.start
 }
