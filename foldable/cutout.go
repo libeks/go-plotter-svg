@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -39,7 +40,7 @@ type FaceEdge struct {
 	EdgeID int
 }
 
-func (c CutOut) Render(b primitives.BBox) []lines.LineLike {
+func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 	// first, convert from a list representation to a face-tree representation
 	faceByID := map[string]*Face{}
 	var initialFace *Face
@@ -95,5 +96,12 @@ func (c CutOut) Render(b primitives.BBox) []lines.LineLike {
 	}
 	// set the initial face
 	initialFace = faceByID[c.Connections[0].FaceA]
-	return initialFace.Render(b.UpperLeft, 0) // TODO: determine the bounding box dynamically
+	faceBundle := initialFace.Render(b.UpperLeft, 0.25)
+	fmt.Printf("FaceBundle map %v\n", faceBundle.FaceConfigs)
+	return FoldablePattern{
+		Edges:       faceBundle.Lines,
+		Polygons:    []objects.Polygon{},
+		Fill:        map[string]lines.LineLike{},
+		Annotations: []lines.LineLike{},
+	}
 }

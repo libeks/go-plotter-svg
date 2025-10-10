@@ -1,7 +1,6 @@
 package foldable
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/fonts"
@@ -33,10 +32,10 @@ func Cube(b primitives.BBox, side float64) []lines.LineLike {
 		),
 		3,
 	)
-	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0).Lines
 }
 
-func CubeID(b primitives.BBox, side float64) []lines.LineLike {
+func CubeID(b primitives.BBox, side float64) FoldablePattern {
 	sq := Square(side)
 	c := NewCutOut(
 		[]FaceID{
@@ -110,9 +109,7 @@ func CubeID(b primitives.BBox, side float64) []lines.LineLike {
 			},
 		},
 	)
-	fmt.Printf("Cube %v\n", c)
 	return c.Render(b)
-	// return nil
 }
 
 func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.LineLike {
@@ -158,7 +155,7 @@ func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.L
 		),
 		3,
 	)
-	return c.Render(b.UpperLeft.Add(primitives.Vector{X: 0, Y: leg1}), 0)
+	return c.Render(b.UpperLeft.Add(primitives.Vector{X: 0, Y: leg1}), 0).Lines
 }
 
 func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
@@ -171,7 +168,7 @@ func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
 			NewFace(tri).WithFlap(0).WithFace(1, NewFace(sq).WithFlap(3).WithFace(0, NewFace(tri).WithFlap(1), 0), 2),
 			2,
 		)
-	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}, 0).Lines
 }
 
 func Rhombicuboctahedron(b primitives.BBox, side float64) []lines.LineLike {
@@ -305,7 +302,7 @@ func Rhombicuboctahedron(b primitives.BBox, side float64) []lines.LineLike {
 				),
 			0,
 		)
-	return c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0).Lines
 }
 
 func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) FoldablePattern {
@@ -440,7 +437,7 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) Foldable
 			0,
 		)
 	return FoldablePattern{
-		Edges:       c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0),
+		Edges:       c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0).Lines,
 		Annotations: fonts.RenderText(b, "ABC").CharCurves,
 	}
 }
@@ -530,7 +527,7 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []lines.LineLike
 		),
 		3,
 	)
-	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0)
+	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0).Lines
 }
 
 // ManualCube is deprecated, use Cube instead, it's more generic

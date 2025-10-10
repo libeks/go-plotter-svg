@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -15,9 +16,10 @@ const (
 )
 
 type FoldablePattern struct {
-	Edges       []lines.LineLike
-	Fill        []lines.LineLike
-	Annotations []lines.LineLike
+	Edges       []lines.LineLike          // edges draw such that there shouldn't be overlap
+	Polygons    []objects.Polygon         // a list of polygons that are contained in the fold, including flap polygons
+	Fill        map[string]lines.LineLike // a collection of fills for the faces, mapped by color
+	Annotations []lines.LineLike          // contains face labels, etc. that won't always need to be plotted
 }
 
 type Edge struct {
@@ -65,11 +67,27 @@ func drawFlap(start primitives.Point, vector primitives.Vector, widthAngle float
 	return l
 }
 
-// Render draws this face, as well as any flaps and directly connected Faces
-func (f Face) Render(start primitives.Point, angle float64) []lines.LineLike {
+type FaceConfig struct {
+	Start primitives.Point
+	Angle float64
+}
+
+type RenderBundle struct {
+	Lines       []lines.LineLike
+	FaceConfigs map[string]FaceConfig
+}
+
+// Render draws this face, as well as any flaps and directly connected Faces.
+// This is used in a recursive tree-like process to draw each edge exactly once.
+func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 	fmt.Printf("angle %f, %v\n", angle, start)
 	lns := []lines.LineLike{}
 	l := lines.NewPath(start)
+	faceConfigs := map[string]FaceConfig{}
+	faceConfigs[f.Name] = FaceConfig{
+		Start: start,
+		Angle: angle,
+	}
 	for i, edge := range f.Shape.Edges {
 		drawEdge := true
 		if c, ok := f.Connects[i]; ok {
@@ -92,7 +110,11 @@ func (f Face) Render(start primitives.Point, angle float64) []lines.LineLike {
 				fmt.Printf("start %v\n", start)
 				newStartpoint := start.Add(diff.RotateCCW(newAngle).Mult(-1))
 				fmt.Printf("Attaching face at angle %f and at %v\n", newAngle, newStartpoint)
-				lns = append(lns, nextFace.Render(newStartpoint, newAngle)...)
+				faceBundle := nextFace.Render(newStartpoint, newAngle)
+				for key, faceConfig := range faceBundle.FaceConfigs {
+					faceConfigs[key] = faceConfig
+				}
+				lns = append(lns, faceBundle.Lines...)
 				drawEdge = false // don't draw this edge, the render of nextFace will draw it
 			}
 		}
@@ -107,7 +129,10 @@ func (f Face) Render(start primitives.Point, angle float64) []lines.LineLike {
 
 	}
 	lns = append(lns, l)
-	return lns
+	return RenderBundle{
+		Lines:       lns,
+		FaceConfigs: faceConfigs,
+	}
 }
 
 // WithFlap adds a standard flap on edge i
