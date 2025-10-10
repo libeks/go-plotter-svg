@@ -39,30 +39,12 @@ func CubeID(b primitives.BBox, side float64) FoldablePattern {
 	sq := Square(side)
 	c := NewCutOut(
 		[]FaceID{
-			{
-				Shape: sq,
-				Name:  "A",
-			},
-			{
-				Shape: sq,
-				Name:  "B",
-			},
-			{
-				Shape: sq,
-				Name:  "C",
-			},
-			{
-				Shape: sq,
-				Name:  "D",
-			},
-			{
-				Shape: sq,
-				Name:  "E",
-			},
-			{
-				Shape: sq,
-				Name:  "F",
-			},
+			faceID(sq, "A"),
+			faceID(sq, "B"),
+			faceID(sq, "C"),
+			faceID(sq, "D"),
+			faceID(sq, "E"),
+			faceID(sq, "F"),
 		},
 		[]ConnectionID{
 			{
@@ -105,6 +87,48 @@ func CubeID(b primitives.BBox, side float64) FoldablePattern {
 				FaceB:          "F",
 				EdgeAID:        3,
 				EdgeBID:        1,
+				ConnectionType: FlapConnection,
+			},
+			{
+				FaceA:          "C",
+				FaceB:          "A",
+				EdgeAID:        3,
+				EdgeBID:        0,
+				ConnectionType: FlapConnection,
+			},
+			{
+				FaceA:          "D",
+				FaceB:          "A",
+				EdgeAID:        3,
+				EdgeBID:        2,
+				ConnectionType: FlapConnection,
+			},
+			{
+				FaceA:          "C",
+				FaceB:          "E",
+				EdgeAID:        1,
+				EdgeBID:        0,
+				ConnectionType: FlapConnection,
+			},
+			{
+				FaceA:          "D",
+				FaceB:          "E",
+				EdgeAID:        1,
+				EdgeBID:        2,
+				ConnectionType: FlapConnection,
+			},
+			{
+				FaceA:          "F",
+				FaceB:          "C",
+				EdgeAID:        0,
+				EdgeBID:        0,
+				ConnectionType: FlapConnection,
+			},
+			{
+				FaceA:          "F",
+				FaceB:          "D",
+				EdgeAID:        2,
+				EdgeBID:        2,
 				ConnectionType: FlapConnection,
 			},
 		},

@@ -1,7 +1,6 @@
 package fonts
 
 import (
-	"fmt"
 	"io"
 	"os"
 
@@ -61,7 +60,7 @@ func (f *Font) LoadGlyph(r rune) (Glyph, error) {
 	// 	return Glyph{}, fmt.Errorf("Couldn't get glyph bounds for rune '%v'", r)
 	// }
 	// minP, maxP := convertBox(glyph.Bounds)
-	fmt.Printf("Glyph '%s'\n", string(r))
+	// fmt.Printf("Glyph '%s'\n", string(r))
 	// fmt.Printf("bounds %v, %v\n", minP, maxP)
 	// fmt.Printf("advance %v\n", efixed.ToFloat64(glyph.AdvanceWidth))
 	// fmt.Printf("Points %d, ends %d\n", len(glyph.Points), len(glyph.Ends))

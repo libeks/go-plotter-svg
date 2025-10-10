@@ -110,7 +110,7 @@ func RenderText(b primitives.BBox, text string, textOptions ...textOption) TextR
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Loaded font %s\n", f.Name(3)) // print "Unique subfamily identification"
+	// fmt.Printf("Loaded font %s\n", f.Name(3)) // print "Unique subfamily identification"
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
 
 	size := o.size
@@ -152,7 +152,7 @@ func RenderText(b primitives.BBox, text string, textOptions ...textOption) TextR
 		vRatio := boundingBox.Height() / b.Height()
 		if !o.fitToBox || (hRatio <= 1.0 && vRatio <= 1.0) {
 			// if need to fit the box and the character is bigger than the box, scale down, otherwise return
-			fmt.Printf("Rendered at size %f\n", size)
+			// fmt.Printf("Rendered at size %f\n", size)
 			return textBox
 		}
 		size = size / max(hRatio, vRatio)

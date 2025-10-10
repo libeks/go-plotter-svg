@@ -1,7 +1,6 @@
 package foldable
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/lines"
@@ -115,7 +114,7 @@ type RenderBundle struct {
 // Render draws this face, as well as any flaps and directly connected Faces.
 // This is used in a recursive tree-like process to draw each edge exactly once.
 func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
-	fmt.Printf("angle %f, %v\n", angle, start)
+	// fmt.Printf("angle %f, %v\n", angle, start)
 	lns := []lines.LineLike{}
 	l := lines.NewPath(start)
 	faceConfigs := map[string]FaceConfig{}
@@ -131,12 +130,12 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 		if c, ok := f.Connects[i]; ok {
 			switch c.Type {
 			case FlapConnection:
-				fmt.Printf("Attaching flap at angle %f\n", angle)
+				// fmt.Printf("Attaching flap at angle %f\n", angle)
 				flap := drawFlap(start, edge.Vector.RotateCCW(angle), deg45)
 				flapPolygons = append(flapPolygons, objects.Polygon{Points: flap.Points()})
 				lns = append(lns, flap)
 			case FlapSmallConnection:
-				fmt.Printf("Attaching flap at angle %f\n", angle)
+				// fmt.Printf("Attaching flap at angle %f\n", angle)
 				flap := drawFlap(start, edge.Vector.RotateCCW(angle), deg30)
 				flapPolygons = append(flapPolygons, objects.Polygon{Points: flap.Points()})
 				lns = append(lns, flap)
@@ -146,18 +145,21 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 					panic("other face nil")
 				}
 				childAngle, diff := nextFace.GetEdgeAngle(c.OtherEdge)
-				fmt.Printf("childAngle %f, diff %v\n", childAngle, diff)
+				// fmt.Printf("childAngle %f, diff %v\n", childAngle, diff)
 				edgeAngle := edge.Atan() + angle
 				newAngle := -childAngle + edgeAngle + math.Pi
-				fmt.Printf("start %v\n", start)
+				// fmt.Printf("start %v\n", start)
 				newStartpoint := start.Add(diff.RotateCCW(newAngle).Mult(-1))
-				fmt.Printf("Attaching face at angle %f and at %v\n", newAngle, newStartpoint)
+				// fmt.Printf("Attaching face at angle %f and at %v\n", newAngle, newStartpoint)
 				faceBundle := nextFace.Render(newStartpoint, newAngle)
 				for key, faceConfig := range faceBundle.FaceConfigs {
 					faceConfigs[key] = faceConfig
 				}
 				for key, facePolygon := range faceBundle.FacePolygons {
 					facePolygons[key] = facePolygon
+				}
+				for _, flapPolygon := range faceBundle.FlapPolygons {
+					flapPolygons = append(flapPolygons, flapPolygon)
 				}
 				lns = append(lns, faceBundle.Lines...)
 				drawEdge = false // don't draw this edge, the render of nextFace will draw it

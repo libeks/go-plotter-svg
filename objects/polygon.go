@@ -127,7 +127,7 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 				panic("polygon is not a square")
 			}
 			if p.bboxInside(candidate) {
-				fmt.Printf("old box side %f, new %f\n", oldSize, candidate.Width())
+				// fmt.Printf("old box side %f, new %f\n", oldSize, candidate.Width())
 				bbox = candidate
 				break
 			}

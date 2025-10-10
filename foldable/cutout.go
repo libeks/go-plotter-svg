@@ -14,6 +14,13 @@ type FaceID struct {
 	Name string
 }
 
+func faceID(s Shape, n string) FaceID {
+	return FaceID{
+		Shape: s,
+		Name:  n,
+	}
+}
+
 type ConnectionID struct {
 	FaceA   string
 	FaceB   string
@@ -67,6 +74,16 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		faceB, ok := faceByID[connection.FaceB]
 		if !ok {
 			fmt.Printf("Could not find face named %s for connection number %d\n", connection.FaceB, i)
+		}
+		// check that the two edges are of the same length
+		aLen := faceA.Shape.Edges[connection.EdgeAID].Vector.Len()
+		bLen := faceB.Shape.Edges[connection.EdgeBID].Vector.Len()
+		if aLen != bLen {
+			fmt.Printf("The connected edges %s:%d and %s:%d have different lengths (%.3f vs %.3f)\n",
+				connection.FaceA, connection.EdgeAID,
+				connection.FaceB, connection.EdgeBID,
+				aLen, bLen,
+			)
 		}
 		faceA.Connects[connection.EdgeAID] = Connection{
 			Face:      faceB,
