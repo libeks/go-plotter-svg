@@ -73,8 +73,9 @@ type FaceConfig struct {
 }
 
 type RenderBundle struct {
-	Lines       []lines.LineLike
-	FaceConfigs map[string]FaceConfig
+	Lines        []lines.LineLike
+	FaceConfigs  map[string]FaceConfig
+	FacePolygons map[string]objects.Polygon
 }
 
 // Render draws this face, as well as any flaps and directly connected Faces.
@@ -88,6 +89,8 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 		Start: start,
 		Angle: angle,
 	}
+	facePolygons := map[string]objects.Polygon{}
+	facePoints := []primitives.Point{start}
 	for i, edge := range f.Shape.Edges {
 		drawEdge := true
 		if c, ok := f.Connects[i]; ok {
@@ -114,11 +117,15 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 				for key, faceConfig := range faceBundle.FaceConfigs {
 					faceConfigs[key] = faceConfig
 				}
+				for key, facePolygon := range faceBundle.FacePolygons {
+					facePolygons[key] = facePolygon
+				}
 				lns = append(lns, faceBundle.Lines...)
 				drawEdge = false // don't draw this edge, the render of nextFace will draw it
 			}
 		}
 		end := start.Add(edge.Vector.RotateCCW(angle))
+		facePoints = append(facePoints, end)
 		if drawEdge {
 			l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
 		} else {
@@ -129,9 +136,11 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 
 	}
 	lns = append(lns, l)
+	facePolygons[f.Name] = objects.Polygon{Points: facePoints}
 	return RenderBundle{
-		Lines:       lns,
-		FaceConfigs: faceConfigs,
+		Lines:        lns,
+		FaceConfigs:  faceConfigs,
+		FacePolygons: facePolygons,
 	}
 }
 

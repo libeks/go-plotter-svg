@@ -698,7 +698,13 @@ func foldableCubeIDScene(b primitives.BBox) Scene {
 
 	foldableBase := 1500.0
 	pattern := foldable.CubeID(b, foldableBase)
+	polygons := []lines.LineLike{}
+	for _, poly := range pattern.Polygons {
+		polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)
+	}
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("green").WithLineLike(pattern.Annotations).WithColor("green").WithWidth(20).MinimizePath(true))
 	return scene
 }
 
