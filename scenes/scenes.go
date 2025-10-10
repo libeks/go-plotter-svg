@@ -707,6 +707,7 @@ func foldableCubeIDScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("green").WithLineLike(pattern.Annotations).WithColor("green").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("blue").WithLineLike(lines.LinesFromBBox(pattern.BBox())).WithColor("blue").WithWidth(20).MinimizePath(true))
 	return scene
 }
 

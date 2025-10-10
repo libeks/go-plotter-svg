@@ -23,6 +23,7 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * Properly set the global bounding box to what can be drawn on a single page
 * Foldable:
   * Provide a way to fill a face
+  * Scale face labels to be the same size
 
 # Plot ideas
 

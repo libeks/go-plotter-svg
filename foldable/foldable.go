@@ -22,8 +22,11 @@ type FoldablePattern struct {
 }
 
 func (p FoldablePattern) BBox() primitives.BBox {
-	box := primitives.BBox{}
-	for _, poly := range p.Polygons {
+	if len(p.Polygons) == 0 {
+		return primitives.BBox{}
+	}
+	box := p.Polygons[0].BBox()
+	for _, poly := range p.Polygons[1:len(p.Polygons)] {
 		box = box.Add(poly.BBox())
 	}
 	return box
