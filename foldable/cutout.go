@@ -29,6 +29,36 @@ type ConnectionID struct {
 	ConnectionType
 }
 
+func smallFlap(faceA, faceB string, edgeA, edgeB int) ConnectionID {
+	return ConnectionID{
+		FaceA:          faceA,
+		FaceB:          faceB,
+		EdgeAID:        edgeA,
+		EdgeBID:        edgeB,
+		ConnectionType: FlapSmallConnection,
+	}
+}
+
+func flap(faceA, faceB string, edgeA, edgeB int) ConnectionID {
+	return ConnectionID{
+		FaceA:          faceA,
+		FaceB:          faceB,
+		EdgeAID:        edgeA,
+		EdgeBID:        edgeB,
+		ConnectionType: FlapConnection,
+	}
+}
+
+func link(faceA, faceB string, edgeA, edgeB int) ConnectionID {
+	return ConnectionID{
+		FaceA:          faceA,
+		FaceB:          faceB,
+		EdgeAID:        edgeA,
+		EdgeBID:        edgeB,
+		ConnectionType: FaceConnection,
+	}
+}
+
 type CutOut struct {
 	//
 	Faces []FaceID
