@@ -1,6 +1,7 @@
 package foldable
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/lines"
@@ -180,6 +181,7 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 
 	}
 	lns = append(lns, l)
+	fmt.Printf("Adding polygon %s\n", f.Name)
 	facePolygons[f.Name] = objects.Polygon{Points: facePoints}
 	return RenderBundle{
 		Lines:        lns,

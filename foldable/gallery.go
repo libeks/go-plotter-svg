@@ -85,6 +85,58 @@ func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.L
 	return c.Render(b.UpperLeft.Add(primitives.Vector{X: 0, Y: leg1}), 0).Lines
 }
 
+func RightTrianglePrismID(b primitives.BBox, height, leg1, leg2 float64) FoldablePattern {
+	a := math.Sqrt(leg1*leg1 + leg2*leg2)
+	c := NewCutOut(
+		[]FaceID{
+			faceID(Rectangle(leg1, height), "A"),
+			faceID(Rectangle(leg2, height), "B"),
+			faceID(Rectangle(a, height), "C"),
+			faceID(Shape{
+				Edges: []Edge{
+					{
+						Vector: primitives.Vector{X: leg2, Y: leg1},
+					},
+					{
+						Vector: primitives.Vector{X: -leg2, Y: 0},
+					},
+					{
+						Vector: primitives.Vector{X: 0, Y: -leg1},
+					},
+				},
+			}, "B+1"),
+			faceID(Shape{
+				Edges: []Edge{
+					{
+						Vector: primitives.Vector{X: leg2, Y: 0},
+					},
+					{
+						Vector: primitives.Vector{X: -leg2, Y: leg1},
+					},
+					{
+						Vector: primitives.Vector{X: 0, Y: -leg1},
+					},
+				},
+			}, "B-1"),
+		},
+		[]ConnectionID{
+			link("A", "B", 1, 3),
+			link("B", "C", 1, 3),
+			link("B", "B+1", 0, 1),
+			link("B", "B-1", 2, 0),
+
+			flap("C", "A", 1, 3),
+
+			flap("B+1", "A", 2, 0),
+			flap("B-1", "A", 2, 2),
+
+			flap("C", "B+1", 0, 0),
+			flap("C", "B-1", 2, 1),
+		},
+	)
+	return c.Render(b)
+}
+
 func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
 	sq := Square(side)
 	tri := EquiTriangle(side)

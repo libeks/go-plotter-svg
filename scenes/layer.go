@@ -53,7 +53,7 @@ func (l Layer) WithWidth(width float64) Layer {
 }
 
 func (l Layer) String() string {
-	return fmt.Sprintf("Layer %s %v", l.name, l.linelikes)
+	return fmt.Sprintf("Layer '%s' %v", l.name, l.linelikes)
 }
 
 func (l Layer) Statistics() string {
@@ -90,7 +90,7 @@ func (l Layer) RandomizedClosedCurves() Layer {
 }
 
 func (l Layer) MinimizePath(allowReverse bool) Layer {
-	fmt.Printf("Layer before %s\n", l.Statistics())
+	fmt.Printf("Layer '%s' before %s\n", l.name, l.Statistics())
 	if len(l.linelikes) == 0 {
 		return l
 	}
