@@ -714,10 +714,12 @@ func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
-	pattern := foldable.RhombicuboctahedronWithoutCorners(b, foldableBase)
-
-	scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
-	scene = scene.AddLayer(NewLayer("blue").WithLineLike(pattern.Annotations).WithColor("blue").WithWidth(20).MinimizePath(true))
+	pattern := foldable.RhombicuboctahedronWithoutCornersID(b, foldableBase)
+	// center in bbox
+	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene = scene.AddFoldableLayers(pattern)
+	// scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
+	// scene = scene.AddLayer(NewLayer("blue").WithLineLike(pattern.Annotations).WithColor("blue").WithWidth(20).MinimizePath(true))
 	return scene
 }
 

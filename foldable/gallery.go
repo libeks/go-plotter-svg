@@ -3,7 +3,6 @@ package foldable
 import (
 	"math"
 
-	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
@@ -241,6 +240,68 @@ func RhombicuboctahedronID(b primitives.BBox, side float64) FoldablePattern {
 	return c.Render(b)
 }
 
+// RhombicuboctahedronWithoutCornersID is the same as RhombicuboctahedronID, but with the triangular corner pieces missing
+// The idea is to have a right-angle corner inserts in each space, but this requires a disconneced foldable
+func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) FoldablePattern {
+	// TODO: Add in corner pieces
+	sq := Square(side)
+	c := NewCutOut(
+		[]FaceID{
+			faceID(sq, "A"),
+			faceID(sq, "B"),
+			faceID(sq, "C"),
+			faceID(sq, "D"),
+			faceID(sq, "E"),
+			faceID(sq, "F"),
+			faceID(sq, "G"),
+			faceID(sq, "H"),
+			faceID(sq, "A+1"),
+			faceID(sq, "A+2"),
+			faceID(sq, "A-1"),
+			faceID(sq, "A-2"),
+			faceID(sq, "C+1"),
+			faceID(sq, "C-1"),
+			faceID(sq, "E+1"),
+			faceID(sq, "E-1"),
+			faceID(sq, "G+1"),
+			faceID(sq, "G-1"),
+		},
+		[]ConnectionID{
+			link("A", "B", 1, 3),
+			link("B", "C", 1, 3),
+			link("C", "D", 1, 3),
+			link("D", "E", 1, 3),
+			link("E", "F", 1, 3),
+			link("F", "G", 1, 3),
+			link("G", "H", 1, 3),
+
+			link("A", "A+1", 0, 2),
+			link("A+1", "A+2", 0, 2),
+			link("A", "A-1", 2, 0),
+			link("A-1", "A-2", 2, 0),
+
+			link("C", "C+1", 0, 2),
+			link("C", "C-1", 2, 0),
+
+			link("E", "E+1", 0, 2),
+			link("E", "E-1", 2, 0),
+
+			link("G", "G+1", 0, 2),
+			link("G", "G-1", 2, 0),
+
+			flap("A", "H", 3, 1),
+			flap("A+2", "G+1", 3, 0),
+			flap("A+2", "C+1", 1, 0),
+			flap("A-2", "G-1", 3, 2),
+			flap("A-2", "C-1", 1, 2),
+
+			flap("E+1", "A+2", 0, 0),
+			flap("E-1", "A-2", 2, 2),
+		},
+	)
+	return c.Render(b)
+}
+
 func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) FoldablePattern {
 	sq := Square(side)
 	// tri := EquiTriangle(side)
@@ -373,8 +434,8 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) Foldable
 			0,
 		)
 	return FoldablePattern{
-		Edges:       c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0).Lines,
-		Annotations: fonts.RenderText(b, "ABC").CharCurves,
+		Edges: c.Render(primitives.Point{X: b.UpperLeft.X - 2_000, Y: b.UpperLeft.Y + side*2}, 0).Lines,
+		// Annotations: fonts.RenderText(b, "ABC").CharCurves,
 	}
 }
 
@@ -439,165 +500,4 @@ func CutCubeID(b primitives.BBox, side float64, cutRatio float64) FoldablePatter
 		},
 	)
 	return c.Render(b)
-}
-
-// ManualCube is deprecated, use Cube instead, it's more generic
-func ManualCube(b primitives.BBox, side float64) []lines.LineLike {
-	start := primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}
-	lns := []lines.LineLike{}
-	// draws the cube as follows:
-	//
-	//     +---+
-	//  /-\| 4 |/-\ /-\
-	// +---+---+---+---+\
-	// | 0 | 1 | 2 | 3 ||
-	// +---+---+---+---+/
-	//  \-/| 5 |\-/ \-/
-	//     +---+
-
-	// face 0
-	l := lines.NewPath(start)
-	end := start.Add(primitives.Vector{X: side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: -side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: -side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// face 1
-	start = primitives.Point{X: b.UpperLeft.X + side, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: -side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// face 2
-	start = primitives.Point{X: b.UpperLeft.X + side*2, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: -side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// face 3
-	start = primitives.Point{X: b.UpperLeft.X + side*3, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: -side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// face 4
-	start = primitives.Point{X: b.UpperLeft.X + side, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: 0, Y: -side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// face 5
-	start = primitives.Point{X: b.UpperLeft.X + side, Y: b.UpperLeft.Y + side*2}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: 0, Y: side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: -side})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 04
-	start = primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side - flapWidth*2, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 24
-	start = primitives.Point{X: b.UpperLeft.X + side*2, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side - flapWidth*2, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 34
-	start = primitives.Point{X: b.UpperLeft.X + side*3, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side - flapWidth*2, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 05
-	start = primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side - flapWidth*2, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 25
-	start = primitives.Point{X: b.UpperLeft.X + side*2, Y: b.UpperLeft.Y + side*2}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side - flapWidth*2, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 35
-	start = primitives.Point{X: b.UpperLeft.X + side*3, Y: b.UpperLeft.Y + side*2}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: side - flapWidth*2, Y: 0})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: flapWidth, Y: -flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	// flap 30
-	start = primitives.Point{X: b.UpperLeft.X + side*4, Y: b.UpperLeft.Y + side}
-	l = lines.NewPath(start)
-	end = start.Add(primitives.Vector{X: flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: 0, Y: side - flapWidth*2})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	start, end = end, end.Add(primitives.Vector{X: -flapWidth, Y: flapWidth})
-	l = l.AddPathChunk(lines.LineChunk{Start: start, End: end})
-	lns = append(lns, l)
-
-	return lns
 }

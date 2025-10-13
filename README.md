@@ -26,6 +26,7 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   * Scale face labels to be the same size
   * Detect that the figure is not drawable, specifically when three faces are connected in a cycle (A>B>C>A). This current causes stack overflow
   * Detect face overlap, such as with flaps being too wide, etc.
+  * Allow connections between foldable objects, i.e. have a scene contain multiple foldables with interlinking
 
 # Plot ideas
 
