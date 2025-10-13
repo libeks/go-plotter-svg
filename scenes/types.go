@@ -20,6 +20,8 @@ func (s Scene) AddLayer(layer Layer) Scene {
 }
 
 func (s Scene) AddFoldableLayers(p foldable.FoldablePattern) Scene {
+	// TODO: Add brush infill, one layer for each brush
+	// TODO: Customize brush width rendering
 	polygons := []lines.LineLike{}
 	for _, poly := range p.Polygons {
 		polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)

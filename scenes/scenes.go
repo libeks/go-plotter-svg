@@ -20,27 +20,29 @@ import (
 var (
 	// BrushBackForthScene    = func(b primitives.BBox) Scene { return getBrushBackForthScene(b) }
 	// CurlyScene             = func(b primitives.BBox) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene               = func(b primitives.BBox) Scene { return getLinesInsideScene(b, 1000) }
-	LineFieldScene                    = func(b primitives.BBox) Scene { return getLineFieldInObjects(b) }
-	RadialBoxScene                    = func(b primitives.BBox) Scene { return radialBoxScene(b) }
-	ParallelBoxScene                  = func(b primitives.BBox) Scene { return parallelBoxScene(b) }
-	ParallelSineFieldScene            = func(b primitives.BBox) Scene { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene             = func(b primitives.BBox) Scene { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene              = func(b primitives.BBox) Scene { return circlesInSquareScene(b) }
-	TestDensityScene                  = func(b primitives.BBox) Scene { return testDensityScene(b) }
-	TruchetScene                      = func(b primitives.BBox) Scene { return getTruchetScene(b) }
-	SweepTruchetScene                 = func(b primitives.BBox) Scene { return getSweepTruchet(b) }
-	RisingSunScene                    = func(b primitives.BBox) Scene { return getRisingSun(b) }
-	CCircleLineSegments               = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
-	Font                              = fontScene
-	Text                              = textScene
+	LinesInsideBoxScene    = func(b primitives.BBox) Scene { return getLinesInsideScene(b, 1000) }
+	LineFieldScene         = func(b primitives.BBox) Scene { return getLineFieldInObjects(b) }
+	RadialBoxScene         = func(b primitives.BBox) Scene { return radialBoxScene(b) }
+	ParallelBoxScene       = func(b primitives.BBox) Scene { return parallelBoxScene(b) }
+	ParallelSineFieldScene = func(b primitives.BBox) Scene { return parallelSineFieldsScene(b) }
+	ParallelCoherentScene  = func(b primitives.BBox) Scene { return parallelCoherentSineFieldsScene(b) }
+	CirclesInSquareScene   = func(b primitives.BBox) Scene { return circlesInSquareScene(b) }
+	TestDensityScene       = func(b primitives.BBox) Scene { return testDensityScene(b) }
+	TruchetScene           = func(b primitives.BBox) Scene { return getTruchetScene(b) }
+	SweepTruchetScene      = func(b primitives.BBox) Scene { return getSweepTruchet(b) }
+	RisingSunScene         = func(b primitives.BBox) Scene { return getRisingSun(b) }
+	CCircleLineSegments    = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
+	Font                   = fontScene
+	Text                   = textScene
+
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
+	FoldableRhombiSansCorner          = foldableRhombicuboctahedronSansCornersScene
+	FoldableCubeIDScene               = foldableCubeIDScene
+	FoldableCutCubeScene              = foldableCutCornerScene
 
-	FoldableRhombiSansCorner = foldableRhombicuboctahedronSansCornersScene
-	FoldableCubeIDScene      = foldableCubeIDScene
-	MazeScene                = mazeScene
-	PolygonBoxScene          = polygonScene
+	MazeScene       = mazeScene
+	PolygonBoxScene = polygonScene
 )
 
 func getLineFieldInObjects(b primitives.BBox) Scene {
@@ -727,6 +729,20 @@ func foldableRightTrianglePrismIDScene(b primitives.BBox) Scene {
 	pattern := foldable.RightTrianglePrismID(b, foldableBase, foldableBase, foldableBase)
 	// center in bbox
 	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene = scene.AddFoldableLayers(pattern)
+	return scene
+}
+
+func foldableCutCornerScene(b primitives.BBox) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+
+	foldableBase := 1500.0
+	// blacks := foldable.CutCube(b, foldableBase, 0.5)
+	pattern := foldable.CutCubeID(b, foldableBase, 0.5)
+	// center in bbox
+	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddFoldableLayers(pattern)
 	return scene
 }

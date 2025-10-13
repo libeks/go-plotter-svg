@@ -42,7 +42,8 @@ func main() {
 	// scene := scenes.FoldableCubeIDScene(innerBox)
 	// scene := scenes.FoldableRhombicuboctahedronID(innerBox)
 	// scene := scenes.FoldableRightTrianglePrismScene(innerBox)
-	scene := scenes.FoldableRightTrianglePrismIDScene(innerBox)
+	// scene := scenes.FoldableRightTrianglePrismIDScene(innerBox)
+	scene := scenes.FoldableCutCubeScene(innerBox)
 	// scene := scenes.FoldableRhombiSansCorner(innerBox)
 	// scene := scenes.MazeScene(innerBox)
 	flipCurves := false

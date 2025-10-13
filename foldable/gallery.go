@@ -137,19 +137,6 @@ func RightTrianglePrismID(b primitives.BBox, height, leg1, leg2 float64) Foldabl
 	return c.Render(b)
 }
 
-func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
-	sq := Square(side)
-	tri := EquiTriangle(side)
-
-	c := NewFace(sq).WithFlap(3).
-		WithFace(
-			0,
-			NewFace(tri).WithFlap(0).WithFace(1, NewFace(sq).WithFlap(3).WithFace(0, NewFace(tri).WithFlap(1), 0), 2),
-			2,
-		)
-	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}, 0).Lines
-}
-
 func RhombicuboctahedronID(b primitives.BBox, side float64) FoldablePattern {
 	sq := Square(side)
 	tri := EquiTriangle(side)
@@ -391,53 +378,16 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) Foldable
 	}
 }
 
-// CutCube is a cube with a triangular prism missing.
-func CutCube(b primitives.BBox, side float64, cutRatio float64) []lines.LineLike {
+func CutCubeID(b primitives.BBox, side float64, cutRatio float64) FoldablePattern {
 	sq := Square(side)
 	a := math.Sqrt(1 + cutRatio*cutRatio)
-	c := NewFace(sq).WithFlap(3).WithFace( // #0
-		1,
-		NewFace(sq).WithFace( // #1
-			1,
-			NewFace(Shape{
-				Edges: []Edge{
-					{
-						Vector: primitives.Vector{X: 1 - cutRatio, Y: 0}.Mult(side),
-					},
-					{
-						Vector: primitives.Vector{X: 0, Y: 1}.Mult(side),
-					},
-					{
-						Vector: primitives.Vector{X: -(1 - cutRatio), Y: 0}.Mult(side),
-					},
-					{
-						Vector: primitives.Vector{X: 0, Y: -1}.Mult(side),
-					},
-				},
-			}).WithFace( // #2
-				1,
-				NewFace(Shape{
-					Edges: []Edge{
-						{
-							Vector: primitives.Vector{X: a, Y: 0}.Mult(side),
-						},
-						{
-							Vector: primitives.Vector{X: 0, Y: 1}.Mult(side),
-						},
-						{
-							Vector: primitives.Vector{X: -a, Y: 0}.Mult(side),
-						},
-						{
-							Vector: primitives.Vector{X: 0, Y: -1}.Mult(side),
-						},
-					},
-				}).WithFlap(0).WithFlap(2), // #3
-				3,
-			),
-			3,
-		).WithFace(
-			0,
-			NewFace(Shape{
+	c := NewCutOut(
+		[]FaceID{
+			faceID(sq, "A"),
+			faceID(sq, "B"),
+			faceID(Rectangle((1-cutRatio)*side, side), "C"),
+			faceID(Rectangle(a*side, side), "D"),
+			faceID(Shape{
 				Edges: []Edge{
 					{
 						Vector: primitives.Vector{X: 1, Y: cutRatio}.Mult(side),
@@ -452,11 +402,8 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []lines.LineLike
 						Vector: primitives.Vector{X: 0, Y: -1}.Mult(side),
 					},
 				},
-			}).WithFlap(1).WithFlap(3), // #4
-			2,
-		).WithFace(
-			2,
-			NewFace(Shape{
+			}, "B+1"),
+			faceID(Shape{
 				Edges: []Edge{
 					{
 						Vector: primitives.Vector{X: 1, Y: 0}.Mult(side),
@@ -471,12 +418,27 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []lines.LineLike
 						Vector: primitives.Vector{X: 0, Y: -1}.Mult(side),
 					},
 				},
-			}).WithFlap(1).WithFlap(3), // #5
-			0,
-		),
-		3,
+			}, "B-1"),
+		},
+		[]ConnectionID{
+			link("A", "B", 1, 3),
+			link("B", "C", 1, 3),
+			link("C", "D", 1, 3),
+			link("B", "B+1", 0, 2),
+			link("B", "B-1", 2, 0),
+
+			flap("A", "D", 3, 1),
+			flap("B+1", "A", 3, 0),
+			flap("B-1", "A", 3, 2),
+
+			flap("B+1", "C", 1, 0),
+			flap("B-1", "C", 1, 2),
+
+			flap("D", "B+1", 0, 0),
+			flap("D", "B-1", 2, 2),
+		},
 	)
-	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side}, 0).Lines
+	return c.Render(b)
 }
 
 // ManualCube is deprecated, use Cube instead, it's more generic
