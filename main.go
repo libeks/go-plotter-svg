@@ -39,7 +39,6 @@ func main() {
 	// scene := scenes.Font(innerBox)
 	// scene := scenes.Text(innerBox)
 	// scene := scenes.PolygonBoxScene(innerBox)
-	// scene := scenes.FoldableCubeScene(innerBox)
 	// scene := scenes.FoldableCubeIDScene(innerBox)
 	scene := scenes.FoldableRhombicuboctahedronID(innerBox)
 	// scene := scenes.FoldableRhombiSansCorner(innerBox)

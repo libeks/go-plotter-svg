@@ -34,11 +34,9 @@ var (
 	CCircleLineSegments           = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
 	Font                          = fontScene
 	Text                          = textScene
-	FoldableRhombicuboctahedron   = foldableRhombicuboctahedronScene
 	FoldableRhombicuboctahedronID = foldableRhombicuboctahedronIDScene
 
 	FoldableRhombiSansCorner = foldableRhombicuboctahedronSansCornersScene
-	FoldableCubeScene        = foldableCubeScene
 	FoldableCubeIDScene      = foldableCubeIDScene
 	MazeScene                = mazeScene
 	PolygonBoxScene          = polygonScene
@@ -684,16 +682,6 @@ func polygonScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func foldableCubeScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
-	foldableBase := 1500.0
-	blacks := foldable.Cube(b, foldableBase)
-	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
-	return scene
-}
-
 func foldableCubeIDScene(b primitives.BBox) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
@@ -710,24 +698,6 @@ func foldableCubeIDScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("green").WithLineLike(pattern.Annotations).WithColor("green").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("blue").WithLineLike(lines.LinesFromBBox(pattern.BBox())).WithColor("blue").WithWidth(20).MinimizePath(true))
-	return scene
-}
-
-func foldableRhombicuboctahedronScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
-	foldableBase := 1500.0
-	// b = b.WithPadding(1000)
-	// blacks := foldable.CutCube(b, foldableBase, 0.75)
-	// blacks := foldable.RightTrianglePrism(b, foldableBase, foldableBase, foldableBase)
-	// blacks2 := foldable.CutCube(b, foldableBase, 0.75)
-	blacks := foldable.Rhombicuboctahedron(b, foldableBase)
-	// blacks := foldable.ShapeTester(b, foldableBase)
-	// fmt.Printf("Blacks %v\n", blacks)
-
-	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
-	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks2).WithColor("black").WithWidth(20).MinimizePath(true))
 	return scene
 }
 
