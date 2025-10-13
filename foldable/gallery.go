@@ -124,6 +124,110 @@ func ShapeTester(b primitives.BBox, side float64) []lines.LineLike {
 	return c.Render(primitives.Point{X: b.UpperLeft.X, Y: b.UpperLeft.Y + side*2}, 0).Lines
 }
 
+func RhombicuboctahedronID(b primitives.BBox, side float64) FoldablePattern {
+	sq := Square(side)
+	tri := EquiTriangle(side)
+	c := NewCutOut(
+		[]FaceID{
+			faceID(sq, "A"),
+			faceID(sq, "B"),
+			faceID(sq, "C"),
+			faceID(sq, "D"),
+			faceID(sq, "E"),
+			faceID(sq, "F"),
+			faceID(sq, "G"),
+			faceID(sq, "H"),
+			faceID(sq, "A+1"),
+			faceID(sq, "A+2"),
+			faceID(sq, "A-1"),
+			faceID(sq, "A-2"),
+			faceID(tri, "B+1"),
+			faceID(tri, "B-1"),
+			faceID(sq, "C+1"),
+			faceID(sq, "C-1"),
+			faceID(tri, "D+1"),
+			faceID(tri, "D-1"),
+			faceID(sq, "E+1"),
+			faceID(sq, "E-1"),
+			faceID(tri, "F+1"),
+			faceID(tri, "F-1"),
+			faceID(sq, "G+1"),
+			faceID(sq, "G-1"),
+			faceID(tri, "H+1"),
+			faceID(tri, "H-1"),
+		},
+		[]ConnectionID{
+			link("A", "B", 1, 3),
+			link("B", "C", 1, 3),
+			link("C", "D", 1, 3),
+			link("D", "E", 1, 3),
+			link("E", "F", 1, 3),
+			link("F", "G", 1, 3),
+			link("G", "H", 1, 3),
+
+			link("A", "A+1", 0, 2),
+			link("A+1", "A+2", 0, 2),
+			link("A", "A-1", 2, 0),
+			link("A-1", "A-2", 2, 0),
+
+			link("B", "B+1", 0, 0),
+			link("B", "B-1", 2, 0),
+
+			link("C", "C+1", 0, 2),
+			link("C", "C-1", 2, 0),
+
+			link("D", "D+1", 0, 0),
+			link("D", "D-1", 2, 0),
+
+			link("E", "E+1", 0, 2),
+			link("E", "E-1", 2, 0),
+
+			link("F", "F+1", 0, 0),
+			link("F", "F-1", 2, 0),
+
+			link("G", "G+1", 0, 2),
+			link("G", "G-1", 2, 0),
+
+			link("H", "H+1", 0, 0),
+			link("H", "H-1", 2, 0),
+
+			flap("A", "H", 3, 1),
+			flap("A+2", "G+1", 3, 0),
+			flap("A+2", "C+1", 1, 0),
+			flap("A-2", "G-1", 3, 2),
+			flap("A-2", "C-1", 1, 2),
+
+			smallFlap("A+1", "B+1", 1, 1),
+			smallFlap("A-1", "B-1", 1, 2),
+
+			smallFlap("B+1", "C+1", 2, 3),
+			smallFlap("B-1", "C-1", 1, 3),
+
+			smallFlap("C+1", "D+1", 1, 1),
+			smallFlap("C-1", "D-1", 1, 2),
+
+			smallFlap("D+1", "E+1", 2, 3),
+			smallFlap("D-1", "E-1", 1, 3),
+
+			smallFlap("E+1", "F+1", 1, 1),
+			smallFlap("E-1", "F-1", 1, 2),
+
+			smallFlap("F+1", "G+1", 2, 3),
+			smallFlap("F-1", "G-1", 1, 3),
+
+			smallFlap("G+1", "H+1", 1, 1),
+			smallFlap("G-1", "H-1", 1, 2),
+
+			smallFlap("H+1", "A+1", 2, 3),
+			smallFlap("H-1", "A-1", 1, 3),
+
+			flap("E+1", "A+2", 0, 0),
+			flap("E-1", "A-2", 2, 2),
+		},
+	)
+	return c.Render(b)
+}
+
 func Rhombicuboctahedron(b primitives.BBox, side float64) []lines.LineLike {
 	sq := Square(side)
 	tri := EquiTriangle(side)

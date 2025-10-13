@@ -20,26 +20,28 @@ import (
 var (
 	// BrushBackForthScene    = func(b primitives.BBox) Scene { return getBrushBackForthScene(b) }
 	// CurlyScene             = func(b primitives.BBox) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene         = func(b primitives.BBox) Scene { return getLinesInsideScene(b, 1000) }
-	LineFieldScene              = func(b primitives.BBox) Scene { return getLineFieldInObjects(b) }
-	RadialBoxScene              = func(b primitives.BBox) Scene { return radialBoxScene(b) }
-	ParallelBoxScene            = func(b primitives.BBox) Scene { return parallelBoxScene(b) }
-	ParallelSineFieldScene      = func(b primitives.BBox) Scene { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene       = func(b primitives.BBox) Scene { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene        = func(b primitives.BBox) Scene { return circlesInSquareScene(b) }
-	TestDensityScene            = func(b primitives.BBox) Scene { return testDensityScene(b) }
-	TruchetScene                = func(b primitives.BBox) Scene { return getTruchetScene(b) }
-	SweepTruchetScene           = func(b primitives.BBox) Scene { return getSweepTruchet(b) }
-	RisingSunScene              = func(b primitives.BBox) Scene { return getRisingSun(b) }
-	CCircleLineSegments         = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
-	Font                        = fontScene
-	Text                        = textScene
-	FoldableRhombicuboctahedron = foldableRhombicuboctahedronScene
-	FoldableRhombiSansCorner    = foldableRhombicuboctahedronSansCornersScene
-	FoldableCubeScene           = foldableCubeScene
-	FoldableCubeIDScene         = foldableCubeIDScene
-	MazeScene                   = mazeScene
-	PolygonBoxScene             = polygonScene
+	LinesInsideBoxScene           = func(b primitives.BBox) Scene { return getLinesInsideScene(b, 1000) }
+	LineFieldScene                = func(b primitives.BBox) Scene { return getLineFieldInObjects(b) }
+	RadialBoxScene                = func(b primitives.BBox) Scene { return radialBoxScene(b) }
+	ParallelBoxScene              = func(b primitives.BBox) Scene { return parallelBoxScene(b) }
+	ParallelSineFieldScene        = func(b primitives.BBox) Scene { return parallelSineFieldsScene(b) }
+	ParallelCoherentScene         = func(b primitives.BBox) Scene { return parallelCoherentSineFieldsScene(b) }
+	CirclesInSquareScene          = func(b primitives.BBox) Scene { return circlesInSquareScene(b) }
+	TestDensityScene              = func(b primitives.BBox) Scene { return testDensityScene(b) }
+	TruchetScene                  = func(b primitives.BBox) Scene { return getTruchetScene(b) }
+	SweepTruchetScene             = func(b primitives.BBox) Scene { return getSweepTruchet(b) }
+	RisingSunScene                = func(b primitives.BBox) Scene { return getRisingSun(b) }
+	CCircleLineSegments           = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
+	Font                          = fontScene
+	Text                          = textScene
+	FoldableRhombicuboctahedron   = foldableRhombicuboctahedronScene
+	FoldableRhombicuboctahedronID = foldableRhombicuboctahedronIDScene
+
+	FoldableRhombiSansCorner = foldableRhombicuboctahedronSansCornersScene
+	FoldableCubeScene        = foldableCubeScene
+	FoldableCubeIDScene      = foldableCubeIDScene
+	MazeScene                = mazeScene
+	PolygonBoxScene          = polygonScene
 )
 
 func getLineFieldInObjects(b primitives.BBox) Scene {
@@ -726,6 +728,25 @@ func foldableRhombicuboctahedronScene(b primitives.BBox) Scene {
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks2).WithColor("black").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func foldableRhombicuboctahedronIDScene(b primitives.BBox) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+
+	foldableBase := 1500.0
+	pattern := foldable.RhombicuboctahedronID(b, foldableBase)
+	// center in bbox
+	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	polygons := []lines.LineLike{}
+	for _, poly := range pattern.Polygons {
+		polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)
+	}
+	scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("green").WithLineLike(pattern.Annotations).WithColor("green").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("blue").WithLineLike(lines.LinesFromBBox(pattern.BBox())).WithColor("blue").WithWidth(20).MinimizePath(true))
 	return scene
 }
 

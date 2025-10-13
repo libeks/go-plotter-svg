@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/libeks/go-plotter-svg/primitives"
@@ -15,7 +14,6 @@ func main() {
 	sizePx := 10000.0
 	padding := 1000.0
 
-	fmt.Printf("args %v\n", args)
 	if len(args) > 0 {
 		fname = args[0]
 	}
@@ -42,8 +40,8 @@ func main() {
 	// scene := scenes.Text(innerBox)
 	// scene := scenes.PolygonBoxScene(innerBox)
 	// scene := scenes.FoldableCubeScene(innerBox)
-	scene := scenes.FoldableCubeIDScene(innerBox)
-	// scene := scenes.FoldableRhombicuboctahedron(innerBox)
+	// scene := scenes.FoldableCubeIDScene(innerBox)
+	scene := scenes.FoldableRhombicuboctahedronID(innerBox)
 	// scene := scenes.FoldableRhombiSansCorner(innerBox)
 	// scene := scenes.MazeScene(innerBox)
 	flipCurves := false

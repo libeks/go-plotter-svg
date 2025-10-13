@@ -100,10 +100,21 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		faceA, ok := faceByID[connection.FaceA]
 		if !ok {
 			fmt.Printf("Could not find face named %s for connection number %d\n", connection.FaceA, i)
+			panic("Couldn't render")
 		}
 		faceB, ok := faceByID[connection.FaceB]
 		if !ok {
 			fmt.Printf("Could not find face named %s for connection number %d\n", connection.FaceB, i)
+			panic("Couldn't render")
+		}
+
+		if connection.EdgeAID >= len(faceA.Shape.Edges) {
+			fmt.Printf("Face %s with %d faces doesn't have an edge number %d\n", connection.FaceA, len(faceA.Shape.Edges), connection.EdgeAID)
+			panic("Couldn't render")
+		}
+		if connection.EdgeBID >= len(faceB.Shape.Edges) {
+			fmt.Printf("Face %s with %d faces doesn't have an edge number %d\n", connection.FaceB, len(faceB.Shape.Edges), connection.EdgeBID)
+			panic("Couldn't render")
 		}
 		// check that the two edges are of the same length
 		aLen := faceA.Shape.Edges[connection.EdgeAID].Vector.Len()
