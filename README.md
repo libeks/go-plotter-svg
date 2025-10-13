@@ -3,6 +3,7 @@ Generate SVG files for AxiDraw plotter
 
 `go run ./...`
 
+See the generated outputs in [the gallery](https://github.com/libeks/go-plotter-svg/tree/main/gallery).
 See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 
 # TODOs
