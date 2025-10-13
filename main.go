@@ -1,15 +1,24 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/scenes"
 	"github.com/libeks/go-plotter-svg/svg"
 )
 
 func main() {
+	args := os.Args[1:]
 	fname := "gallery/test1.svg"
 	sizePx := 10000.0
 	padding := 1000.0
+
+	fmt.Printf("args %v\n", args)
+	if len(args) > 0 {
+		fname = args[0]
+	}
 
 	outerBox := primitives.BBox{
 		UpperLeft:  primitives.Point{X: 0, Y: 0},
