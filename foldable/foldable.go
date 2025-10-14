@@ -16,10 +16,10 @@ const (
 )
 
 type FoldablePattern struct {
-	Edges       []lines.LineLike          // edges draw such that there shouldn't be overlap
-	Polygons    []objects.Polygon         // a list of polygons that are contained in the fold, including flap polygons
-	Fill        map[string]lines.LineLike // a collection of fills for the faces, mapped by color
-	Annotations []lines.LineLike          // contains face labels, etc. that won't always need to be plotted
+	Edges       []lines.LineLike            // edges draw such that there shouldn't be overlap
+	Polygons    []objects.Polygon           // a list of polygons that are contained in the fold, including flap polygons
+	Fill        map[string][]lines.LineLike // a collection of fills for the faces, mapped by color
+	Annotations []lines.LineLike            // contains face labels, etc. that won't always need to be plotted
 }
 
 func (p FoldablePattern) BBox() primitives.BBox {
@@ -42,9 +42,12 @@ func (p FoldablePattern) Translate(v primitives.Vector) FoldablePattern {
 	for i, poly := range p.Polygons {
 		polygons[i] = poly.Translate(v)
 	}
-	fills := make(map[string]lines.LineLike, len(p.Fill))
-	for key, fill := range p.Fill {
-		fills[key] = fill.Translate(v)
+	fills := make(map[string][]lines.LineLike, len(p.Fill))
+	for key, subfills := range p.Fill {
+		for i, fill := range subfills {
+			subfills[i] = fill.Translate(v)
+		}
+		fills[key] = subfills
 	}
 	annotations := make([]lines.LineLike, len(p.Annotations))
 	for i, annotation := range p.Annotations {

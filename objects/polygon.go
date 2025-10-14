@@ -155,7 +155,7 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 			// fmt.Printf("Candidate %v\n", candidate)
 			candidate = candidate.Scale(1.005)
 			// fmt.Printf("Candidate2 %v\n", candidate)
-			if math.Abs(1.0-candidate.Width()/candidate.Height()) > 0.001 {
+			if math.Abs(1.0-candidate.Width()/candidate.Height()) > FLOAT_ACCURACY {
 				fmt.Printf("width %f, height %f\n", candidate.Width(), candidate.Height())
 				panic("polygon is not a square")
 			}
@@ -167,6 +167,57 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 		}
 	}
 	return bbox
+}
+
+// return a slice of parallel line segments that completely fill the polygon, at 'spacing' apart
+func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
+	// start with a line perpendicular to the angle
+	// find the line-t value of each polygon vertex projected onto this line
+	// sort these t-values
+	// starting at the smallest t-value to the largest, produce perpendicular lines with the correct spacing apart
+	// for each line, intersect with polygon to find the line segment that is inside the polygon
+	v := primitives.UnitRight.RotateCCW(-angle)
+	vPerp := v.Perp() // unit vector perpendicular to the angle
+	tValues := make([]float64, len(p.Points))
+
+	for i, point := range p.Points {
+		vp := point.Subtract(primitives.Origin)
+		tValues[i] = vp.Dot(vPerp) / (vPerp.Dot(vPerp))
+	}
+	minT := tValues[0]
+	maxT := tValues[0]
+	for _, t := range tValues {
+		if t < minT {
+			minT = t
+		}
+		if t > maxT {
+			maxT = t
+		}
+	}
+	fmt.Printf("minT: %f, maxT: %f\n", minT, maxT)
+	perpLine := lines.Line{
+		P: primitives.Origin,
+		V: vPerp,
+	}
+	lineLikes := []lines.LineLike{}
+	for i := range int((maxT - minT) / spacing) {
+		lineT := minT + float64(i)*spacing
+		line := lines.Line{
+			P: perpLine.At(lineT),
+			V: v,
+		}
+		ts := p.IntersectTs(line)
+		fmt.Printf("ts %v\n", ts)
+		if len(ts) == 2 {
+			lineLikes = append(lineLikes, lines.LineSegment{
+				P1: line.At(ts[0]),
+				P2: line.At(ts[1]),
+			})
+		} else if len(ts) != 0 && len(ts) != 1 {
+			panic("Unexpected t-values for line and polygon intersection")
+		}
+	}
+	return lineLikes
 }
 
 // EdgeSegments return the line segments that constitute the polygon
@@ -220,7 +271,7 @@ func (p Polygon) Grow(d float64) Polygon {
 		if intersection == nil {
 			return Polygon{}
 		}
-		fmt.Printf("Intersection of %v and %v is %v\n", edgeA, edgeB, *intersection)
+		// fmt.Printf("Intersection of %v and %v is %v\n", edgeA, edgeB, *intersection)
 		points = append(points, *intersection)
 	}
 

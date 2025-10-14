@@ -158,11 +158,14 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 	faceBundle := initialFace.Render(b.UpperLeft, 0)
 	polygons := []objects.Polygon{}
 	annotations := []lines.LineLike{}
+	fills := map[string][]lines.LineLike{}
 	for key, polygon := range faceBundle.FacePolygons {
 		polygons = append(polygons, polygon)
 		bbox := polygon.LargestContainedSquareBBox()
 		bbox = bbox.WithPadding(100)
 		annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
+		fills[key] = polygon.LineFill(0, 10)
+
 	}
 	for _, polygon := range faceBundle.FlapPolygons {
 		polygons = append(polygons, polygon)
@@ -170,7 +173,7 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 	return FoldablePattern{
 		Edges:       faceBundle.Lines,
 		Polygons:    polygons,
-		Fill:        map[string]lines.LineLike{},
+		Fill:        fills,
 		Annotations: annotations,
 	}
 }

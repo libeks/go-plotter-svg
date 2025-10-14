@@ -666,6 +666,7 @@ func polygonScene(b primitives.BBox) Scene {
 	reds := []lines.LineLike{}
 	greens := []lines.LineLike{}
 	greys := []lines.LineLike{}
+	yellows := []lines.LineLike{}
 	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
 	// text := fonts.RenderText(b, "fe fi fo fum", fonts.WithSize(2000))
 
@@ -678,9 +679,10 @@ func polygonScene(b primitives.BBox) Scene {
 		bbox = bbox.WithPadding(100)
 		reds = append(reds, lines.LinesFromBBox(bbox)...)
 		greens = append(greens, fonts.RenderText(bbox, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
-		// note, some polygons above are clockwise, others are counter-clockwise. this means growing happens in different directions for them
 		grown := poly.Grow(-100)
-		fmt.Printf("grown %v\n", grown)
+		fill := grown.LineFill(0.2, 50)
+		fmt.Printf("Fill %v\n", fill)
+		yellows = append(yellows, fill...)
 		greys = append(greys, segmentsToLineLikes(grown.EdgeLines())...)
 	}
 
@@ -688,6 +690,7 @@ func polygonScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("red").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("green").WithLineLike(greens).WithColor("green").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("greys").WithLineLike(greys).WithColor("blue").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("yellows").WithLineLike(yellows).WithColor("yellow").WithWidth(20).MinimizePath(true))
 	return scene
 }
 
