@@ -244,7 +244,7 @@ func (p Polygon) isClockwise() bool {
 		panic("The midpoint is not inside the polygon, isClockwise won't work here")
 	}
 	totalAngle := p.pointWindingAngle(midpoint)
-	return math.Abs(totalAngle-math.Pi) < FLOAT_ACCURACY
+	return math.Abs(totalAngle+math.Pi) < FLOAT_ACCURACY
 }
 
 func (p Polygon) isBBoxInside(bbox primitives.BBox) bool {
