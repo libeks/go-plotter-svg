@@ -167,9 +167,7 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		fills[key] = polygon.LineFill(0, 10)
 
 	}
-	for _, polygon := range faceBundle.FlapPolygons {
-		polygons = append(polygons, polygon)
-	}
+	polygons = append(polygons, faceBundle.FlapPolygons...)
 	return FoldablePattern{
 		Edges:       faceBundle.Lines,
 		Polygons:    polygons,

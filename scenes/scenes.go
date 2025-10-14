@@ -679,7 +679,7 @@ func polygonScene(b primitives.BBox) Scene {
 		bbox = bbox.WithPadding(100)
 		reds = append(reds, lines.LinesFromBBox(bbox)...)
 		greens = append(greens, fonts.RenderText(bbox, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
-		grown := poly.Grow(-100)
+		grown := poly.Grow(-50)
 		fill := grown.LineFill(0.2, 50)
 		fmt.Printf("Fill %v\n", fill)
 		yellows = append(yellows, fill...)

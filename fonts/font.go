@@ -6,9 +6,7 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	"github.com/kintar/etxt/efixed"
-	"github.com/libeks/go-plotter-svg/primitives"
 	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 )
 
 const (
@@ -38,14 +36,6 @@ func LoadFont(filename string) (*Font, error) {
 	}, nil
 }
 
-func convertBox(r fixed.Rectangle26_6) (primitives.Point, primitives.Point) {
-	return primitives.Point{
-			X: efixed.ToFloat64(r.Min.X), Y: efixed.ToFloat64(r.Min.Y),
-		}, primitives.Point{
-			X: efixed.ToFloat64(r.Max.X), Y: efixed.ToFloat64(r.Max.Y),
-		}
-}
-
 func (f *Font) LoadGlyph(r rune) (Glyph, error) {
 	index := f.Index(r)
 	glyph := truetype.GlyphBuf{}
@@ -54,20 +44,6 @@ func (f *Font) LoadGlyph(r rune) (Glyph, error) {
 	if err != nil {
 		return Glyph{}, err
 	}
-	// face := truetype.NewFace(f.Font, nil)
-	// bounds, advance, ok := face.GlyphBounds(r)
-	// if !ok {
-	// 	return Glyph{}, fmt.Errorf("Couldn't get glyph bounds for rune '%v'", r)
-	// }
-	// minP, maxP := convertBox(glyph.Bounds)
-	// fmt.Printf("Glyph '%s'\n", string(r))
-	// fmt.Printf("bounds %v, %v\n", minP, maxP)
-	// fmt.Printf("advance %v\n", efixed.ToFloat64(glyph.AdvanceWidth))
-	// fmt.Printf("Points %d, ends %d\n", len(glyph.Points), len(glyph.Ends))
-
-	// for i, end := range glyph.Ends {
-	// 	fmt.Printf("Countour %d, %v\n", i, end)
-	// }
 
 	return Glyph{
 		Rune:    r,

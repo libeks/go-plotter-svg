@@ -165,9 +165,7 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 				for key, facePolygon := range faceBundle.FacePolygons {
 					facePolygons[key] = facePolygon
 				}
-				for _, flapPolygon := range faceBundle.FlapPolygons {
-					flapPolygons = append(flapPolygons, flapPolygon)
-				}
+				flapPolygons = append(flapPolygons, faceBundle.FlapPolygons...)
 				lns = append(lns, faceBundle.Lines...)
 				drawEdge = false // don't draw this edge, the render of nextFace will draw it
 			}
