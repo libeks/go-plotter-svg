@@ -136,6 +136,47 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 	return bbox
 }
 
+// https://stackoverflow.com/a/59299881
+func mod(a, b int) int {
+	return (a%b + b) % b
+}
+
+// Grow increases the polygon outwards (or inwards, if d is negative), by moving every
+// edge line outwards perpendicular to itself by the distance d.
+// If the resulting polygon is too small, this will return a polygon with no edges
+func (p Polygon) Grow(d float64) Polygon {
+	// TODO: Fix growing direction for CW and CCW polygons, they each grow in opposite directions
+	// for every point,
+	//   take the edges that the point falls on,
+	//   take their lines,
+	//   extend each line perpendicularly outward by d
+	//   find the new intersection point of the extended lines
+	edges := make([]lines.Line, len(p.Points))
+	for i := range len(p.Points) {
+		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beatifully
+		pointB := p.Points[i]
+		edges[i] = lines.Line{P: pointA, V: pointB.Subtract(pointA).Unit()}
+	}
+	for i, edge := range edges {
+		fmt.Printf("old edge %v\n", edge)
+		edges[i] = lines.Line{P: edge.P.Add(edge.V.Perp().Unit().Mult(d)), V: edge.V}
+		fmt.Printf("new edge %v\n", edges[i])
+	}
+	points := []primitives.Point{}
+	for i := range edges {
+		edgeA := edges[mod(i-1, len(edges))] // ensure that it wraps around beatifully
+		edgeB := edges[i]
+		intersection := edgeA.Intersect(edgeB)
+		if intersection == nil {
+			return Polygon{}
+		}
+		fmt.Printf("Intersection of %v and %v is %v\n", edgeA, edgeB, *intersection)
+		points = append(points, *intersection)
+	}
+
+	return Polygon{Points: points}
+}
+
 // should return circle t-values
 func (p Polygon) IntersectCircleTs(circle Circle) []float64 {
 	ts := []float64{}

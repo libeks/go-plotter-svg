@@ -31,13 +31,14 @@ func (l Line) Intersect(l2 Line) *primitives.Point {
 	}
 	// result is
 	// x = ((x1*y2 - y1*x2)(x3-x4) - (x1-x2)(x3*y4 - y3*x4))/determinant
+	//   = ()
 	// y = ((x1*y2 - y1*x2)(y3-y4) - (y1-y2)(x3*y4 - y3*x4))/determinant
 	x1x2 := -l.V.X
 	x3x4 := -l2.V.X
 	y1y2 := -l.V.Y
 	y3y4 := -l2.V.Y
-	x1y2y1x2 := (l.P.X*(l.P.Y+l.V.Y) - l.P.Y*(l.P.X+l.V.X))
-	x3y4y3x4 := (l2.P.X * (l2.P.Y + l2.V.Y)) * (l2.P.Y * (l2.P.X + l2.V.X))
+	x1y2y1x2 := (l.P.X*(l.P.Y+l.V.Y) - l.P.Y*(l.P.X+l.V.X))                 // x1*(y2) - y1*x2
+	x3y4y3x4 := (l2.P.X * (l2.P.Y + l2.V.Y)) - (l2.P.Y * (l2.P.X + l2.V.X)) // x4*(y4+y3) - y4*(x3+x4)
 
 	x := (x1y2y1x2*x3x4 - x1x2*x3y4y3x4) / determinant
 	y := (x1y2y1x2*y3y4 - y1y2*x3y4y3x4) / determinant

@@ -134,7 +134,6 @@ func (l Layer) MinimizePath(allowReverse bool) Layer {
 		panic(fmt.Errorf("did not get the same number of lines %s vs %s", l.linelikes, lns))
 	}
 	l.linelikes = lns
-	// fmt.Printf("Layer after %s\n", l.Statistics())
 	return l
 }
 
