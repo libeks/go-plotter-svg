@@ -667,8 +667,6 @@ func polygonScene(b primitives.BBox) Scene {
 	greens := []lines.LineLike{}
 	greys := []lines.LineLike{}
 	yellows := []lines.LineLike{}
-	// text := fonts.RenderText(b, "The quick brown fox jumps", fonts.WithSize(500))
-	// text := fonts.RenderText(b, "fe fi fo fum", fonts.WithSize(2000))
 
 	chars := []string{"A", "B", "C", "D", "E", "F", "G", "H"}
 
@@ -681,7 +679,6 @@ func polygonScene(b primitives.BBox) Scene {
 		greens = append(greens, fonts.RenderText(bbox, chars[i], fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
 		grown := poly.Grow(-50)
 		fill := grown.LineFill(0.2, 50)
-		fmt.Printf("Fill %v\n", fill)
 		yellows = append(yellows, fill...)
 		greys = append(greys, segmentsToLineLikes(grown.EdgeLines())...)
 	}
@@ -727,8 +724,6 @@ func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Scene {
 	// center in bbox
 	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
 	scene = scene.AddFoldableLayers(pattern)
-	// scene = scene.AddLayer(NewLayer("black").WithLineLike(pattern.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
-	// scene = scene.AddLayer(NewLayer("blue").WithLineLike(pattern.Annotations).WithColor("blue").WithWidth(20).MinimizePath(true))
 	return scene
 }
 
@@ -749,11 +744,9 @@ func foldableCutCornerScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
-	// blacks := foldable.CutCube(b, foldableBase, 0.5)
 	pattern := foldable.CutCubeID(b, foldableBase, 0.5)
 	// center in bbox
 	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	// scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	scene = scene.AddFoldableLayers(pattern)
 	return scene
 }

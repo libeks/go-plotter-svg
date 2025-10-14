@@ -152,15 +152,12 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 		oldSize = bbox.Width()
 		for i := range 8 {
 			candidate := bbox.Translate(primitives.UnitRight.RotateCCW(math.Pi / 4.0 * float64(i)).Mult(bbox.Width() * 0.01))
-			// fmt.Printf("Candidate %v\n", candidate)
 			candidate = candidate.Scale(1.005)
-			// fmt.Printf("Candidate2 %v\n", candidate)
 			if math.Abs(1.0-candidate.Width()/candidate.Height()) > FLOAT_ACCURACY {
 				fmt.Printf("width %f, height %f\n", candidate.Width(), candidate.Height())
 				panic("polygon is not a square")
 			}
 			if p.isBBoxInside(candidate) {
-				// fmt.Printf("old box side %f, new %f\n", oldSize, candidate.Width())
 				bbox = candidate
 				break
 			}
@@ -194,7 +191,6 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 			maxT = t
 		}
 	}
-	fmt.Printf("minT: %f, maxT: %f\n", minT, maxT)
 	perpLine := lines.Line{
 		P: primitives.Origin,
 		V: vPerp,
@@ -207,13 +203,12 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 			V: v,
 		}
 		ts := p.IntersectTs(line)
-		fmt.Printf("ts %v\n", ts)
 		if len(ts) == 2 {
 			lineLikes = append(lineLikes, lines.LineSegment{
 				P1: line.At(ts[0]),
 				P2: line.At(ts[1]),
 			})
-		} else if len(ts) != 0 && len(ts) != 1 {
+		} else if len(ts) > 2 {
 			panic("Unexpected t-values for line and polygon intersection")
 		}
 	}
@@ -299,12 +294,7 @@ func (p Polygon) isClockwise() bool {
 }
 
 func (p Polygon) isBBoxInside(bbox primitives.BBox) bool {
-	pts := []primitives.Point{
-		bbox.UpperLeft,
-		bbox.LowerRight,
-		{X: bbox.UpperLeft.X, Y: bbox.LowerRight.Y},
-		{X: bbox.LowerRight.X, Y: bbox.UpperLeft.Y},
-	}
+	pts := bbox.Corners()
 	for _, pt := range pts {
 		if !p.Inside(pt) {
 			return false
