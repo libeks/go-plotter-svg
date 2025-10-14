@@ -1,7 +1,6 @@
 package foldable
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/lines"
@@ -90,7 +89,8 @@ func NewFace(shape Shape) Face {
 
 type Face struct {
 	Shape
-	Name     string
+	Name string
+	infill
 	Connects map[int]Connection
 }
 
@@ -182,7 +182,7 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 
 	}
 	lns = append(lns, l)
-	fmt.Printf("Adding polygon %s\n", f.Name)
+	facePoints = facePoints[:len(facePoints)-1] // the starting point is the same as the last point, so it can be removed
 	facePolygons[f.Name] = objects.Polygon{Points: facePoints}
 	return RenderBundle{
 		Lines:        lns,

@@ -30,6 +30,10 @@ func (s Scene) AddFoldableLayers(p foldable.FoldablePattern) Scene {
 	s = s.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
 	s = s.AddLayer(NewLayer("green").WithLineLike(p.Annotations).WithColor("green").WithWidth(20).MinimizePath(true))
 	s = s.AddLayer(NewLayer("blue").WithLineLike(lines.LinesFromBBox(p.BBox())).WithColor("blue").WithWidth(20).MinimizePath(true))
+	for color, infill := range p.Fill {
+		layerName := fmt.Sprintf("fill-%s", color)
+		s = s.AddLayer(NewLayer(layerName).WithLineLike(infill).WithColor(color).WithWidth(20).MinimizePath(true))
+	}
 	return s
 }
 

@@ -227,7 +227,6 @@ func parallelBoxScene(b primitives.BBox) Scene {
 	maxLineWidth := 100.0
 	minAngle := 0.0
 	maxAngle := math.Pi
-	// angle := math.Pi / 3
 	scene := Scene{}.WithGuides()
 	segments := [][]lines.LineLike{}
 	boxes := primitives.PartitionIntoSquares(b, 10)

@@ -93,7 +93,7 @@ func (p Polygon) IntersectTs(line lines.Line) []float64 {
 			ts = append(ts, *t)
 		}
 	}
-	return ts
+	return deduplicate(ts)
 }
 
 // Midpoint returns the average of all vertices of a polygon. This is helpful sometimes, but not other times.
@@ -166,6 +166,18 @@ func (p Polygon) LargestContainedSquareBBox() primitives.BBox {
 	return bbox
 }
 
+func deduplicate(ts []float64) []float64 {
+	tMap := map[float64]struct{}{}
+	for _, t := range ts {
+		tMap[t] = struct{}{}
+	}
+	retList := []float64{}
+	for key := range tMap {
+		retList = append(retList, key)
+	}
+	return retList
+}
+
 // return a slice of parallel line segments that completely fill the polygon, at 'spacing' apart
 func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 	// start with a line perpendicular to the angle
@@ -196,7 +208,7 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 		V: vPerp,
 	}
 	lineLikes := []lines.LineLike{}
-	for i := range int((maxT - minT) / spacing) {
+	for i := range int((maxT-minT)/spacing) + 1 {
 		lineT := minT + float64(i)*spacing
 		line := lines.Line{
 			P: perpLine.At(lineT),
@@ -208,7 +220,9 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 				P1: line.At(ts[0]),
 				P2: line.At(ts[1]),
 			})
+
 		} else if len(ts) > 2 {
+			fmt.Printf("ts %v\n", ts)
 			panic("Unexpected t-values for line and polygon intersection")
 		}
 	}
@@ -236,7 +250,6 @@ func mod(a, b int) int {
 // edge line outwards perpendicular to itself by the distance d.
 // If the resulting polygon is too small, this will return a polygon with no edges
 func (p Polygon) Grow(d float64) Polygon {
-	// TODO: Fix growing direction for CW and CCW polygons, they each grow in opposite directions
 	// for every point,
 	//   take the edges that the point falls on,
 	//   take their lines,
@@ -251,12 +264,11 @@ func (p Polygon) Grow(d float64) Polygon {
 	for i := range len(p.Points) {
 		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beatifully
 		pointB := p.Points[i]
+
 		edges[i] = lines.Line{P: pointA, V: pointB.Subtract(pointA).Unit()}
 	}
 	for i, edge := range edges {
-		// fmt.Printf("old edge %v\n", edge)
 		edges[i] = lines.Line{P: edge.P.Add(edge.V.Perp().Unit().Mult(d)), V: edge.V}
-		// fmt.Printf("new edge %v\n", edges[i])
 	}
 	points := []primitives.Point{}
 	for i := range edges {
@@ -266,7 +278,6 @@ func (p Polygon) Grow(d float64) Polygon {
 		if intersection == nil {
 			return Polygon{}
 		}
-		// fmt.Printf("Intersection of %v and %v is %v\n", edgeA, edgeB, *intersection)
 		points = append(points, *intersection)
 	}
 

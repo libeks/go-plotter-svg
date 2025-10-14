@@ -11,7 +11,25 @@ import (
 
 type FaceID struct {
 	Shape
+	infill
 	Name string
+}
+
+type infill struct {
+	color   string  // color for the infill, should be a csv defined color
+	spacing float64 // spacing between lines
+	angle   float64 // angle of the lines
+	gap     float64 // distance from the edge of the polygon
+}
+
+func (f FaceID) WithFill(color string, spacing, angle, gap float64) FaceID {
+	f.infill = infill{
+		color:   color,
+		spacing: spacing,
+		angle:   angle,
+		gap:     gap,
+	}
+	return f
 }
 
 func faceID(s Shape, n string) FaceID {
@@ -90,6 +108,7 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		faceByID[face.Name] = &Face{
 			Shape:    face.Shape,
 			Name:     face.Name,
+			infill:   face.infill,
 			Connects: map[int]Connection{},
 		}
 		for i := range face.Shape.Edges {
@@ -164,7 +183,17 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		bbox := polygon.LargestContainedSquareBBox()
 		bbox = bbox.WithPadding(100)
 		annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
-		fills[key] = polygon.LineFill(0, 10)
+		face := faceByID[key]
+		if face.infill.color != "" {
+			fmt.Printf("face %s has infill!\n", face.Name)
+			if _, ok := fills[face.infill.color]; !ok {
+				fills[face.infill.color] = []lines.LineLike{}
+			}
+			infillPoly := polygon.Grow(-face.infill.gap)
+			fmt.Printf("Infill poly %v, gap %f\n", infillPoly, face.infill.gap)
+			fills[face.infill.color] = append(fills[face.infill.color], infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
+			fmt.Printf("color %s infill is now %v\n", face.infill.color, len(fills[face.infill.color]))
+		}
 
 	}
 	polygons = append(polygons, faceBundle.FlapPolygons...)
