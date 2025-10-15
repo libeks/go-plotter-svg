@@ -2,12 +2,15 @@ package foldable
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
+
+const MATH_PRECISION = 0.001
 
 type FaceID struct {
 	Shape
@@ -138,11 +141,11 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		// check that the two edges are of the same length
 		aLen := faceA.Shape.Edges[connection.EdgeAID].Vector.Len()
 		bLen := faceB.Shape.Edges[connection.EdgeBID].Vector.Len()
-		if aLen != bLen {
-			fmt.Printf("The connected edges %s:%d and %s:%d have different lengths (%.3f vs %.3f)\n",
+		if math.Abs(aLen-bLen) > MATH_PRECISION {
+			fmt.Printf("The connected edges %s:%d and %s:%d have different lengths (%.3f vs %.3f = diff of %.3f)\n",
 				connection.FaceA, connection.EdgeAID,
 				connection.FaceB, connection.EdgeBID,
-				aLen, bLen,
+				aLen, bLen, math.Abs(aLen-bLen),
 			)
 		}
 		faceA.Connects[connection.EdgeAID] = Connection{
@@ -185,14 +188,11 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
 		face := faceByID[key]
 		if face.infill.color != "" {
-			fmt.Printf("face %s has infill!\n", face.Name)
 			if _, ok := fills[face.infill.color]; !ok {
 				fills[face.infill.color] = []lines.LineLike{}
 			}
 			infillPoly := polygon.Grow(-face.infill.gap)
-			fmt.Printf("Infill poly %v, gap %f\n", infillPoly, face.infill.gap)
 			fills[face.infill.color] = append(fills[face.infill.color], infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
-			fmt.Printf("color %s infill is now %v\n", face.infill.color, len(fills[face.infill.color]))
 		}
 
 	}

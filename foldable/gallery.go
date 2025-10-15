@@ -248,17 +248,17 @@ func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) Foldab
 	triColor := "red"
 	faceColor := "yellow"
 	sq := Square(side)
-	triSide := math.Sqrt(2) * side
+	triSide := side / (math.Sqrt(2))
 	tr := Shape{
 		Edges: []Edge{
 			{
 				Vector: primitives.Vector{X: triSide, Y: 0},
 			},
 			{
-				Vector: primitives.Vector{X: triSide, Y: triSide},
+				Vector: primitives.Vector{X: -triSide, Y: math.Sqrt(2 * triSide * triSide)},
 			},
 			{
-				Vector: primitives.Vector{X: 0, Y: triSide},
+				Vector: primitives.Vector{X: 0, Y: -math.Sqrt(2 * triSide * triSide)},
 			},
 		},
 	}
@@ -337,6 +337,12 @@ func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) Foldab
 
 			link("G", "G+1", 0, 2),
 			link("G", "G-1", 2, 0),
+
+			link("B+a", "B+b", 0, 1),
+			link("B+b", "B+c", 0, 1),
+			flap("B", "B+a", 0, 2),
+			flap("C+1", "B+b", 3, 2),
+			flap("A+1", "B+c", 1, 2),
 
 			flap("A", "H", 3, 1),
 			flap("A+2", "G+1", 3, 0),
