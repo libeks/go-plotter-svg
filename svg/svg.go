@@ -35,7 +35,7 @@ func (s SVG) WriteSVG() {
 			Name: "svg", Attrs: []xmlwriter.Attr{
 				{Name: "width", Value: s.Width},
 				{Name: "height", Value: s.Height},
-				{Name: "viewBox", Value: "0 0 10000 10000"},
+				{Name: "viewBox", Value: "0 0 13333 10000"}, // ensure the viewbox fits the page size
 				{Name: "version", Value: "1.1"},
 				{Name: "id", Value: "svg6"},
 				{Name: "sodipodi:docname", Value: "test_inkscape.svg"},

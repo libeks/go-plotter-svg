@@ -181,11 +181,17 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 	polygons := []objects.Polygon{}
 	annotations := []lines.LineLike{}
 	fills := map[string][]lines.LineLike{}
+	minAnnotationSize := math.MaxFloat64
 	for key, polygon := range faceBundle.FacePolygons {
 		polygons = append(polygons, polygon)
 		bbox := polygon.LargestContainedSquareBBox()
 		bbox = bbox.WithPadding(100)
-		annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
+		annotation := fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox())
+		if annotation.Size < minAnnotationSize {
+			minAnnotationSize = annotation.Size
+		}
+		// annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
+
 		face := faceByID[key]
 		if face.infill.color != "" {
 			if _, ok := fills[face.infill.color]; !ok {
@@ -194,7 +200,12 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 			infillPoly := polygon.Grow(-face.infill.gap)
 			fills[face.infill.color] = append(fills[face.infill.color], infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
 		}
-
+	}
+	// redo it again with the min annotation size
+	for key, polygon := range faceBundle.FacePolygons {
+		bbox := polygon.LargestContainedSquareBBox()
+		bbox = bbox.WithPadding(100)
+		annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(minAnnotationSize)).CharCurves...)
 	}
 	polygons = append(polygons, faceBundle.FlapPolygons...)
 	return FoldablePattern{

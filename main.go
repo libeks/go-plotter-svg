@@ -12,17 +12,16 @@ func main() {
 	args := os.Args[1:]
 	fname := "gallery/test1.svg"
 	sizePx := 10000.0
-	padding := 1000.0
 
 	if len(args) > 0 {
 		fname = args[0]
 	}
 
 	outerBox := primitives.BBox{
-		UpperLeft:  primitives.Point{X: 0, Y: 0},
-		LowerRight: primitives.Point{X: sizePx, Y: sizePx},
+		UpperLeft:  primitives.Point{X: 0, Y: 800},                        // leave space at the top for guides
+		LowerRight: primitives.Point{X: sizePx * (12.0 / 9.0), Y: sizePx}, // make sure it spans the 9"x12" canvas
 	}
-	innerBox := outerBox.WithPadding(padding)
+	innerBox := outerBox.WithPadding(300) // enough to no hit the edges
 	// scene := scenes.getCurlyScene(outerBox)
 	// scene := scenes.getLinesInsideScene(innerBox, 1000)
 	// scene := scenes.getLineFieldInObjects(innerBox)
