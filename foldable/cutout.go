@@ -187,11 +187,10 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		bbox := polygon.LargestContainedSquareBBox()
 		bbox = bbox.WithPadding(100)
 		annotation := fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox())
-		if annotation.Size < minAnnotationSize {
+		// ensure that all annotations are rendered at the same size, which is the smallest size you can render
+		if annotation.Size < minAnnotationSize && annotation.Size > 0 {
 			minAnnotationSize = annotation.Size
 		}
-		// annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox()).CharCurves...)
-
 		face := faceByID[key]
 		if face.infill.color != "" {
 			if _, ok := fills[face.infill.color]; !ok {
