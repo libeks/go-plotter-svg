@@ -12,6 +12,7 @@ import (
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/maze"
 	"github.com/libeks/go-plotter-svg/objects"
+	"github.com/libeks/go-plotter-svg/pack"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 	"github.com/libeks/go-plotter-svg/truchet"
@@ -34,6 +35,7 @@ var (
 	CCircleLineSegments    = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
 	Text                   = textScene
+	RectanglePackingScene  = rectanglePackginScene
 
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
@@ -760,5 +762,26 @@ func mazeScene(b primitives.BBox) Scene {
 
 	scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("walls").WithLineLike(mazeLines.Walls).WithColor("black").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func rectanglePackginScene(b primitives.BBox) Scene {
+	scene := Scene{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+
+	// maze := maze.NewMaze(30)
+	// mazeLines := maze.Render(b)
+	rectangles := []primitives.BBox{
+		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 1000})},
+	}
+	translations := pack.PackOnOnePage(rectangles, b)
+	blacks := []lines.LineLike{}
+	for i, rect := range rectangles {
+		rectangles[i] = rect.Translate(translations[i])
+		blacks = append(blacks, lines.LinesFromBBox(rectangles[i])...)
+	}
+
+	// scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("walls").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	return scene
 }
