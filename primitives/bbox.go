@@ -1,6 +1,7 @@
 package primitives
 
 import (
+	"fmt"
 	"math"
 	"slices"
 )
@@ -28,6 +29,11 @@ func (b BBox) IsEmpty() bool {
 	}
 	// otherwise the area is 0, but the points are not the same
 	return false
+}
+
+// PointInside returns true if the point is inside the bounding box
+func (b BBox) PointInside(p Point) bool {
+	return p.X >= b.UpperLeft.X && p.X <= b.LowerRight.X && p.Y >= b.UpperLeft.Y && p.Y <= b.LowerRight.Y
 }
 
 func (b BBox) Width() float64 {
@@ -118,8 +124,16 @@ func (b BBox) Intersect(c BBox) (BBox, bool) {
 }
 
 func (b BBox) DoesIntersect(c BBox) bool {
-	_, doesIntersect := b.Intersect(c)
+	inter, doesIntersect := b.Intersect(c)
+	if doesIntersect {
+		fmt.Printf("Overlap is %v\n", inter)
+	}
 	return doesIntersect
+}
+
+// Contains returns true if c is completely inside the box b
+func (b BBox) Contains(c BBox) bool {
+	return b.PointInside(c.UpperLeft) && b.PointInside(c.LowerRight)
 }
 
 func BBoxAroundPoints(pts ...Point) BBox {

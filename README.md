@@ -21,7 +21,6 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#distinguishing
 * For font families, consider this library:
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
-* Properly set the global bounding box to what can be drawn on a single page
 * Foldable:
   * Detect that the figure is not drawable, specifically when three faces are connected in a cycle (A>B>C>A). This current causes stack overflow
   * Detect face overlap, such as with flaps being too wide, etc.

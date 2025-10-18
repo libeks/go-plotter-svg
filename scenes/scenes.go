@@ -773,11 +773,18 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 	// mazeLines := maze.Render(b)
 	rectangles := []primitives.BBox{
 		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 1000})},
+		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 1000})},
+		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 2000})},
+		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 2000})},
 	}
-	translations := pack.PackOnOnePage(rectangles, b)
+	translations := pack.PackOnOnePage(rectangles, b, 200)
 	blacks := []lines.LineLike{}
 	for i, rect := range rectangles {
-		rectangles[i] = rect.Translate(translations[i])
+		vect := translations[i]
+		if vect != nil {
+			rectangles[i] = rect.Translate(*vect)
+		}
+
 		blacks = append(blacks, lines.LinesFromBBox(rectangles[i])...)
 	}
 
