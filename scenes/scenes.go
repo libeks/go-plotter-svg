@@ -770,8 +770,8 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	rectangles := []primitives.BBox{}
-	for i := range 2 {
-		for j := range 2 {
+	for i := range 3 {
+		for j := range 3 {
 			rectangles = append(rectangles, primitives.BBox{
 				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
 					X: float64((i + 1) * 1000),
@@ -780,24 +780,17 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 			})
 		}
 	}
-	// rectangles := []primitives.BBox{
-	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 1000})},
-	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 1000})},
-	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 2000})},
-	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 2000})},
-	// }
 	blacks := []lines.LineLike{}
 	reds := []lines.LineLike{}
-	translations, vectors := pack.PackOnOnePageExhaustive(rectangles, b, 200)
-	for _, v := range vectors {
+	solution := pack.PackOnOnePageExhaustive(rectangles, b, 200)
+	for _, v := range solution.DebugPositions {
 		reds = append(reds, lines.LinesFromBBox(primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 50, Y: 50})}.Translate(v))...)
 	}
 
 	for i, rect := range rectangles {
-		vect := translations[i]
+		vect := solution.Translations[i]
 		if vect != nil {
 			rectangles[i] = rect.Translate(*vect)
-			fmt.Printf("Rectangle %d will be translated by %v\n", i, *vect)
 		}
 
 		blacks = append(blacks, lines.LinesFromBBox(rectangles[i])...)
