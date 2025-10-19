@@ -1,7 +1,6 @@
 package primitives
 
 import (
-	"fmt"
 	"math"
 	"slices"
 )
@@ -124,10 +123,7 @@ func (b BBox) Intersect(c BBox) (BBox, bool) {
 }
 
 func (b BBox) DoesIntersect(c BBox) bool {
-	inter, doesIntersect := b.Intersect(c)
-	if doesIntersect {
-		fmt.Printf("Overlap is %v\n", inter)
-	}
+	_, doesIntersect := b.Intersect(c)
 	return doesIntersect
 }
 

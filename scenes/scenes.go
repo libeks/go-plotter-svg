@@ -769,26 +769,41 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 	scene := Scene{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
-	// maze := maze.NewMaze(30)
-	// mazeLines := maze.Render(b)
-	rectangles := []primitives.BBox{
-		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 1000})},
-		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 1000})},
-		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 2000})},
-		{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 2000})},
+	rectangles := []primitives.BBox{}
+	for i := range 2 {
+		for j := range 2 {
+			rectangles = append(rectangles, primitives.BBox{
+				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
+					X: float64((i + 1) * 1000),
+					Y: float64((j + 1) * 1000),
+				}),
+			})
+		}
 	}
-	translations := pack.PackOnOnePage(rectangles, b, 200)
+	// rectangles := []primitives.BBox{
+	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 1000})},
+	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 1000})},
+	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 1000, Y: 2000})},
+	// 	{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 2000, Y: 2000})},
+	// }
 	blacks := []lines.LineLike{}
+	reds := []lines.LineLike{}
+	translations, vectors := pack.PackOnOnePageExhaustive(rectangles, b, 200)
+	for _, v := range vectors {
+		reds = append(reds, lines.LinesFromBBox(primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 50, Y: 50})}.Translate(v))...)
+	}
+
 	for i, rect := range rectangles {
 		vect := translations[i]
 		if vect != nil {
 			rectangles[i] = rect.Translate(*vect)
+			fmt.Printf("Rectangle %d will be translated by %v\n", i, *vect)
 		}
 
 		blacks = append(blacks, lines.LinesFromBBox(rectangles[i])...)
 	}
 
-	// scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
+	scene = scene.AddLayer(NewLayer("path").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("walls").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
 	return scene
 }
