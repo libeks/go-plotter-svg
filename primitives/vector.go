@@ -15,8 +15,14 @@ type Vector struct {
 	Y float64
 }
 
+// String is the human-readable representation of this value
 func (v Vector) String() string {
 	return fmt.Sprintf("Vector (%.1f, %.1f)", v.X, v.Y)
+}
+
+// Repr is used for sorting, the strings being the same means the vectors are the same
+func (v Vector) Repr() string {
+	return fmt.Sprintf("%f,%f", v.X, v.Y)
 }
 
 func (v Vector) Mult(t float64) Vector {

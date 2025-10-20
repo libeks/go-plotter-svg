@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strings"
 
 	"golang.org/x/exp/maps"
 
@@ -118,7 +119,7 @@ type searchState struct {
 	unprocessables bitmap.Bitmap
 	positions      []primitives.Vector
 	unprocessed    bitmap.Bitmap
-	processed      map[int]box // map from box index to the box entity
+	processed      map[int]primitives.Vector // map from box index to the translation vector
 }
 
 func (s searchState) RemoveSuperfluousPositions() searchState {
@@ -129,7 +130,8 @@ func (s searchState) RemoveSuperfluousPositions() searchState {
 	for _, pos := range s.positions {
 		pt := primitives.Origin.Add(pos)
 		conflict := false
-		for _, bx := range s.processed {
+		for i, v := range s.processed {
+			bx := s.boxes[i].Translate(v)
 			if bx.PointInside(pt) {
 				conflict = true
 				break
@@ -145,16 +147,41 @@ func (s searchState) RemoveSuperfluousPositions() searchState {
 	return s
 }
 
-// // Key is used to compare whether two states are the same
-// func (s searchState) Key() string {
-
-// }
+// Key is used to compare whether two states are the same
+func (s searchState) Key() string {
+	unprocessables, err := s.unprocessables.MarshalJSON()
+	if err != nil {
+		panic("Couldn't marshal unprocessables")
+	}
+	unprocessed, err := s.unprocessed.MarshalJSON()
+	if err != nil {
+		panic("Couldn't marshal unprocessed")
+	}
+	processedKeys := maps.Keys(s.processed)
+	sort.Ints(processedKeys)
+	processedStrings := make([]string, len(processedKeys))
+	for i, key := range processedKeys {
+		v := s.processed[key]
+		processedStrings[i] = fmt.Sprintf("%d#%s", key, v.Repr())
+	}
+	sort.Slice(s.positions, func(i, j int) bool {
+		if s.positions[i].X != s.positions[j].X {
+			return s.positions[i].X > s.positions[j].X
+		}
+		return s.positions[i].Y != s.positions[j].Y
+	})
+	positionStrings := make([]string, len(s.positions))
+	for i, pos := range s.positions {
+		positionStrings[i] = pos.Repr()
+	}
+	return fmt.Sprintf("%s_%s_%s_%s", unprocessables, unprocessed, strings.Join(processedStrings, ";"), strings.Join(positionStrings, ";"))
+}
 
 func (s searchState) IntersectsFixed(b primitives.BBox) bool {
-	for _, fixedBox := range s.processed {
+	for i, v := range s.processed {
+		fixedBox := s.boxes[i].Translate(v)
 		if fixedBox.DoesIntersect(b) {
 			// there is a conflict
-			// fmt.Printf("Box %v intersects with box %v\n", fixedBox, b)
 			return true
 		}
 	}
@@ -163,8 +190,8 @@ func (s searchState) IntersectsFixed(b primitives.BBox) bool {
 
 func (s searchState) ProcessedIndexes() []int {
 	ret := []int{}
-	for _, box := range s.processed {
-		ret = append(ret, box.index)
+	for i := range s.processed {
+		ret = append(ret, i)
 	}
 	return ret
 }
@@ -174,16 +201,14 @@ func (s searchState) UnprocessedIndexes() []int {
 	s.unprocessed.Range(func(x uint32) {
 		ret = append(ret, int(x))
 	})
-	// for _, box := range s.unprocessed {
-	// 	ret = append(ret, box.index)
-	// }
 	return ret
 }
 
 // return the area of the bounding box that contains all processed boxes
 func (s searchState) ProcessedArea() float64 {
 	points := []primitives.Point{}
-	for _, bx := range s.processed {
+	for i, v := range s.processed {
+		bx := s.boxes[i].Translate(v)
 		points = append(points, bx.BBox.Corners()...)
 	}
 	totalBoundingBox := primitives.BBoxAroundPoints(points...)
@@ -221,12 +246,6 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 		if b.Width() > container.Width() || b.Height() > container.Height() {
 			fmt.Printf("Box %v is too big for the container, will ignore\n", b)
 			unprocessableBoxes.Set(uint32(i))
-			// unprocessables = append(unprocessables,
-			// 	box{
-			// 		BBox:  b.Translate(b.UpperLeft.Subtract(primitives.Origin)),
-			// 		index: i,
-			// 	},
-			// )
 			continue
 		}
 		allBoxes.Set(uint32(i))
@@ -237,7 +256,7 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 			unprocessables: unprocessableBoxes,
 			positions:      []primitives.Vector{container.UpperLeft.Subtract(primitives.Origin)},
 			unprocessed:    allBoxes,
-			processed:      map[int]box{},
+			processed:      map[int]primitives.Vector{},
 		},
 	}
 	finalStates := []searchState{}
@@ -279,7 +298,7 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 					positions = append(positions, positionedBox.SWCorner().Add(primitives.Vector{X: padding, Y: 0}).Subtract(primitives.Origin))
 
 					newProcessed := maps.Clone(state.processed)
-					newProcessed[int(boxID)] = positionedBox
+					newProcessed[int(boxID)] = pos
 					newUnprocessed := state.unprocessed.Clone(nil)
 					newUnprocessed.Remove(boxID)
 					newState := searchState{
@@ -321,18 +340,10 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 		// sort by total area of processed
 		return cmp.Compare(a.ProcessedArea(), b.ProcessedArea())
 	})
-	// for i, solution := range finalStates {
-	// 	fmt.Printf("%d, %d unprocessables, area: %f\n", i, len(solution.unprocessables), solution.ProcessedArea())
-	// }
-	// solution := finalStates[0]
-	// fmt.Printf("Best solution is %v\n", solution)
 	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", len(solution.unprocessables), len(solution.processed))
-	// fmt.Printf("%v\n", solution.processed)
 	positions := make([]*primitives.Vector, len(bxs))
-	for i, bx := range solution.processed {
-		tmp := bx.UpperLeft.Subtract(bxs[i].UpperLeft)
-		// fmt.Printf("processed box %d (%d) has tranlsation of %v\n", i, bx.index, tmp)
-		positions[i] = &tmp
+	for i, v := range solution.processed {
+		positions[i] = &v
 	}
 	return PackingSolution{
 		Translations:   positions,
@@ -344,7 +355,13 @@ func consolidateSearchStates(states []searchState) []searchState {
 	if len(states) < 2 {
 		return states
 	}
-	return states
+	fmt.Printf("Consolidating from %d... ", len(states))
+	stateMap := map[string]searchState{}
+	for _, state := range states {
+		stateMap[state.Key()] = state
+	}
+	fmt.Printf("to %d\n", len(stateMap))
+	return maps.Values(stateMap)
 }
 
 // func PackOnMultiplePages(boxes []primitives.BBox, container primitives.BBox)
