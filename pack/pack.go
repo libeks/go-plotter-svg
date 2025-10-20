@@ -132,12 +132,15 @@ func (s searchState) RemoveSuperfluousPositions() searchState {
 		for i, v := range s.processed {
 			bx := s.boxes[i].Translate(v)
 			if bx.PointInside(pt) {
+				// fmt.Printf("%v is inside %v\n", pt, bx)
 				conflict = true
 				break
 			}
 		}
 		if !conflict {
 			newPositions = append(newPositions, pos)
+		} else {
+			// fmt.Printf("Removing candidate position %v\n", pos)
 		}
 	}
 	s.positions = newPositions
@@ -306,8 +309,20 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 					found = true
 					positions := append(append([]primitives.Vector{}, state.positions[:posID]...), state.positions[posID+1:]...) // remove the current position
 					// add padded positions at the two corners
-					positions = append(positions, positionedBox.NECorner().Add(primitives.Vector{X: 0, Y: padding}).Subtract(primitives.Origin))
-					positions = append(positions, positionedBox.SWCorner().Add(primitives.Vector{X: padding, Y: 0}).Subtract(primitives.Origin))
+					swCandidate := positionedBox.NECorner().Add(primitives.Vector{X: 0, Y: padding}).Subtract(primitives.Origin)
+					neCandidate := positionedBox.SWCorner().Add(primitives.Vector{X: padding, Y: 0}).Subtract(primitives.Origin)
+					positions = append(positions, neCandidate)
+					if neCandidate.Y > container.UpperLeft.Y {
+						candidate := primitives.Vector{X: neCandidate.X, Y: container.UpperLeft.Y}
+						// fmt.Printf("Added ne candidate tangent %v from %v\n", candidate, neCandidate)
+						positions = append(positions, candidate)
+					}
+					positions = append(positions, swCandidate)
+					if swCandidate.X > container.UpperLeft.X {
+						candidate := primitives.Vector{X: container.UpperLeft.X, Y: swCandidate.Y}
+						// fmt.Printf("Added sw candidate tangent %v from %v\n", candidate, swCandidate)
+						positions = append(positions, candidate)
+					}
 
 					newProcessed := maps.Clone(state.processed)
 					newProcessed[int(boxID)] = pos
