@@ -22,9 +22,11 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 * For font families, consider this library:
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
 * Foldable:
-  * Detect that the figure is not drawable, specifically when three faces are connected in a cycle (A>B>C>A). This current causes stack overflow
+  * Detect that the figure is not drawable, specifically when three faces are connected in a cycle (A>B>C>A). This currently causes stack overflow
   * Detect face overlap, such as with flaps being too wide, etc.
   * Allow connections between foldable objects, i.e. have a scene contain multiple foldables with interlinking
+* Multi-page rendering
+* Rectangle-packing: Support multi-page coverage
 
 # Plot ideas
 

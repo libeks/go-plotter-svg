@@ -391,11 +391,6 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 	}
 }
 
-type areaStruct struct {
-	area float64
-	searchState
-}
-
 func consolidateSearchStates(states []searchState) []searchState {
 	if len(states) < 2 {
 		return states
@@ -408,7 +403,7 @@ func consolidateSearchStates(states []searchState) []searchState {
 		if len(state.processed) > 3 {
 			coveredArea := state.ProcessedArea()
 			processedArea := state.ProcessedAreaSum()
-			if processedArea/coveredArea > 0.65 { // TODO: dynamically determine the threshold
+			if processedArea/coveredArea > 0.67 { // TODO: dynamically determine the threshold
 				newStates = append(newStates, state)
 			}
 		} else {
