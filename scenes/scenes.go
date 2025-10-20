@@ -771,7 +771,7 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 
 	rectangles := []primitives.BBox{}
 	for i := range 3 {
-		for j := range 3 {
+		for j := range 2 {
 			rectangles = append(rectangles, primitives.BBox{
 				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
 					X: float64((i + 1) * 1000),

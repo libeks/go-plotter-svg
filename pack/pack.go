@@ -6,7 +6,11 @@ import (
 	"slices"
 	"sort"
 
+	"golang.org/x/exp/maps"
+
 	"github.com/libeks/go-plotter-svg/primitives"
+
+	"github.com/kelindar/bitmap"
 )
 
 type box struct {
@@ -110,10 +114,11 @@ func PackOnOnePage(bxs []primitives.BBox, container primitives.BBox, padding flo
 }
 
 type searchState struct {
-	unprocessables []box
+	boxes          []box
+	unprocessables bitmap.Bitmap
 	positions      []primitives.Vector
-	unprocessed    []box
-	processed      []box
+	unprocessed    bitmap.Bitmap
+	processed      map[int]box // map from box index to the box entity
 }
 
 func (s searchState) RemoveSuperfluousPositions() searchState {
@@ -145,15 +150,6 @@ func (s searchState) RemoveSuperfluousPositions() searchState {
 
 // }
 
-func (s searchState) Copy() searchState {
-	return searchState{
-		unprocessables: append([]box{}, s.unprocessables...),
-		positions:      append([]primitives.Vector{}, s.positions...),
-		unprocessed:    append([]box{}, s.unprocessed...),
-		processed:      append([]box{}, s.processed...),
-	}
-}
-
 func (s searchState) IntersectsFixed(b primitives.BBox) bool {
 	for _, fixedBox := range s.processed {
 		if fixedBox.DoesIntersect(b) {
@@ -175,9 +171,12 @@ func (s searchState) ProcessedIndexes() []int {
 
 func (s searchState) UnprocessedIndexes() []int {
 	ret := []int{}
-	for _, box := range s.unprocessed {
-		ret = append(ret, box.index)
-	}
+	s.unprocessed.Range(func(x uint32) {
+		ret = append(ret, int(x))
+	})
+	// for _, box := range s.unprocessed {
+	// 	ret = append(ret, box.index)
+	// }
 	return ret
 }
 
@@ -193,9 +192,9 @@ func (s searchState) ProcessedArea() float64 {
 
 func (s searchState) unprocessedArea() float64 {
 	total := 0.0
-	for _, box := range s.unprocessables {
-		total += box.Area()
-	}
+	s.unprocessables.Range(func(id uint32) {
+		total += s.boxes[id].Area()
+	})
 	return total
 }
 
@@ -208,32 +207,37 @@ type PackingSolution struct {
 // the container. If it cannot be placed into the container... return something more interesting
 // Include a padding between the boxes
 func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, padding float64) PackingSolution {
-	unprocessables := []box{}
+	// unprocessables := []box{}
 	boxes := make([]box, len(bxs))
+
+	allBoxes := bitmap.Bitmap{}
+	unprocessableBoxes := bitmap.Bitmap{}
 	for i, b := range bxs {
-		if b.Width() > container.Width() || b.Height() > container.Height() {
-			fmt.Printf("Box %v is too big for the container, will ignore\n", b)
-			unprocessables = append(unprocessables,
-				box{
-					BBox:  b.Translate(b.UpperLeft.Subtract(primitives.Origin)),
-					index: i,
-				},
-			)
-			continue
-		}
 		// ensure that all boxes have their upper left at origin for easier handling
 		boxes[i] = box{
 			BBox:  b.Translate(b.UpperLeft.Subtract(primitives.Origin)),
 			index: i,
 		}
+		if b.Width() > container.Width() || b.Height() > container.Height() {
+			fmt.Printf("Box %v is too big for the container, will ignore\n", b)
+			unprocessableBoxes.Set(uint32(i))
+			// unprocessables = append(unprocessables,
+			// 	box{
+			// 		BBox:  b.Translate(b.UpperLeft.Subtract(primitives.Origin)),
+			// 		index: i,
+			// 	},
+			// )
+			continue
+		}
+		allBoxes.Set(uint32(i))
 	}
-	// fmt.Printf("boxes %v\n", boxes)
 	searchStates := []searchState{
 		{
-			unprocessables: unprocessables,
+			boxes:          boxes,
+			unprocessables: unprocessableBoxes,
 			positions:      []primitives.Vector{container.UpperLeft.Subtract(primitives.Origin)},
-			unprocessed:    boxes,
-			processed:      []box{},
+			unprocessed:    allBoxes,
+			processed:      map[int]box{},
 		},
 	}
 	finalStates := []searchState{}
@@ -251,20 +255,21 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 			if len(state.positions) == 0 {
 				// if there are no positions, we are done, but the rest of the boxes are unprocessable
 				finalStates = append(finalStates, searchState{
-					unprocessables: append([]box{}, state.unprocessed...),
+					unprocessables: state.unprocessed.Clone(nil),
 					positions:      state.positions,
-					unprocessed:    []box{},
-					processed:      append([]box{}, state.processed...),
+					unprocessed:    bitmap.Bitmap{},
+					processed:      maps.Clone(state.processed),
 				})
 			}
 			for posID, pos := range state.positions {
-				for boxID, boxCandidate := range state.unprocessed {
+				state.unprocessed.Range(func(boxID uint32) {
+					boxCandidate := state.boxes[boxID]
 					positionedBox := boxCandidate.Translate(pos)
 					if !container.Contains(positionedBox.BBox) {
-						continue
+						return
 					}
 					if state.IntersectsFixed(positionedBox.BBox) {
-						continue
+						return
 					}
 					// box can be placed here, let's do so
 					found = true
@@ -273,23 +278,29 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 					positions = append(positions, positionedBox.NECorner().Add(primitives.Vector{X: 0, Y: padding}).Subtract(primitives.Origin))
 					positions = append(positions, positionedBox.SWCorner().Add(primitives.Vector{X: padding, Y: 0}).Subtract(primitives.Origin))
 
+					newProcessed := maps.Clone(state.processed)
+					newProcessed[int(boxID)] = positionedBox
+					newUnprocessed := state.unprocessed.Clone(nil)
+					newUnprocessed.Remove(boxID)
 					newState := searchState{
-						unprocessables: append([]box{}, state.unprocessables...),
+						boxes:          state.boxes,
+						unprocessables: state.unprocessables.Clone(nil),
 						positions:      positions,
-						unprocessed:    append(append([]box{}, state.unprocessed[:boxID]...), state.unprocessed[boxID+1:]...), // strip out this box
-						processed:      append(append([]box{}, state.processed...), positionedBox),
+						unprocessed:    newUnprocessed, // strip out this box
+						processed:      newProcessed,
 					}
 					newState = newState.RemoveSuperfluousPositions()
 					newStates = append(newStates, newState)
-				}
+				})
 
 			}
 			if !found {
 				finalStates = append(finalStates, searchState{
-					unprocessables: append([]box{}, state.unprocessed...),
+					boxes:          state.boxes,
+					unprocessables: state.unprocessed.Clone(nil),
 					positions:      append([]primitives.Vector{}, state.positions...),
-					unprocessed:    []box{},
-					processed:      append([]box{}, state.processed...),
+					unprocessed:    bitmap.Bitmap{},
+					processed:      maps.Clone(state.processed),
 				})
 			}
 		}
@@ -318,10 +329,10 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", len(solution.unprocessables), len(solution.processed))
 	// fmt.Printf("%v\n", solution.processed)
 	positions := make([]*primitives.Vector, len(bxs))
-	for _, bx := range solution.processed {
-		tmp := bx.UpperLeft.Subtract(bxs[bx.index].UpperLeft)
+	for i, bx := range solution.processed {
+		tmp := bx.UpperLeft.Subtract(bxs[i].UpperLeft)
 		// fmt.Printf("processed box %d (%d) has tranlsation of %v\n", i, bx.index, tmp)
-		positions[bx.index] = &tmp
+		positions[i] = &tmp
 	}
 	return PackingSolution{
 		Translations:   positions,
