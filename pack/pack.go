@@ -115,7 +115,7 @@ func PackOnOnePage(bxs []primitives.BBox, container primitives.BBox, padding flo
 }
 
 type searchState struct {
-	boxes          []box
+	boxes          []box // all search states will point to the same slice of boxes, they shouldn't be changing
 	unprocessables bitmap.Bitmap
 	positions      []primitives.Vector
 	unprocessed    bitmap.Bitmap
@@ -139,8 +139,6 @@ func (s searchState) RemoveSuperfluousPositions() searchState {
 		}
 		if !conflict {
 			newPositions = append(newPositions, pos)
-		} else {
-			// fmt.Printf("Found superfluous position\n")
 		}
 	}
 	s.positions = newPositions
@@ -224,7 +222,7 @@ func (s searchState) unprocessedArea() float64 {
 }
 
 type PackingSolution struct {
-	Translations   []*primitives.Vector
+	Translations   map[int]primitives.Vector
 	DebugPositions []primitives.Vector // only for debugging, lists the positions where additional boxes could be placed
 }
 
@@ -327,7 +325,7 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 	}
 	if len(finalStates) == 0 {
 		return PackingSolution{
-			make([]*primitives.Vector, len(bxs)),
+			make(map[int]primitives.Vector, len(bxs)),
 			[]primitives.Vector{},
 		}
 	}
@@ -341,12 +339,8 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 		return cmp.Compare(a.ProcessedArea(), b.ProcessedArea())
 	})
 	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", len(solution.unprocessables), len(solution.processed))
-	positions := make([]*primitives.Vector, len(bxs))
-	for i, v := range solution.processed {
-		positions[i] = &v
-	}
 	return PackingSolution{
-		Translations:   positions,
+		Translations:   solution.processed,
 		DebugPositions: solution.positions,
 	}
 }
@@ -358,6 +352,7 @@ func consolidateSearchStates(states []searchState) []searchState {
 	fmt.Printf("Consolidating from %d... ", len(states))
 	stateMap := map[string]searchState{}
 	for _, state := range states {
+		// fmt.Printf("key %s\n", state.Key())
 		stateMap[state.Key()] = state
 	}
 	fmt.Printf("to %d\n", len(stateMap))

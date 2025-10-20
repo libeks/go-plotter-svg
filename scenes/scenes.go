@@ -758,7 +758,6 @@ func mazeScene(b primitives.BBox) Scene {
 
 	maze := maze.NewMaze(30)
 	mazeLines := maze.Render(b)
-	// blacks := foldable.CutCube(b, foldableBase, 0.75)
 
 	scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("walls").WithLineLike(mazeLines.Walls).WithColor("black").WithWidth(20).MinimizePath(true))
@@ -788,11 +787,9 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 	}
 
 	for i, rect := range rectangles {
-		vect := solution.Translations[i]
-		if vect != nil {
-			rectangles[i] = rect.Translate(*vect)
+		if vect, ok := solution.Translations[i]; ok {
+			rectangles[i] = rect.Translate(vect)
 		}
-
 		blacks = append(blacks, lines.LinesFromBBox(rectangles[i])...)
 	}
 
