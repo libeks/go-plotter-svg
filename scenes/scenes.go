@@ -770,14 +770,34 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 
 	rectangles := []primitives.BBox{}
 	for i := range 3 {
-		for j := range 2 {
+		for j := range 3 {
 			rectangles = append(rectangles, primitives.BBox{
 				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-					X: float64((i + 1) * 1000),
-					Y: float64((j + 1) * 1000),
+					X: float64((i+1)*1000) + rand.Float64()*500,
+					Y: float64((j+1)*1000) + rand.Float64()*500,
 				}),
 			})
 		}
+	}
+	rectangles = []primitives.BBox{
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1450.1, 1254.2}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1155.0, 2367.1}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1137.7, 3095.9}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2427.6, 1227.9}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2122.4, 2213.4}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2057.4, 3417.1}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3474.9, 1111.2}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3449.5, 2210.7}},
+		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3144.9, 3471.1}},
+	}
+	// rectangles = []primitives.BBox{
+	// 	{primitives.Point{0.0, 0.0}, primitives.Point{1015.7, 1471.2}},
+	// 	{primitives.Point{0.0, 0.0}, primitives.Point{1235.7, 2211.5}},
+	// 	{primitives.Point{0.0, 0.0}, primitives.Point{2321.4, 1235.5}},
+	// 	{primitives.Point{0.0, 0.0}, primitives.Point{2050.7, 2496.6}},
+	// }
+	for _, rect := range rectangles {
+		fmt.Printf("%v\n", rect)
 	}
 	blacks := []lines.LineLike{}
 	reds := []lines.LineLike{}

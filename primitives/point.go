@@ -12,7 +12,7 @@ type Point struct {
 }
 
 func (p Point) String() string {
-	return fmt.Sprintf("Point (%.1f, %.1f)", p.X, p.Y)
+	return fmt.Sprintf("Point{%.1f, %.1f}", p.X, p.Y)
 }
 
 func (p Point) Add(v Vector) Point {

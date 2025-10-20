@@ -34,7 +34,6 @@ func (fb fixedBox) Intersect(b primitives.BBox) bool {
 	for _, fixedBox := range fb.boxes {
 		if fixedBox.DoesIntersect(b) {
 			// there is a conflict
-			// fmt.Printf("Box %v intersects with box %v\n", fixedBox, b)
 			return true
 		}
 	}
@@ -175,11 +174,26 @@ func (s searchState) Key() string {
 	return fmt.Sprintf("%s_%s_%s_%s", unprocessables, unprocessed, strings.Join(processedStrings, ";"), strings.Join(positionStrings, ";"))
 }
 
+// return a string that represents the bitmap of the boxes that have been placed
+func (s searchState) processedKey() string {
+	bitmap := bitmap.Bitmap{}
+	for key := range s.processed {
+		bitmap.Set(uint32(key))
+	}
+	key, err := bitmap.MarshalJSON()
+	if err != nil {
+		panic("Could not marshal")
+	}
+	return string(key)
+}
+
 func (s searchState) IntersectsFixed(b primitives.BBox) bool {
 	for i, v := range s.processed {
-		fixedBox := s.boxes[i].Translate(v)
+		fixedBox := s.boxes[i].Translate(v).WithPadding(-199) // grow the box by the padding amount (minus a bit)
+		// fmt.Printf("Box is %v, but padded is %v\n", box, fixedBox)
 		if fixedBox.DoesIntersect(b) {
 			// there is a conflict
+			// fmt.Printf("There is an intersection between %v and %v\n", fixedBox, b)
 			return true
 		}
 	}
@@ -202,7 +216,7 @@ func (s searchState) UnprocessedIndexes() []int {
 	return ret
 }
 
-// return the area of the bounding box that contains all processed boxes
+// return the area of the bounding box that contains all positioned processed boxes
 func (s searchState) ProcessedArea() float64 {
 	points := []primitives.Point{}
 	for i, v := range s.processed {
@@ -345,18 +359,63 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 	}
 }
 
+type areaStruct struct {
+	area float64
+	searchState
+}
+
 func consolidateSearchStates(states []searchState) []searchState {
 	if len(states) < 2 {
 		return states
 	}
 	fmt.Printf("Consolidating from %d... ", len(states))
+	// consolidate states that contain the same boxes and cover the same area
 	stateMap := map[string]searchState{}
 	for _, state := range states {
-		// fmt.Printf("key %s\n", state.Key())
-		stateMap[state.Key()] = state
+		key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
+		stateMap[key] = state
 	}
-	fmt.Printf("to %d\n", len(stateMap))
-	return maps.Values(stateMap)
+	fmt.Printf("to %d ", len(stateMap))
+	states = maps.Values(stateMap)
+
+	// // consolidate states that contain the same boxes to only keep the one that covers the least area
+	// stateMap2 := map[string]areaStruct{}
+	// for _, state := range states {
+	// 	area := state.ProcessedArea()
+	// 	key := state.processedKey()
+	// 	if alternate, ok := stateMap2[key]; ok {
+	// 		if alternate.area > area {
+	// 			stateMap2[key] = areaStruct{
+	// 				area:        area,
+	// 				searchState: state,
+	// 			}
+	// 		}
+	// 	} else {
+	// 		stateMap2[key] = areaStruct{
+	// 			area:        area,
+	// 			searchState: state,
+	// 		}
+	// 	}
+	// 	// stateMap[key] = state
+	// }
+	// states = make([]searchState, 0, len(stateMap))
+	// for _, value := range stateMap2 {
+	// 	states = append(states, value.searchState)
+	// }
+	// fmt.Printf("to %d", len(states))
+
+	// states = maps.Values(stateMap)
+	// // remove states that are identical
+	// stateMap = map[string]searchState{}
+	// for _, state := range states {
+	// 	// fmt.Printf("key %s\n", state.Key())
+	// 	stateMap[state.Key()] = state
+	// }
+	// fmt.Printf("to %d ", len(stateMap))
+	// states = maps.Values(stateMap)
+
+	fmt.Printf("\n")
+	return states
 }
 
 // func PackOnMultiplePages(boxes []primitives.BBox, container primitives.BBox)

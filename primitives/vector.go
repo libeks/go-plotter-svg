@@ -17,7 +17,7 @@ type Vector struct {
 
 // String is the human-readable representation of this value
 func (v Vector) String() string {
-	return fmt.Sprintf("Vector (%.1f, %.1f)", v.X, v.Y)
+	return fmt.Sprintf("Vector{%.1f, %.1f}", v.X, v.Y)
 }
 
 // Repr is used for sorting, the strings being the same means the vectors are the same

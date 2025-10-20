@@ -10,50 +10,50 @@ import (
 
 func TestLineIntersection(t *testing.T) {
 	type testCase struct {
-		Name      string
-		LineA     Line
-		LineB     Line
-		ExpectNil bool
-		Expect    primitives.Point
+		name      string
+		lineA     Line
+		lineB     Line
+		expectNil bool
+		expect    primitives.Point
 	}
 	tests := []testCase{
 		{
-			Name:   "origin",
-			LineA:  Line{P: primitives.Origin, V: primitives.Vector{X: 1, Y: 0}},
-			LineB:  Line{P: primitives.Origin, V: primitives.Vector{X: 0, Y: 1}},
-			Expect: primitives.Origin,
+			name:   "origin",
+			lineA:  Line{P: primitives.Origin, V: primitives.Vector{X: 1, Y: 0}},
+			lineB:  Line{P: primitives.Origin, V: primitives.Vector{X: 0, Y: 1}},
+			expect: primitives.Origin,
 		},
 		{
-			Name:   "origin*100",
-			LineA:  Line{P: primitives.Origin, V: primitives.Vector{X: 100, Y: 0}},
-			LineB:  Line{P: primitives.Origin, V: primitives.Vector{X: 0, Y: 100}},
-			Expect: primitives.Origin,
+			name:   "origin*100",
+			lineA:  Line{P: primitives.Origin, V: primitives.Vector{X: 100, Y: 0}},
+			lineB:  Line{P: primitives.Origin, V: primitives.Vector{X: 0, Y: 100}},
+			expect: primitives.Origin,
 		},
 		{
-			Name:   "1_1",
-			LineA:  Line{P: primitives.Point{X: 1, Y: 1}, V: primitives.Vector{X: 100, Y: 0}},
-			LineB:  Line{P: primitives.Point{X: 1, Y: 1}, V: primitives.Vector{X: 0, Y: 100}},
-			Expect: primitives.Point{X: 1, Y: 1},
+			name:   "1_1",
+			lineA:  Line{P: primitives.Point{X: 1, Y: 1}, V: primitives.Vector{X: 100, Y: 0}},
+			lineB:  Line{P: primitives.Point{X: 1, Y: 1}, V: primitives.Vector{X: 0, Y: 100}},
+			expect: primitives.Point{X: 1, Y: 1},
 		},
 		{
-			Name:   "1_1",
-			LineA:  Line{P: primitives.Point{X: 100, Y: 100}, V: primitives.Vector{X: 100, Y: 0}},
-			LineB:  Line{P: primitives.Point{X: 100, Y: 100}, V: primitives.Vector{X: 0, Y: 100}},
-			Expect: primitives.Point{X: 100, Y: 100},
+			name:   "1_1",
+			lineA:  Line{P: primitives.Point{X: 100, Y: 100}, V: primitives.Vector{X: 100, Y: 0}},
+			lineB:  Line{P: primitives.Point{X: 100, Y: 100}, V: primitives.Vector{X: 0, Y: 100}},
+			expect: primitives.Point{X: 100, Y: 100},
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.Name, func(t *testing.T) {
-			got := tt.LineA.Intersect(tt.LineB)
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.lineA.Intersect(tt.lineB)
 			fmt.Printf("Got %v\n", got)
-			if (got == nil) != tt.ExpectNil {
-				t.Fatalf("Expected %v, got %v", tt.ExpectNil, got)
+			if (got == nil) != tt.expectNil {
+				t.Fatalf("Expected %v, got %v", tt.expectNil, got)
 			}
-			if tt.ExpectNil {
+			if tt.expectNil {
 				return
 			}
-			if diff := cmp.Diff(tt.Expect, *got); diff != "" {
-				fmt.Printf("got (%.6f, %.6f), want (%.6f, %.6f)\n", got.X, got.Y, tt.Expect.X, tt.Expect.Y)
+			if diff := cmp.Diff(tt.expect, *got); diff != "" {
+				fmt.Printf("got (%.6f, %.6f), want (%.6f, %.6f)\n", got.X, got.Y, tt.expect.X, tt.expect.Y)
 				t.Fatalf("Unexpected diff %v", diff)
 			}
 		})

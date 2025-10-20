@@ -1,6 +1,7 @@
 package primitives
 
 import (
+	"fmt"
 	"math"
 	"slices"
 )
@@ -28,6 +29,10 @@ func (b BBox) IsEmpty() bool {
 	}
 	// otherwise the area is 0, but the points are not the same
 	return false
+}
+
+func (b BBox) String() string {
+	return fmt.Sprintf("BBox{UpperLeft: %v, LowerRight: %v}", b.UpperLeft, b.LowerRight)
 }
 
 // PointInside returns true if the point is inside the bounding box
