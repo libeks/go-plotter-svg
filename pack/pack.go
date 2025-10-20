@@ -130,7 +130,7 @@ func (s searchState) RemoveSuperfluousPositions() searchState {
 		pt := primitives.Origin.Add(pos)
 		conflict := false
 		for i, v := range s.processed {
-			bx := s.boxes[i].Translate(v)
+			bx := s.boxes[i].Translate(v).WithPadding(-199)
 			if bx.PointInside(pt) {
 				// fmt.Printf("%v is inside %v\n", pt, bx)
 				conflict = true
@@ -377,6 +377,14 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 		return cmp.Compare(a.ProcessedArea(), b.ProcessedArea())
 	})
 	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", len(solution.unprocessables), len(solution.processed))
+	fmt.Printf("Boxes are:\n")
+	for i, v := range solution.processed {
+		fmt.Printf("\t%v\n", boxes[i].Translate(v))
+	}
+	fmt.Printf("\nPositions are:\n")
+	for _, pos := range solution.positions {
+		fmt.Printf("\t%v\n", pos)
+	}
 	return PackingSolution{
 		Translations:   solution.processed,
 		DebugPositions: solution.positions,
@@ -393,14 +401,6 @@ func consolidateSearchStates(states []searchState) []searchState {
 		return states
 	}
 	fmt.Printf("Consolidating from %d... ", len(states))
-	// consolidate states that contain the same boxes and cover the same area
-	// stateMap := map[string]searchState{}
-	// for _, state := range states {
-	// 	key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
-	// 	stateMap[key] = state
-	// }
-	// fmt.Printf("to %d ", len(stateMap))
-	// states = maps.Values(stateMap)
 
 	// consolidate states that leave 50%+ space empty
 	newStates := []searchState{}
@@ -408,7 +408,7 @@ func consolidateSearchStates(states []searchState) []searchState {
 		if len(state.processed) > 3 {
 			coveredArea := state.ProcessedArea()
 			processedArea := state.ProcessedAreaSum()
-			if processedArea/coveredArea > 0.70 {
+			if processedArea/coveredArea > 0.65 { // TODO: dynamically determine the threshold
 				newStates = append(newStates, state)
 			}
 		} else {
@@ -417,6 +417,15 @@ func consolidateSearchStates(states []searchState) []searchState {
 	}
 	states = newStates
 	fmt.Printf("to %d ", len(states))
+
+	// consolidate states that contain the same boxes and cover the same area
+	stateMap := map[string]searchState{}
+	for _, state := range states {
+		key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
+		stateMap[key] = state
+	}
+	fmt.Printf("to %d ", len(stateMap))
+	states = maps.Values(stateMap)
 
 	// // consolidate states that contain the same boxes to only keep the one that covers the least area
 	// stateMap2 := map[string]areaStruct{}

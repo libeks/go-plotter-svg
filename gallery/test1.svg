@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="12in" height="9in" viewBox="0 0 13333 10000" version="1.1" id="svg6" sodipodi:docname="test_inkscape.svg" inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"><g inkscape:groupmode="layer" inkscape:label="0 - frame" id="g5" transform="translate(0.0 0.0)"><path d="M 300.0 1100.0 L 300.0 9700.0 L 13033.3 9700.0 L 13033.3 1100.0 L 300.0 1100.0" stroke="black" fill="none" stroke-width="3" stroke-opacity="0.5"/></g>
-    <g inkscape:groupmode="layer" inkscape:label="1 - path" id="g5" transform="translate(0.0 0.0)"><path d="M 300.0 2411.2 L 300.0 2461.2 L 350.0 2461.2 L 350.0 2411.2 L 300.0 2411.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 1655.0 2554.2 L 1655.0 2604.2 L 1705.0 2604.2 L 1705.0 2554.2 L 1655.0 2554.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 1637.7 5121.3 L 1637.7 5171.3 L 1687.7 5171.3 L 1687.7 5121.3 L 1637.7 5121.3" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 1950.1 8493.0 L 1950.1 8543.0 L 2000.1 8543.0 L 2000.1 8493.0 L 1950.1 8493.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 8493.0 L 300.0 8543.0 L 350.0 8543.0 L 350.0 8493.0 L 300.0 8493.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 8417.2 L 300.0 8467.2 L 350.0 8467.2 L 350.0 8417.2 L 300.0 8417.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 8663.2 L 300.0 8713.2 L 350.0 8713.2 L 350.0 8663.2 L 300.0 8663.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5295.0 8663.2 L 5295.0 8713.2 L 5345.0 8713.2 L 5345.0 8663.2 L 5295.0 8663.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 7617.4 6249.8 L 7617.4 6299.8 L 7667.4 6299.8 L 7667.4 6249.8 L 7617.4 6249.8" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 7922.6 4821.9 L 7922.6 4871.9 L 7972.6 4871.9 L 7972.6 4821.9 L 7922.6 4821.9" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5625.0 4717.1 L 5625.0 4767.1 L 5675.0 4767.1 L 5675.0 4717.1 L 5625.0 4717.1" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5599.6 2411.2 L 5599.6 2461.2 L 5649.6 2461.2 L 5649.6 2411.2 L 5599.6 2411.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5599.6 1100.0 L 5599.6 1150.0 L 5649.6 1150.0 L 5649.6 1100.0 L 5599.6 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 7882.4 1100.0 L 7882.4 1150.0 L 7932.4 1150.0 L 7932.4 1100.0 L 7882.4 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 7922.6 1100.0 L 7922.6 1150.0 L 7972.6 1150.0 L 7972.6 1100.0 L 7922.6 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="1 - path" id="g5" transform="translate(0.0 0.0)"><path d="M 3831.3 1100.0 L 3831.3 1150.0 L 3881.3 1150.0 L 3881.3 1100.0 L 3831.3 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3890.4 1100.0 L 3890.4 1150.0 L 3940.4 1150.0 L 3940.4 1100.0 L 3890.4 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3917.1 1100.0 L 3917.1 1150.0 L 3967.1 1150.0 L 3967.1 1100.0 L 3917.1 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3693.1 2399.8 L 3693.1 2449.8 L 3743.1 2449.8 L 3743.1 2399.8 L 3693.1 2399.8" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3917.1 4948.7 L 3917.1 4998.7 L 3967.1 4998.7 L 3967.1 4948.7 L 3917.1 4948.7" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 2516.3 6835.8 L 2516.3 6885.8 L 2566.3 6885.8 L 2566.3 6835.8 L 2516.3 6835.8" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3890.4 7587.2 L 3890.4 7637.2 L 3940.4 7637.2 L 3940.4 7587.2 L 3890.4 7587.2" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 2897.0 9624.7 L 2897.0 9674.7 L 2947.0 9674.7 L 2947.0 9624.7 L 2897.0 9624.7" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 9752.6 L 300.0 9802.6 L 350.0 9802.6 L 350.0 9752.6 L 300.0 9752.6" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
-    <g inkscape:groupmode="layer" inkscape:label="2 - walls" id="g5" transform="translate(0.0 0.0)"><path d="M 300.0 1100.0 L 300.0 2354.2 L 1750.1 2354.2 L 1750.1 1100.0 L 300.0 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 2554.2 L 300.0 4921.3 L 1455.0 4921.3 L 1455.0 2554.2 L 300.0 2554.2" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 1950.1 2411.2 L 1950.1 4621.9 L 5399.6 4621.9 L 5399.6 2411.2 L 1950.1 2411.2" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 1950.1 1100.0 L 1950.1 2211.2 L 5425.0 2211.2 L 5425.0 1100.0 L 1950.1 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5625.0 1100.0 L 5625.0 4517.1 L 7682.4 4517.1 L 7682.4 1100.0 L 5625.0 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5295.0 4821.9 L 5295.0 6049.8 L 7722.6 6049.8 L 7722.6 4821.9 L 5295.0 4821.9" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5295.0 6249.8 L 5295.0 8463.2 L 7417.4 8463.2 L 7417.4 6249.8 L 5295.0 6249.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 1950.1 4821.9 L 1950.1 8293.0 L 5095.0 8293.0 L 5095.0 4821.9 L 1950.1 4821.9" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 5121.3 L 300.0 8217.2 L 1437.7 8217.2 L 1437.7 5121.3 L 300.0 5121.3" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="2 - walls" id="g5" transform="translate(0.0 0.0)"><path d="M 300.0 2451.2 L 300.0 4619.2 L 1257.3 4619.2 L 1257.3 2451.2 L 300.0 2451.2" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 1457.3 2399.8 L 1457.3 4748.7 L 3493.1 4748.7 L 3493.1 2399.8 L 1457.3 2399.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 1457.3 1100.0 L 1457.3 2199.8 L 3631.3 2199.8 L 3631.3 1100.0 L 1457.3 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 1100.0 L 300.0 2251.2 L 1150.3 2251.2 L 1150.3 1100.0 L 300.0 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 4948.7 L 300.0 5625.8 L 914.0 5625.8 L 914.0 4948.7 L 300.0 4948.7" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 1114.0 4948.7 L 1114.0 5495.3 L 2670.4 5495.3 L 2670.4 4948.7 L 1114.0 4948.7" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 1213.9 5825.8 L 1213.9 6543.6 L 2627.9 6543.6 L 2627.9 5825.8 L 1213.9 5825.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 5825.8 L 300.0 6635.8 L 1013.9 6635.8 L 1013.9 5825.8 L 300.0 5825.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 6835.8 L 300.0 7387.2 L 2316.3 7387.2 L 2316.3 6835.8 L 300.0 6835.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 7587.2 L 300.0 9552.6 L 2697.0 9552.6 L 2697.0 7587.2 L 300.0 7587.2" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 2897.0 7587.2 L 2897.0 9424.7 L 3690.4 9424.7 L 3690.4 7587.2 L 2897.0 7587.2" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 2870.4 4948.7 L 2870.4 7375.5 L 3717.1 7375.5 L 3717.1 4948.7 L 2870.4 4948.7" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
     <g inkscape:groupmode="layer" inkscape:label="3 - GUIDELINES-pen" id="g5" transform="translate(0.0 0.0)"><line x1="1300.0" x2="1300.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="1325.0" x2="1325.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>

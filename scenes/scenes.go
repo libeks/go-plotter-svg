@@ -769,27 +769,29 @@ func rectanglePackginScene(b primitives.BBox) Scene {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	rectangles := []primitives.BBox{}
-	for i := range 2 {
-		for j := range 2 {
+	for i := range 3 {
+		for j := range 4 {
 			rectangles = append(rectangles, primitives.BBox{
 				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-					X: float64((i+1)*1000) + rand.Float64()*500,
-					Y: float64((j+1)*1000) + rand.Float64()*500,
+					// X: float64((i+1)*700) + rand.Float64()*500,
+					// Y: float64((j+1)*700) + rand.Float64()*500,
+					X: 500 + rand.Float64()*2000 + float64(i),
+					Y: 500 + rand.Float64()*2000 + float64(j),
 				}),
 			})
 		}
 	}
-	rectangles = []primitives.BBox{
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1450.1, 1254.2}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1155.0, 2367.1}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1137.7, 3095.9}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2427.6, 1227.9}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2122.4, 2213.4}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2057.4, 3417.1}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3474.9, 1111.2}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3449.5, 2210.7}},
-		primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3144.9, 3471.1}},
-	}
+	// rectangles = []primitives.BBox{
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1450.1, 1254.2}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1155.0, 2367.1}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1137.7, 3095.9}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2427.6, 1227.9}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2122.4, 2213.4}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2057.4, 3417.1}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3474.9, 1111.2}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3449.5, 2210.7}},
+	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3144.9, 3471.1}},
+	// }
 	// rectangles = []primitives.BBox{
 	// 	{primitives.Point{0.0, 0.0}, primitives.Point{1015.7, 1471.2}},
 	// 	{primitives.Point{0.0, 0.0}, primitives.Point{1235.7, 2211.5}},
