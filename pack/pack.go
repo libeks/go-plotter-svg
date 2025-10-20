@@ -230,6 +230,15 @@ func (s searchState) ProcessedArea() float64 {
 	return totalBoundingBox.Area()
 }
 
+// return the total area of each individual placed box
+func (s searchState) ProcessedAreaSum() float64 {
+	total := 0.0
+	for i := range s.processed {
+		total += s.boxes[i].Area()
+	}
+	return total
+}
+
 func (s searchState) unprocessedArea() float64 {
 	total := 0.0
 	s.unprocessables.Range(func(id uint32) {
@@ -385,13 +394,29 @@ func consolidateSearchStates(states []searchState) []searchState {
 	}
 	fmt.Printf("Consolidating from %d... ", len(states))
 	// consolidate states that contain the same boxes and cover the same area
-	stateMap := map[string]searchState{}
+	// stateMap := map[string]searchState{}
+	// for _, state := range states {
+	// 	key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
+	// 	stateMap[key] = state
+	// }
+	// fmt.Printf("to %d ", len(stateMap))
+	// states = maps.Values(stateMap)
+
+	// consolidate states that leave 50%+ space empty
+	newStates := []searchState{}
 	for _, state := range states {
-		key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
-		stateMap[key] = state
+		if len(state.processed) > 3 {
+			coveredArea := state.ProcessedArea()
+			processedArea := state.ProcessedAreaSum()
+			if processedArea/coveredArea > 0.70 {
+				newStates = append(newStates, state)
+			}
+		} else {
+			newStates = append(newStates, state)
+		}
 	}
-	fmt.Printf("to %d ", len(stateMap))
-	states = maps.Values(stateMap)
+	states = newStates
+	fmt.Printf("to %d ", len(states))
 
 	// // consolidate states that contain the same boxes to only keep the one that covers the least area
 	// stateMap2 := map[string]areaStruct{}

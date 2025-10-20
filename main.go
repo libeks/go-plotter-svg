@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/scenes"
@@ -21,6 +23,7 @@ func main() {
 		UpperLeft:  primitives.Point{X: 0, Y: 800},                        // leave space at the top for guides
 		LowerRight: primitives.Point{X: sizePx * (12.0 / 9.0), Y: sizePx}, // make sure it spans the 9"x12" canvas
 	}
+	start := time.Now()
 	innerBox := outerBox.WithPadding(300) // enough to no hit the edges
 	// scene := scenes.getCurlyScene(outerBox)
 	// scene := scenes.getLinesInsideScene(innerBox, 1000)
@@ -46,6 +49,7 @@ func main() {
 	// scene := scenes.FoldableCutCubeScene(innerBox)
 	// scene := scenes.FoldableRhombiSansCorner(innerBox)
 	// scene := scenes.MazeScene(innerBox)
+
 	scene := scenes.RectanglePackingScene(innerBox)
 	flipCurves := false
 	scene.OptimizeLines(flipCurves)
@@ -56,4 +60,5 @@ func main() {
 		Height: "9in",
 		Scene:  scene,
 	}.WriteSVG()
+	fmt.Printf("Rendering took %s.\n", time.Since(start))
 }
