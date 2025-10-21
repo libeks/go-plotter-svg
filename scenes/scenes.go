@@ -21,18 +21,18 @@ import (
 var (
 	// BrushBackForthScene    = func(b primitives.BBox) Scene { return getBrushBackForthScene(b) }
 	// CurlyScene             = func(b primitives.BBox) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene    = func(b primitives.BBox) Scene { return getLinesInsideScene(b, 1000) }
-	LineFieldScene         = func(b primitives.BBox) Scene { return getLineFieldInObjects(b) }
-	RadialBoxScene         = func(b primitives.BBox) Scene { return radialBoxScene(b) }
-	ParallelBoxScene       = func(b primitives.BBox) Scene { return parallelBoxScene(b) }
-	ParallelSineFieldScene = func(b primitives.BBox) Scene { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene  = func(b primitives.BBox) Scene { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene   = func(b primitives.BBox) Scene { return circlesInSquareScene(b) }
-	TestDensityScene       = func(b primitives.BBox) Scene { return testDensityScene(b) }
-	TruchetScene           = func(b primitives.BBox) Scene { return getTruchetScene(b) }
-	SweepTruchetScene      = func(b primitives.BBox) Scene { return getSweepTruchet(b) }
-	RisingSunScene         = func(b primitives.BBox) Scene { return getRisingSun(b) }
-	CCircleLineSegments    = func(b primitives.BBox) Scene { return getCirlceLineSegmentScene(b) }
+	LinesInsideBoxScene    = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
+	LineFieldScene         = func(b primitives.BBox) Document { return getLineFieldInObjects(b) }
+	RadialBoxScene         = func(b primitives.BBox) Document { return radialBoxScene(b) }
+	ParallelBoxScene       = func(b primitives.BBox) Document { return parallelBoxScene(b) }
+	ParallelSineFieldScene = func(b primitives.BBox) Document { return parallelSineFieldsScene(b) }
+	ParallelCoherentScene  = func(b primitives.BBox) Document { return parallelCoherentSineFieldsScene(b) }
+	CirclesInSquareScene   = func(b primitives.BBox) Document { return circlesInSquareScene(b) }
+	TestDensityScene       = func(b primitives.BBox) Document { return testDensityScene(b) }
+	TruchetScene           = func(b primitives.BBox) Document { return getTruchetScene(b) }
+	SweepTruchetScene      = func(b primitives.BBox) Document { return getSweepTruchet(b) }
+	RisingSunScene         = func(b primitives.BBox) Document { return getRisingSun(b) }
+	CCircleLineSegments    = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
 	Text                   = textScene
 	RectanglePackingScene  = rectanglePackginScene
@@ -47,8 +47,8 @@ var (
 	PolygonBoxScene = polygonScene
 )
 
-func getLineFieldInObjects(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func getLineFieldInObjects(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 
 	poly1 := objects.Polygon{
 		Points: []primitives.Point{
@@ -97,8 +97,8 @@ func getLineFieldInObjects(b primitives.BBox) Scene {
 	return scene
 }
 
-func parallelCoherentSineFieldsScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func parallelCoherentSineFieldsScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	layer1 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
@@ -132,8 +132,8 @@ func parallelCoherentSineFieldsScene(b primitives.BBox) Scene {
 
 // circlesInSquareScene are concentric circles in a square
 // due to overlap, there tends to be a darkening on the left with certain pens
-func circlesInSquareScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func circlesInSquareScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	layer1 := collections.LimitCirclesToShape(
 		collections.ConcentricCircles(
 			b, b.Center(), 100,
@@ -145,8 +145,8 @@ func circlesInSquareScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func testDensityScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func testDensityScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	quarters := primitives.PartitionIntoSquares(b, 2)
 	colors := []string{
 		"red",
@@ -191,8 +191,8 @@ func testDensityScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func parallelSineFieldsScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func parallelSineFieldsScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	layer1 := segmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
@@ -224,12 +224,12 @@ func parallelSineFieldsScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func parallelBoxScene(b primitives.BBox) Scene {
+func parallelBoxScene(b primitives.BBox) Document {
 	minLineWidth := 20.0
 	maxLineWidth := 100.0
 	minAngle := 0.0
 	maxAngle := math.Pi
-	scene := Scene{}.WithGuides()
+	scene := Document{}.WithGuides()
 	segments := [][]lines.LineLike{}
 	boxes := primitives.PartitionIntoSquares(b, 10)
 	for _, minibox := range boxes {
@@ -246,11 +246,11 @@ func parallelBoxScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func radialBoxScene(b primitives.BBox) Scene {
+func radialBoxScene(b primitives.BBox) Document {
 	nSegments := 15
 	exclusionRadius := 100.0
 	wiggle := 200.0
-	scene := Scene{}.WithGuides()
+	scene := Document{}.WithGuides()
 	segments := [][]lines.LineLike{}
 	boxes := primitives.PartitionIntoSquares(b, 10)
 	for _, minibox := range boxes {
@@ -275,8 +275,8 @@ func radialBoxScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func getLinesInsidePolygonScene(b primitives.BBox, poly objects.Object, n int) Scene {
-	scene := Scene{}
+func getLinesInsidePolygonScene(b primitives.BBox, poly objects.Object, n int) Document {
+	scene := Document{}
 	ls := []lines.LineLike{}
 	for {
 		if len(ls) == n {
@@ -293,7 +293,7 @@ func getLinesInsidePolygonScene(b primitives.BBox, poly objects.Object, n int) S
 	return scene
 }
 
-func getLinesInsideScene(b primitives.BBox, n int) Scene {
+func getLinesInsideScene(b primitives.BBox, n int) Document {
 	poly := objects.Circle{
 		Center: primitives.Point{X: 5000, Y: 5000},
 		Radius: 1000,
@@ -364,8 +364,8 @@ func radialBoxWithCircleExclusion(container objects.Object, center primitives.Po
 // 	return []lines.LineLike{path.GetPath()}
 // }
 
-func getTruchetScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func getTruchetScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	tileSource := samplers.RandomDataSource{}
 	// tileSource := samplers.ConstantDataSource{0}
@@ -409,8 +409,8 @@ func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []line
 	return outlineCurves
 }
 
-func getSweepTruchet(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func getSweepTruchet(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	grid1 := truchet.NewGrid(b, 3, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
 	curves1 := grid1.GererateCurves()
@@ -426,8 +426,8 @@ func getSweepTruchet(b primitives.BBox) Scene {
 	return scene
 }
 
-func getRisingSun(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func getRisingSun(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	sun := objects.Circle{
 		Radius: 1500,
@@ -459,8 +459,8 @@ func relativeMinusPlusOneCenter(b, parentBox primitives.BBox) primitives.Point {
 	}
 }
 
-func getCirlceLineSegmentScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func getCirlceLineSegmentScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	blacks := []lines.LineLike{}
@@ -518,8 +518,8 @@ func getCirlceLineSegmentScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func fontScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func fontScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	fname := "C:/Windows/Fonts/bahnschrift.ttf"
@@ -559,8 +559,8 @@ func fontScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func textScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func textScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	blacks := []lines.LineLike{}
@@ -601,8 +601,8 @@ func textScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func polygonScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func polygonScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	polygons := []objects.Polygon{
@@ -692,8 +692,8 @@ func polygonScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func foldableCubeIDScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func foldableCubeIDScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
@@ -704,8 +704,8 @@ func foldableCubeIDScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func foldableRhombicuboctahedronIDScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
@@ -716,8 +716,8 @@ func foldableRhombicuboctahedronIDScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
@@ -728,8 +728,8 @@ func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func foldableRightTrianglePrismIDScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
@@ -740,8 +740,8 @@ func foldableRightTrianglePrismIDScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func foldableCutCornerScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func foldableCutCornerScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
@@ -752,8 +752,8 @@ func foldableCutCornerScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func mazeScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func mazeScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	maze := maze.NewMaze(30)
@@ -764,13 +764,21 @@ func mazeScene(b primitives.BBox) Scene {
 	return scene
 }
 
-func rectanglePackginScene(b primitives.BBox) Scene {
-	scene := Scene{}.WithGuides()
+func rectanglePackginScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	rectangles := []primitives.BBox{}
 	for i := range 3 {
-		for j := range 4 {
+		for j := range 2 {
+			rectangles = append(rectangles, primitives.BBox{
+				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
+					// X: float64((i+1)*700) + rand.Float64()*500,
+					// Y: float64((j+1)*700) + rand.Float64()*500,
+					X: 500 + rand.Float64()*4000 + float64(i),
+					Y: 500 + rand.Float64()*4000 + float64(j),
+				}),
+			})
 			rectangles = append(rectangles, primitives.BBox{
 				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
 					// X: float64((i+1)*700) + rand.Float64()*500,

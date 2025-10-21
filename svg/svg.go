@@ -3,6 +3,8 @@ package svg
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/shabbyrobe/xmlwriter"
 
@@ -13,10 +15,10 @@ type SVG struct {
 	Fname  string
 	Width  string
 	Height string
-	scenes.Scene
+	scenes.Document
 }
 
-func (s SVG) WriteSVG() {
+func (s SVG) WritePage(fname string, scene scenes.Page) {
 	f, err := os.OpenFile(s.Fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		panic(err)
@@ -26,7 +28,7 @@ func (s SVG) WriteSVG() {
 	ec := &xmlwriter.ErrCollector{}
 	defer ec.Panic()
 	layers := []xmlwriter.Writable{}
-	for i, layer := range s.Scene.GetLayers() {
+	for i, layer := range scene.GetLayers() {
 		layers = append(layers, layer.XML(i))
 	}
 	ec.Do(
@@ -49,5 +51,18 @@ func (s SVG) WriteSVG() {
 		}),
 		w.EndAllFlush(),
 	)
-	fmt.Printf("Finished rendering to file %s\n", s.Fname)
+	fmt.Printf("Finished rendering to file %s\n", fname)
+}
+
+func (s SVG) WriteSVG() {
+	if s.Document.NumPages() == 1 {
+		s.WritePage(s.Fname, s.Document.Page(0))
+	} else {
+		extension := filepath.Ext(s.Fname)
+		basename := strings.TrimSuffix(s.Fname, extension)
+		fnamePattern := fmt.Sprintf("%s_%%d%s", basename, extension)
+		for i := range s.Document.NumPages() {
+			s.WritePage(fmt.Sprintf(fnamePattern, i), s.Document.Page(i))
+		}
+	}
 }

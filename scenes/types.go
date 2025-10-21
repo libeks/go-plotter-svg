@@ -9,18 +9,48 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
-type Scene struct {
-	Layers []Layer
-	Guides bool
+type Document struct {
+	pages  []Page
+	guides bool
 }
 
-func (s Scene) AddLayer(layer Layer) Scene {
-	s.Layers = append(s.Layers, layer)
-	return s
+func (d Document) WithGuides() Document {
+	d.guides = true
+	return d
 }
 
-func (s Scene) AddFoldableLayers(p foldable.FoldablePattern) Scene {
-	// TODO: Add brush infill, one layer for each brush
+func (d Document) NumPages() int {
+	return len(d.pages)
+}
+
+// Adds a layer to the first page of the document, this is here for backwards compatibility
+func (d Document) AddLayer(layer Layer) Document {
+	if len(d.pages) == 0 {
+		d.pages = []Page{
+			Page{}.AddLayer(layer),
+		}
+	} else {
+		d.pages[0] = d.pages[0].AddLayer(layer)
+	}
+	return d
+}
+
+func (d Document) CalculateStatistics() {
+	fmt.Printf("Document contains %d pages\n", len(d.pages))
+	for i, page := range d.pages {
+		fmt.Printf("Page #%d:\n", i)
+		page.CalculateStatistics()
+	}
+}
+
+func (d Document) Page(i int) Page {
+	if i > len(d.pages)-1 {
+		panic(fmt.Sprintf("Document only has %d pages", len(d.pages)))
+	}
+	return d.pages[i]
+}
+
+func (s Document) AddFoldableLayers(p foldable.FoldablePattern) Document {
 	// TODO: Customize brush width rendering
 	polygons := []lines.LineLike{}
 	for _, poly := range p.Polygons {
@@ -37,21 +67,31 @@ func (s Scene) AddFoldableLayers(p foldable.FoldablePattern) Scene {
 	return s
 }
 
-func (s Scene) WithGuides() Scene {
-	s.Guides = true
+type Page struct {
+	layers []Layer
+	guides bool
+}
+
+func (s Page) AddLayer(layer Layer) Page {
+	s.layers = append(s.layers, layer)
 	return s
 }
 
-func (s Scene) GetLayers() []Layer {
-	if !s.Guides || len(s.Layers) < 2 {
-		return s.Layers
+func (s Page) WithGuides() Page {
+	s.guides = true
+	return s
+}
+
+func (s Page) GetLayers() []Layer {
+	if !s.guides || len(s.layers) < 2 {
+		return s.layers
 	}
 	// draw guides on the upper edge of the image
 	// assume that the 0th layer contains the guidelines
-	layers := s.Layers
+	layers := s.layers
 	ls := []lines.LineLike{}
 	increment := 25.0
-	for i := 1; i < len(s.Layers); i++ {
+	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
 
 		for j := 300.0; j <= 700.0; j += increment {
@@ -93,7 +133,7 @@ func (s Scene) GetLayers() []Layer {
 
 	}
 	layers = append(layers, NewLayer("GUIDELINES-pen").WithLineLike(ls))
-	for i := 1; i < len(s.Layers); i++ {
+	for i := 1; i < len(s.layers); i++ {
 		ii := float64(i)
 		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]lines.LineLike{
 			lines.LineSegment{P1: primitives.Point{X: 500.0 + ii*1000, Y: 300.0}, P2: primitives.Point{X: 500 + ii*1000, Y: 700}},
@@ -103,21 +143,16 @@ func (s Scene) GetLayers() []Layer {
 	return layers
 }
 
-func (s Scene) CalculateStatistics() {
+func (s Page) CalculateStatistics() {
 	yesGuides := "without"
-	if s.Guides {
+	if s.guides {
 		yesGuides = "with"
 	}
 
-	fmt.Printf("Scene has %d layers, %s guides\n", len(s.Layers), yesGuides)
-	for i, layer := range s.Layers {
+	fmt.Printf("Page has %d layers, %s guides\n", len(s.layers), yesGuides)
+	for i, layer := range s.layers {
 		fmt.Printf("layer '%s' #%d has %s\n", layer.name, i, layer.Statistics())
 	}
-}
-
-func (s Scene) OptimizeLines(flipCurves bool) Scene {
-	// TODO: Actually fill in
-	return s
 }
 
 func timeToMinSec(d time.Duration) string {

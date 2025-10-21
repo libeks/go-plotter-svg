@@ -12,7 +12,7 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	fname := "gallery/test1.svg"
+	fname := "gallery/test.svg"
 	sizePx := 10000.0
 
 	if len(args) > 0 {
@@ -51,14 +51,12 @@ func main() {
 	// scene := scenes.MazeScene(innerBox)
 
 	scene := scenes.RectanglePackingScene(innerBox)
-	flipCurves := false
-	scene.OptimizeLines(flipCurves)
 	scene.CalculateStatistics()
 	svg.SVG{
-		Fname:  fname,
-		Width:  "12in",
-		Height: "9in",
-		Scene:  scene,
+		Fname:    fname,
+		Width:    "12in",
+		Height:   "9in",
+		Document: scene,
 	}.WriteSVG()
 	fmt.Printf("Rendering took %s.\n", time.Since(start))
 }
