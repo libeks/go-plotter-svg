@@ -765,29 +765,28 @@ func mazeScene(b primitives.BBox) Document {
 }
 
 func rectanglePackginScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	doc := Document{}.WithGuides()
 
 	rectangles := []primitives.BBox{}
-	for i := range 3 {
-		for j := range 2 {
-			rectangles = append(rectangles, primitives.BBox{
-				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-					// X: float64((i+1)*700) + rand.Float64()*500,
-					// Y: float64((j+1)*700) + rand.Float64()*500,
-					X: 500 + rand.Float64()*4000 + float64(i),
-					Y: 500 + rand.Float64()*4000 + float64(j),
-				}),
-			})
-			rectangles = append(rectangles, primitives.BBox{
-				UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-					// X: float64((i+1)*700) + rand.Float64()*500,
-					// Y: float64((j+1)*700) + rand.Float64()*500,
-					X: 500 + rand.Float64()*2000 + float64(i),
-					Y: 500 + rand.Float64()*2000 + float64(j),
-				}),
-			})
-		}
+	for i := range 4 {
+		// for j := range 1 {
+		rectangles = append(rectangles, primitives.BBox{
+			UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
+				// X: float64((i+1)*700) + rand.Float64()*500,
+				// Y: float64((j+1)*700) + rand.Float64()*500,
+				X: 500 + rand.Float64()*4000 + float64(i),
+				Y: 500 + rand.Float64()*4000,
+			}),
+		})
+		rectangles = append(rectangles, primitives.BBox{
+			UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
+				// X: float64((i+1)*700) + rand.Float64()*500,
+				// Y: float64((j+1)*700) + rand.Float64()*500,
+				X: 500 + rand.Float64()*2000 + float64(i),
+				Y: 500 + rand.Float64()*2000,
+			}),
+		})
+		// }
 	}
 	// rectangles = []primitives.BBox{
 	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1450.1, 1254.2}},
@@ -815,21 +814,38 @@ func rectanglePackginScene(b primitives.BBox) Document {
 	for _, rect := range rectangles {
 		fmt.Printf("%v\n", rect)
 	}
-	blacks := []lines.LineLike{}
-	reds := []lines.LineLike{}
-	solution := pack.PackOnOnePageExhaustive(rectangles, b, 200)
+	blacks := map[int][]lines.LineLike{}
+	reds := map[int][]lines.LineLike{}
+	solution := pack.PackOnOnePage(rectangles, b, 200)
 	for _, v := range solution.DebugPositions {
-		reds = append(reds, lines.LinesFromBBox(primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{X: 50, Y: 50})}.Translate(v))...)
+		reds[v.Page] = append(
+			reds[v.Page],
+			lines.LinesFromBBox(
+				primitives.BBox{
+					UpperLeft:  primitives.Origin,
+					LowerRight: primitives.Origin.Add(primitives.Vector{X: 50, Y: 50}),
+				}.Translate(v.Vector),
+			)...,
+		)
 	}
 
 	for i, rect := range rectangles {
 		if vect, ok := solution.Translations[i]; ok {
-			rectangles[i] = rect.Translate(vect)
+			rectangles[i] = rect.Translate(vect.Vector)
+			blacks[vect.Page] = append(blacks[vect.Page], lines.LinesFromBBox(rectangles[i])...)
+		} else {
+			blacks[0] = append(blacks[0], lines.LinesFromBBox(rectangles[i])...)
 		}
-		blacks = append(blacks, lines.LinesFromBBox(rectangles[i])...)
+
+	}
+	fmt.Printf("Doc has %d pages\n", solution.Pages)
+	for i := range solution.Pages {
+		page := Page{}
+		page = page.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+		page = page.AddLayer(NewLayer("path").WithLineLike(reds[i]).WithColor("red").WithWidth(20).MinimizePath(true))
+		page = page.AddLayer(NewLayer("walls").WithLineLike(blacks[i]).WithColor("black").WithWidth(20).MinimizePath(true))
+		doc = doc.AddPage(page)
 	}
 
-	scene = scene.AddLayer(NewLayer("path").WithLineLike(reds).WithColor("red").WithWidth(20).MinimizePath(true))
-	scene = scene.AddLayer(NewLayer("walls").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))
-	return scene
+	return doc
 }

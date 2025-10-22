@@ -26,38 +26,57 @@ func (b box) Translate(v primitives.Vector) box {
 	}
 }
 
-type fixedBox struct {
-	boxes []primitives.BBox
+// Paged Vector describes a vector that is placed on a specific page of the document
+type PagedVector struct {
+	primitives.Vector
+	IsUpperLeftCorner bool
+	Page              int
 }
 
-func (fb fixedBox) Intersect(b primitives.BBox) bool {
-	for _, fixedBox := range fb.boxes {
-		if fixedBox.DoesIntersect(b) {
-			// there is a conflict
-			return true
-		}
-	}
-	return false
+func (p PagedVector) Repr() string {
+	return fmt.Sprintf("%d=%s", p.Page, p.Vector.Repr())
 }
 
 type searchState struct {
 	boxes          []box // all search states will point to the same slice of boxes, they shouldn't be changing
+	_pages         int   // cached value of number of pages, if 0 it is not cached
 	unprocessables bitmap.Bitmap
-	positions      []primitives.Vector
+	positions      []PagedVector
 	unprocessed    bitmap.Bitmap
-	processed      map[int]primitives.Vector // map from box index to the translation vector
+	processed      map[int]PagedVector // map from box index to the translation vector
+
+}
+
+func (s *searchState) Pages() int {
+	// check if value is cached
+	if s._pages > 0 {
+		// fmt.Printf("from cache\n")
+		return s._pages
+	}
+	// fmt.Printf("recomputing\n")
+	pages := 1
+	for _, processed := range s.processed {
+		if processed.Page+1 > pages {
+			pages = processed.Page + 1
+		}
+	}
+	s._pages = pages
+	return pages
 }
 
 func (s searchState) RemoveSuperfluousPositions() searchState {
 	if len(s.positions) == 0 {
 		return s
 	}
-	newPositions := []primitives.Vector{}
+	newPositions := []PagedVector{}
 	for _, pos := range s.positions {
-		pt := primitives.Origin.Add(pos)
+		pt := primitives.Origin.Add(pos.Vector)
 		conflict := false
 		for i, v := range s.processed {
-			bx := s.boxes[i].Translate(v).WithPadding(-199)
+			if v.Page != pos.Page { // if the box is not on the same page as the position, ignore; there is no conflict
+				continue
+			}
+			bx := s.boxes[i].Translate(v.Vector).WithPadding(-199)
 			if bx.PointInside(pt) {
 				// fmt.Printf("%v is inside %v\n", pt, bx)
 				conflict = true
@@ -117,9 +136,12 @@ func (s searchState) processedKey() string {
 	return string(key)
 }
 
-func (s searchState) IntersectsFixed(b primitives.BBox) bool {
+func (s searchState) IntersectsFixed(page int, b primitives.BBox) bool {
 	for i, v := range s.processed {
-		fixedBox := s.boxes[i].Translate(v).WithPadding(-199) // grow the box by the padding amount (minus a bit)
+		if page != v.Page {
+			continue
+		}
+		fixedBox := s.boxes[i].Translate(v.Vector).WithPadding(-199) // grow the box by the padding amount (minus a bit)
 		// fmt.Printf("Box is %v, but padded is %v\n", box, fixedBox)
 		if fixedBox.DoesIntersect(b) {
 			// there is a conflict
@@ -130,31 +152,52 @@ func (s searchState) IntersectsFixed(b primitives.BBox) bool {
 	return false
 }
 
-func (s searchState) ProcessedIndexes() []int {
-	ret := []int{}
-	for i := range s.processed {
-		ret = append(ret, i)
-	}
-	return ret
-}
-
-func (s searchState) UnprocessedIndexes() []int {
-	ret := []int{}
-	s.unprocessed.Range(func(x uint32) {
-		ret = append(ret, int(x))
-	})
-	return ret
-}
-
 // return the area of the bounding box that contains all positioned processed boxes
 func (s searchState) ProcessedArea() float64 {
-	points := []primitives.Point{}
+	pointsByPage := map[int][]primitives.Point{}
 	for i, v := range s.processed {
-		bx := s.boxes[i].Translate(v)
-		points = append(points, bx.BBox.Corners()...)
+		bx := s.boxes[i].Translate(v.Vector)
+		pointsByPage[v.Page] = append(pointsByPage[v.Page], bx.BBox.Corners()...)
 	}
-	totalBoundingBox := primitives.BBoxAroundPoints(points...)
-	return totalBoundingBox.Area()
+	totalArea := 0.0
+	for _, points := range pointsByPage {
+		boundingBox := primitives.BBoxAroundPoints(points...)
+		totalArea += boundingBox.Area()
+	}
+	return totalArea
+}
+
+type pageStat struct {
+	page             int
+	boxes            int
+	bboxArea         float64
+	points           []primitives.Point
+	componentAreaSum float64
+}
+
+func (s searchState) PageAreaStats() map[int]pageStat {
+	byPage := map[int]pageStat{}
+	for i, v := range s.processed {
+		page := v.Page
+		if _, ok := byPage[page]; !ok {
+			byPage[page] = pageStat{
+				page:   page,
+				points: []primitives.Point{},
+			}
+		}
+		bx := s.boxes[i].Translate(v.Vector)
+		stat := byPage[page]
+		stat.points = append(stat.points, bx.BBox.Corners()...)
+		stat.boxes += 1
+		stat.componentAreaSum += bx.Area()
+		byPage[page] = stat
+	}
+	for pageID, stats := range byPage {
+		bbox := primitives.BBoxAroundPoints(stats.points...)
+		stats.bboxArea = bbox.Area()
+		byPage[pageID] = stats
+	}
+	return byPage
 }
 
 // return the total area of each individual placed box
@@ -175,14 +218,26 @@ func (s searchState) unprocessedArea() float64 {
 }
 
 type PackingSolution struct {
-	Translations   map[int]primitives.Vector
-	DebugPositions []primitives.Vector // only for debugging, lists the positions where additional boxes could be placed
+	Pages          int
+	Translations   map[int]PagedVector
+	DebugPositions []PagedVector // only for debugging, lists the positions where additional boxes could be placed
 }
 
 // given a list of bounding boxes, return a list of vectors that tell how much each box should be translated for efficient packing onto
 // the container. If it cannot be placed into the container... return something more interesting
 // Include a padding between the boxes
-func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, padding float64) PackingSolution {
+func PackOnOnePage(bxs []primitives.BBox, container primitives.BBox, padding float64) PackingSolution {
+	return packingAlgo(bxs, container, padding, false)
+}
+
+func PackOnMultiplePages(bxs []primitives.BBox, container primitives.BBox, padding float64) PackingSolution {
+	return packingAlgo(bxs, container, padding, true)
+}
+
+// given a list of bounding boxes, return a list of vectors that tell how much each box should be translated for efficient packing onto
+// the container. If it cannot be placed into the container... return something more interesting
+// Include a padding between the boxes
+func packingAlgo(bxs []primitives.BBox, container primitives.BBox, padding float64, multiPage bool) PackingSolution {
 	// unprocessables := []box{}
 	boxes := make([]box, len(bxs))
 
@@ -201,21 +256,26 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 		}
 		allBoxes.Set(uint32(i))
 	}
-	searchStates := []searchState{
+	searchStates := []*searchState{
 		{
 			boxes:          boxes,
 			unprocessables: unprocessableBoxes,
-			positions:      []primitives.Vector{container.UpperLeft.Subtract(primitives.Origin)},
-			unprocessed:    allBoxes,
-			processed:      map[int]primitives.Vector{},
+			positions: []PagedVector{{
+				Page:              0,
+				IsUpperLeftCorner: true,
+				Vector:            container.UpperLeft.Subtract(primitives.Origin)}},
+			unprocessed: allBoxes,
+			processed:   map[int]PagedVector{},
 		},
 	}
-	finalStates := []searchState{}
+	finalStates := []*searchState{}
+
 	for len(searchStates) > 0 {
-		newStates := []searchState{} // append to this slice, then swap this out with searchStates at the end
+		newStates := []*searchState{} // append to this slice, then swap this out with searchStates at the end
 		fmt.Printf("have %d search states\n", len(searchStates))
 		searchStates = consolidateSearchStates(searchStates)
 		for _, state := range searchStates {
+			// fmt.Printf("%v, %v\n", state.processed, state.positions)
 			found := false
 			if len(state.unprocessed) == 0 {
 				// if there are no unprocessed boxes, we are done with this state
@@ -224,7 +284,7 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 			}
 			if len(state.positions) == 0 {
 				// if there are no positions, we are done, but the rest of the boxes are unprocessable
-				finalStates = append(finalStates, searchState{
+				finalStates = append(finalStates, &searchState{
 					unprocessables: state.unprocessed.Clone(nil),
 					positions:      state.positions,
 					unprocessed:    bitmap.Bitmap{},
@@ -234,29 +294,60 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 			for posID, pos := range state.positions {
 				state.unprocessed.Range(func(boxID uint32) {
 					boxCandidate := state.boxes[boxID]
-					positionedBox := boxCandidate.Translate(pos)
+					positionedBox := boxCandidate.Translate(pos.Vector)
 					if !container.Contains(positionedBox.BBox) {
 						return
 					}
-					if state.IntersectsFixed(positionedBox.BBox) {
+					if state.IntersectsFixed(pos.Page, positionedBox.BBox) {
 						return
 					}
 					// box can be placed here, let's do so
 					found = true
-					positions := append(append([]primitives.Vector{}, state.positions[:posID]...), state.positions[posID+1:]...) // remove the current position
+					positions := append(
+						append(
+							[]PagedVector{},
+							state.positions[:posID]...,
+						),
+						state.positions[posID+1:]...,
+					) // remove the current position
+					if pos.IsUpperLeftCorner {
+						// Add a new page to positions
+						positions = append(
+							positions,
+							PagedVector{
+								Page:              pos.Page + 1,
+								IsUpperLeftCorner: true,
+								Vector:            container.UpperLeft.Subtract(primitives.Origin),
+							},
+						)
+					}
 					// add padded positions at the two corners
-					swCandidate := positionedBox.NECorner().Add(primitives.Vector{X: 0, Y: padding}).Subtract(primitives.Origin)
-					neCandidate := positionedBox.SWCorner().Add(primitives.Vector{X: padding, Y: 0}).Subtract(primitives.Origin)
+					swCandidate := PagedVector{
+						Page:              pos.Page,
+						IsUpperLeftCorner: false,
+						Vector:            positionedBox.NECorner().Add(primitives.Vector{X: 0, Y: padding}).Subtract(primitives.Origin),
+					}
+					neCandidate := PagedVector{
+						Page:              pos.Page,
+						IsUpperLeftCorner: false,
+						Vector:            positionedBox.SWCorner().Add(primitives.Vector{X: padding, Y: 0}).Subtract(primitives.Origin),
+					}
 					positions = append(positions, neCandidate)
 					if neCandidate.Y > container.UpperLeft.Y {
-						candidate := primitives.Vector{X: neCandidate.X, Y: container.UpperLeft.Y}
-						// fmt.Printf("Added ne candidate tangent %v from %v\n", candidate, neCandidate)
+						candidate := PagedVector{
+							Page:              pos.Page,
+							IsUpperLeftCorner: false,
+							Vector:            primitives.Vector{X: neCandidate.X, Y: container.UpperLeft.Y},
+						}
 						positions = append(positions, candidate)
 					}
 					positions = append(positions, swCandidate)
 					if swCandidate.X > container.UpperLeft.X {
-						candidate := primitives.Vector{X: container.UpperLeft.X, Y: swCandidate.Y}
-						// fmt.Printf("Added sw candidate tangent %v from %v\n", candidate, swCandidate)
+						candidate := PagedVector{
+							Page:              pos.Page,
+							IsUpperLeftCorner: false,
+							Vector:            primitives.Vector{X: container.UpperLeft.X, Y: swCandidate.Y},
+						}
 						positions = append(positions, candidate)
 					}
 
@@ -272,15 +363,15 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 						processed:      newProcessed,
 					}
 					newState = newState.RemoveSuperfluousPositions()
-					newStates = append(newStates, newState)
+					newStates = append(newStates, &newState)
 				})
 
 			}
 			if !found {
-				finalStates = append(finalStates, searchState{
+				finalStates = append(finalStates, &searchState{
 					boxes:          state.boxes,
 					unprocessables: state.unprocessed.Clone(nil),
-					positions:      append([]primitives.Vector{}, state.positions...),
+					positions:      append([]PagedVector{}, state.positions...),
 					unprocessed:    bitmap.Bitmap{},
 					processed:      maps.Clone(state.processed),
 				})
@@ -290,12 +381,16 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 	}
 	if len(finalStates) == 0 {
 		return PackingSolution{
-			make(map[int]primitives.Vector, len(bxs)),
-			[]primitives.Vector{},
+			Pages:          0,
+			Translations:   make(map[int]PagedVector, len(bxs)),
+			DebugPositions: []PagedVector{},
 		}
 	}
 	fmt.Printf("Got %d possible solutions\n", len(finalStates))
-	solution := slices.MinFunc(finalStates, func(a, b searchState) int {
+	solution := slices.MaxFunc(finalStates, func(a, b *searchState) int {
+		if a.Pages() != b.Pages() {
+			return cmp.Compare(a.Pages(), b.Pages())
+		}
 		// there should be as little unprocessable
 		if len(a.unprocessables) != len(b.unprocessables) {
 			return cmp.Compare(a.unprocessedArea(), b.unprocessedArea())
@@ -306,48 +401,92 @@ func PackOnOnePageExhaustive(bxs []primitives.BBox, container primitives.BBox, p
 	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", len(solution.unprocessables), len(solution.processed))
 	fmt.Printf("Boxes are:\n")
 	for i, v := range solution.processed {
-		fmt.Printf("\t%v\n", boxes[i].Translate(v))
+		fmt.Printf("\t%v\n", boxes[i].Translate(v.Vector))
 	}
 	fmt.Printf("\nPositions are:\n")
 	for _, pos := range solution.positions {
 		fmt.Printf("\t%v\n", pos)
 	}
 	return PackingSolution{
+		Pages:          solution.Pages(),
 		Translations:   solution.processed,
 		DebugPositions: solution.positions,
 	}
 }
 
-func consolidateSearchStates(states []searchState) []searchState {
-	if len(states) < 2 {
-		return states
+func filterWithTooManyPages(states []*searchState) []*searchState {
+	// remove solutions with too many pages
+	// pages := map[int]int{}
+	minpages := 10000
+	maxpages := 1
+	for _, state := range states {
+		// pages[state.Pages()] += 1
+		if state.Pages() < minpages {
+			minpages = state.Pages()
+		}
+		if state.Pages() > maxpages {
+			maxpages = state.Pages()
+		}
 	}
-	fmt.Printf("Consolidating from %d... ", len(states))
+	fmt.Printf("\nmin: %d, max: %d\n", minpages, maxpages)
+	newStates := []*searchState{}
+	for _, state := range states {
+		if state.Pages() <= minpages+1 {
+			newStates = append(newStates, state)
+		}
+	}
+	return newStates
+}
 
+func filterWithTooMuchUnusedSpace(states []*searchState) []*searchState {
 	// consolidate states that leave 50%+ space empty
-	newStates := []searchState{}
+	newStates := []*searchState{}
 	for _, state := range states {
 		if len(state.processed) > 3 {
-			coveredArea := state.ProcessedArea()
-			processedArea := state.ProcessedAreaSum()
-			if processedArea/coveredArea > 0.67 { // TODO: dynamically determine the threshold
+			pageStats := state.PageAreaStats()
+			shouldRemove := false
+			for _, stats := range pageStats {
+				if stats.boxes > 3 {
+					if stats.componentAreaSum/stats.bboxArea < 0.67 {
+						shouldRemove = true
+						break
+					}
+				}
+			}
+			if !shouldRemove { // TODO: dynamically determine the threshold
 				newStates = append(newStates, state)
 			}
 		} else {
 			newStates = append(newStates, state)
 		}
 	}
-	states = newStates
-	fmt.Printf("to %d ", len(states))
+	return newStates
+}
 
+func filterWithSameFootprint(states []*searchState) []*searchState {
 	// consolidate states that contain the same boxes and cover the same area
-	stateMap := map[string]searchState{}
+	stateMap := map[string]*searchState{}
 	for _, state := range states {
 		key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
 		stateMap[key] = state
 	}
 	fmt.Printf("to %d ", len(stateMap))
-	states = maps.Values(stateMap)
+	return maps.Values(stateMap)
+}
+
+func consolidateSearchStates(states []*searchState) []*searchState {
+	if len(states) < 2 {
+		return states
+	}
+	fmt.Printf("Consolidating from %d... ", len(states))
+	states = filterWithTooManyPages(states)
+	fmt.Printf("to %d ", len(states))
+
+	states = filterWithTooMuchUnusedSpace(states)
+	fmt.Printf("to %d ", len(states))
+
+	states = filterWithSameFootprint(states)
+	fmt.Printf("to %d ", len(states))
 
 	// // consolidate states that contain the same boxes to only keep the one that covers the least area
 	// stateMap2 := map[string]areaStruct{}

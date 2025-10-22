@@ -19,8 +19,10 @@ type SVG struct {
 }
 
 func (s SVG) WritePage(fname string, scene scenes.Page) {
-	f, err := os.OpenFile(s.Fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	fmt.Printf("trying to open file %s\n", fname)
+	f, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
+		fmt.Printf("Got error\n")
 		panic(err)
 	}
 	defer f.Close()
@@ -60,9 +62,8 @@ func (s SVG) WriteSVG() {
 	} else {
 		extension := filepath.Ext(s.Fname)
 		basename := strings.TrimSuffix(s.Fname, extension)
-		fnamePattern := fmt.Sprintf("%s_%%d%s", basename, extension)
 		for i := range s.Document.NumPages() {
-			s.WritePage(fmt.Sprintf(fnamePattern, i), s.Document.Page(i))
+			s.WritePage(fmt.Sprintf("./%s_%d%s", basename, i, extension), s.Document.Page(i))
 		}
 	}
 }

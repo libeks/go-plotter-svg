@@ -35,6 +35,11 @@ func (d Document) AddLayer(layer Layer) Document {
 	return d
 }
 
+func (d Document) AddPage(p Page) Document {
+	d.pages = append(d.pages, p)
+	return d
+}
+
 func (d Document) CalculateStatistics() {
 	fmt.Printf("Document contains %d pages\n", len(d.pages))
 	for i, page := range d.pages {
