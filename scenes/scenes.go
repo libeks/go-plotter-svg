@@ -768,7 +768,7 @@ func rectanglePackginScene(b primitives.BBox) Document {
 	doc := Document{}.WithGuides()
 
 	rectangles := []primitives.BBox{}
-	for i := range 4 {
+	for i := range 10 {
 		// for j := range 1 {
 		rectangles = append(rectangles, primitives.BBox{
 			UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
@@ -778,14 +778,14 @@ func rectanglePackginScene(b primitives.BBox) Document {
 				Y: 500 + rand.Float64()*4000,
 			}),
 		})
-		rectangles = append(rectangles, primitives.BBox{
-			UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-				// X: float64((i+1)*700) + rand.Float64()*500,
-				// Y: float64((j+1)*700) + rand.Float64()*500,
-				X: 500 + rand.Float64()*2000 + float64(i),
-				Y: 500 + rand.Float64()*2000,
-			}),
-		})
+		// rectangles = append(rectangles, primitives.BBox{
+		// 	UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
+		// 		// X: float64((i+1)*700) + rand.Float64()*500,
+		// 		// Y: float64((j+1)*700) + rand.Float64()*500,
+		// 		X: 500 + rand.Float64()*2000 + float64(i),
+		// 		Y: 500 + rand.Float64()*2000,
+		// 	}),
+		// })
 		// }
 	}
 	// rectangles = []primitives.BBox{

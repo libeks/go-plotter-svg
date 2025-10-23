@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="12in" height="9in" viewBox="0 0 13333 10000" version="1.1" id="svg6" sodipodi:docname="test_inkscape.svg" inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"><g inkscape:groupmode="layer" inkscape:label="0 - frame" id="g5" transform="translate(0.0 0.0)"><path d="M 300.0 1100.0 L 300.0 9700.0 L 13033.3 9700.0 L 13033.3 1100.0 L 300.0 1100.0" stroke="black" fill="none" stroke-width="3" stroke-opacity="0.5"/></g>
-    <g inkscape:groupmode="layer" inkscape:label="1 - path" id="g5" transform="translate(0.0 0.0)"><path d="M 300.0 4204.1 L 300.0 4254.1 L 350.0 4254.1 L 350.0 4204.1 L 300.0 4204.1" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 5063.4 L 300.0 5113.4 L 350.0 5113.4 L 350.0 5063.4 L 300.0 5063.4" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 2775.3 5063.4 L 2775.3 5113.4 L 2825.3 5113.4 L 2825.3 5063.4 L 2775.3 5063.4" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 4573.6 3506.1 L 4573.6 3556.1 L 4623.6 3556.1 L 4623.6 3506.1 L 4573.6 3506.1" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 4142.3 2838.1 L 4142.3 2888.1 L 4192.3 2888.1 L 4192.3 2838.1 L 4142.3 2838.1" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 5559.7 1100.0 L 5559.7 1150.0 L 5609.7 1150.0 L 5609.7 1100.0 L 5559.7 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="1 - path" id="g5" transform="translate(0.0 0.0)"><path d="M 1578.2 5975.8 L 1578.2 6025.8 L 1628.2 6025.8 L 1628.2 5975.8 L 1578.2 5975.8" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 2630.2 6887.8 L 2630.2 6937.8 L 2680.2 6937.8 L 2680.2 6887.8 L 2630.2 6887.8" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 5170.5 7240.1 L 5170.5 7290.1 L 5220.5 7290.1 L 5220.5 7240.1 L 5170.5 7240.1" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 6186.6 4969.5 L 6186.6 5019.5 L 6236.6 5019.5 L 6236.6 4969.5 L 6186.6 4969.5" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 4576.5 4690.1 L 4576.5 4740.1 L 4626.5 4740.1 L 4626.5 4690.1 L 4576.5 4690.1" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 5759.4 1100.0 L 5759.4 1150.0 L 5809.4 1150.0 L 5809.4 1100.0 L 5759.4 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 6186.6 1100.0 L 6186.6 1150.0 L 6236.6 1150.0 L 6236.6 1100.0 L 6186.6 1100.0" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 7983.7 L 300.0 8033.7 L 350.0 8033.7 L 350.0 7983.7 L 300.0 7983.7" stroke="red" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
-    <g inkscape:groupmode="layer" inkscape:label="2 - walls" id="g5" transform="translate(0.0 0.0)"><path d="M 2775.3 3506.1 L 2775.3 4863.4 L 4373.6 4863.4 L 4373.6 3506.1 L 2775.3 3506.1" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 2775.3 2486.8 L 2775.3 3306.1 L 3804.2 3306.1 L 3804.2 2486.8 L 2775.3 2486.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 2775.3 1100.0 L 2775.3 2286.8 L 3942.3 2286.8 L 3942.3 1100.0 L 2775.3 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 4142.3 1100.0 L 4142.3 2638.1 L 5359.7 2638.1 L 5359.7 1100.0 L 4142.3 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 300.0 1100.0 L 300.0 4004.1 L 2575.3 4004.1 L 2575.3 1100.0 L 300.0 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="2 - walls" id="g5" transform="translate(0.0 0.0)"><path d="M 5170.5 4969.5 L 5170.5 7040.1 L 5986.6 7040.1 L 5986.6 4969.5 L 5170.5 4969.5" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 2806.5 2381.6 L 2806.5 4697.7 L 4339.9 4697.7 L 4339.9 2381.6 L 2806.5 2381.6" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 1578.2 2381.6 L 1578.2 4769.5 L 2606.5 4769.5 L 2606.5 2381.6 L 1578.2 2381.6" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 2381.6 L 300.0 6687.8 L 1378.2 6687.8 L 1378.2 2381.6 L 300.0 2381.6" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 1100.0 L 300.0 2181.6 L 4376.5 2181.6 L 4376.5 1100.0 L 300.0 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 1578.2 4969.5 L 1578.2 5775.8 L 4970.5 5775.8 L 4970.5 4969.5 L 1578.2 4969.5" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 300.0 6887.8 L 300.0 7783.7 L 2430.2 7783.7 L 2430.2 6887.8 L 300.0 6887.8" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 4576.5 1100.0 L 4576.5 4490.1 L 5559.4 4490.1 L 5559.4 1100.0 L 4576.5 1100.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
 </svg>
