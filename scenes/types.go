@@ -78,7 +78,6 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 		fillColors := map[string][]lines.LineLike{}
 		objects := shapesByPage[i]
 		for _, p := range objects {
-			// p := p.Translate(primitives.Origin.Subtract(p.BBox().UpperLeft).Add())
 			for _, poly := range p.Polygons {
 				polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)
 			}
@@ -100,7 +99,6 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 		}
 		doc = doc.AddPage(page)
 	}
-	// fmt.Printf("document %v\n", s)
 	return doc
 }
 

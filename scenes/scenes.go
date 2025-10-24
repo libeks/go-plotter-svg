@@ -704,8 +704,6 @@ func foldableCubeIDScene(b primitives.BBox) Document {
 func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
 	pattern := foldable.RhombicuboctahedronID(b, foldableBase)
-	// center in bbox
-	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
 	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
@@ -713,8 +711,6 @@ func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
 func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
 	pattern := foldable.RhombicuboctahedronWithoutCornersID(b, foldableBase)
-	// center in bbox
-	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
 	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
@@ -723,8 +719,6 @@ func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
 
 	foldableBase := 1500.0
 	pattern := foldable.RightTrianglePrismID(b, foldableBase, foldableBase, foldableBase)
-	// center in bbox
-	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
 	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
@@ -732,8 +726,6 @@ func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
 func foldableCutCornerScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
 	pattern := foldable.CutCubeID(b, foldableBase, 0.5)
-	// center in bbox
-	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
 	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
@@ -755,60 +747,13 @@ func rectanglePackginScene(b primitives.BBox) Document {
 
 	rectangles := []primitives.BBox{}
 	for i := range 20 {
-		// for j := range 1 {
 		rectangles = append(rectangles, primitives.BBox{
 			UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-				// X: float64((i+1)*700) + rand.Float64()*500,
-				// Y: float64((j+1)*700) + rand.Float64()*500,
 				X: 1500 + rand.Float64()*4000 + float64(i),
 				Y: 1500 + rand.Float64()*4000,
 			}),
 		})
-		// rectangles = append(rectangles, primitives.BBox{
-		// 	UpperLeft: primitives.Origin, LowerRight: primitives.Origin.Add(primitives.Vector{
-		// 		// X: float64((i+1)*700) + rand.Float64()*500,
-		// 		// Y: float64((j+1)*700) + rand.Float64()*500,
-		// 		X: 500 + rand.Float64()*2000 + float64(i),
-		// 		Y: 500 + rand.Float64()*2000,
-		// 	}),
-		// })
-		// }
 	}
-	// rectangles = []primitives.BBox{
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1999.0, 977.8}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2343.9, 2082.1}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{4060.0, 3760.4}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3739.2, 3582.2}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{992.6, 1855.4}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2993.4, 1936.1}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2657.2, 1397.4}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2472.0, 4213.3}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3550.8, 3380.8}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{4424.2, 2394.2}},
-	// }
-	// rectangles = []primitives.BBox{
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1450.1, 1254.2}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1155.0, 2367.1}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1137.7, 3095.9}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2427.6, 1227.9}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2122.4, 2213.4}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2057.4, 3417.1}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3474.9, 1111.2}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3449.5, 2210.7}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{3144.9, 3471.1}},
-	// }
-	// rectangles = []primitives.BBox{
-	// 	{primitives.Point{0.0, 0.0}, primitives.Point{1015.7, 1471.2}},
-	// 	{primitives.Point{0.0, 0.0}, primitives.Point{1235.7, 2211.5}},
-	// 	{primitives.Point{0.0, 0.0}, primitives.Point{2321.4, 1235.5}},
-	// 	{primitives.Point{0.0, 0.0}, primitives.Point{2050.7, 2496.6}},
-	// }
-	// rectangles = []primitives.BBox{
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1054.9, 1488.2}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{1098.0, 2385.7}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2225.5, 1268.0}},
-	// 	primitives.BBox{UpperLeft: primitives.Point{0.0, 0.0}, LowerRight: primitives.Point{2307.7, 2131.7}},
-	// }
 	for _, rect := range rectangles {
 		fmt.Printf("%v\n", rect)
 	}
