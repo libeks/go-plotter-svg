@@ -1,6 +1,7 @@
 package pack
 
 import (
+	"cmp"
 	"fmt"
 	"sort"
 	"strings"
@@ -39,13 +40,17 @@ func (s *searchState) Pages() int {
 	return pages
 }
 
-func (s searchState) RemoveSuperfluousPositions() searchState {
+func (s searchState) RemoveSuperfluousPositions(container primitives.BBox) searchState {
 	if len(s.positions) == 0 {
 		return s
 	}
 	newPositions := []PagedVector{}
 	for _, pos := range s.positions {
 		pt := primitives.Origin.Add(pos.Vector)
+		// skip if position falls outside of the container
+		if !container.PointInside(pt) {
+			continue
+		}
 		conflict := false
 		for i, v := range s.processed {
 			if v.Page != pos.Page { // if the box is not on the same page as the position, ignore; there is no conflict
@@ -142,20 +147,45 @@ func (s searchState) IntersectsFixed(page int, b primitives.BBox) bool {
 // 	return totalArea
 // }
 
+func stateComparatorFunc(a, b *searchState) int {
+	// fewer pages is better
+	if a.Pages() != b.Pages() {
+		return cmp.Compare(a.Pages(), b.Pages())
+	}
+	// there should be as few unprocessable rectangles
+	if a.unprocessables.Count() != b.unprocessables.Count() {
+		return cmp.Compare(a.unprocessables.Count(), b.unprocessables.Count())
+	}
+	// sort by total area of processed
+	return cmp.Compare(a.ProcessedAreaSum(), b.ProcessedAreaSum())
+}
+
+type pageStat struct {
+	page             int
+	nBoxes           int
+	bboxArea         float64
+	boxes            bitmap.Bitmap
+	points           []primitives.Point
+	componentAreaSum float64
+}
+
 func (s searchState) PageAreaStats() map[int]pageStat {
 	byPage := map[int]pageStat{}
+
 	for i, v := range s.processed {
 		page := v.Page
 		if _, ok := byPage[page]; !ok {
 			byPage[page] = pageStat{
 				page:   page,
 				points: []primitives.Point{},
+				boxes:  bitmap.Bitmap{},
 			}
 		}
 		bx := s.boxes[i].Translate(v.Vector)
 		stat := byPage[page]
 		stat.points = append(stat.points, bx.BBox.Corners()...)
-		stat.boxes += 1
+		stat.nBoxes += 1
+		stat.boxes.Set(uint32(i))
 		stat.componentAreaSum += bx.Area()
 		byPage[page] = stat
 	}

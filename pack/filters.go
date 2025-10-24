@@ -8,14 +8,6 @@ import (
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
-type pageStat struct {
-	page             int
-	boxes            int
-	bboxArea         float64
-	points           []primitives.Point
-	componentAreaSum float64
-}
-
 func filterWithTooManyPages(states []*searchState) []*searchState {
 	// remove solutions with too many pages
 	minpages := 10000
@@ -67,8 +59,8 @@ func filterWithTooMuchUnusedSpace(states []*searchState) []*searchState {
 			pageStats := state.PageAreaStats()
 			shouldRemove := false
 			for _, stats := range pageStats {
-				if stats.boxes > 3 {
-					if stats.componentAreaSum/stats.bboxArea < 0.65 {
+				if stats.nBoxes > 3 {
+					if stats.componentAreaSum/stats.bboxArea < 0.70 {
 						shouldRemove = true
 						break
 					}
@@ -101,16 +93,71 @@ func filterFirstPageTooSmall(states []*searchState, container primitives.BBox) [
 	return newStates
 }
 
-// func filterWithSameFootprint(states []*searchState) []*searchState {
-// 	// consolidate states that contain the same boxes and cover the same area
-// 	stateMap := map[string]*searchState{}
-// 	for _, state := range states {
-// 		key := fmt.Sprintf("%s:%f", state.processedKey(), state.ProcessedArea())
-// 		stateMap[key] = state
-// 	}
-// 	// fmt.Printf("to %d ", len(stateMap))
-// 	return maps.Values(stateMap)
-// }
+func filterTwoPagesAddToLessThanContainer(states []*searchState, container primitives.BBox) []*searchState {
+	// consolidate states where two or more pages have a bbox that could be placed on a single page
+	newStates := []*searchState{}
+	for _, state := range states {
+		pageStats := state.PageAreaStats()
+		shouldRemove := false
+		// fmt.Printf("page stats %v, %f\n", pageStats, pageStats[0].bboxArea/container.Area())
+		if len(pageStats) > 1 {
+			total := 0.0
+			for pageID, stat := range pageStats {
+				if pageID > 0 && total+stat.bboxArea/container.Area() < 1.0 {
+					shouldRemove = true
+				}
+				total += stat.bboxArea / container.Area()
+			}
+		}
+		if !shouldRemove { // TODO: dynamically determine the threshold
+			newStates = append(newStates, state)
+		}
+	}
+	return newStates
+}
+
+func filterWithSameFootprintButMoreArea(states []*searchState) []*searchState {
+	type areaStruct struct {
+		area        float64
+		searchState *searchState
+	}
+	// consolidate states that contain the same boxes and cover the same area
+	stateMap := map[string]areaStruct{}
+	for _, state := range states {
+		stats := state.PageAreaStats()
+		// TODO: see if the same set of objects on this page take up more area
+		key := ""
+		totalArea := 0.0
+		for page, stat := range stats {
+			st, err := stat.boxes.MarshalJSON()
+			if err != nil {
+				panic("Couldn't marshal")
+			}
+			key = fmt.Sprintf("%s:%d-%s", key, page, st)
+			totalArea += stat.componentAreaSum
+		}
+		if val, ok := stateMap[key]; !ok {
+			stateMap[key] = areaStruct{
+				area:        totalArea,
+				searchState: state,
+			}
+		} else {
+			if val.area > totalArea {
+				stateMap[key] = areaStruct{
+					area:        totalArea,
+					searchState: state,
+				}
+			}
+		}
+	}
+	states = []*searchState{}
+	for _, val := range stateMap {
+		states = append(states, val.searchState)
+	}
+	// fmt.Printf("to %d ", len(stateMap))
+	// return maps.Values(stateMap)
+	return states
+}
 
 func filterSameBoxesWithMoreArea(states []*searchState) []*searchState {
 	type areaStruct struct {
@@ -135,7 +182,6 @@ func filterSameBoxesWithMoreArea(states []*searchState) []*searchState {
 				searchState: state,
 			}
 		}
-		// stateMap[key] = state
 	}
 	states = make([]*searchState, 0, len(stateMap))
 	for _, value := range stateMap {
@@ -149,11 +195,18 @@ func consolidateSearchStates(states []*searchState, container primitives.BBox) [
 		return states
 	}
 	fmt.Printf("Consolidating\n  from %d... \n", len(states))
+
+	states = filterWithSameFootprintButMoreArea(states)
+	fmt.Printf("  to %d (same footprint, more area)\n", len(states))
+
 	states = filterWithTooManyPages(states)
 	fmt.Printf("  to %d (too many pages)\n", len(states))
 
-	states = filterFirstPageTooSmall(states, container)
-	fmt.Printf("  to %d (first page too small)\n", len(states))
+	// states = filterFirstPageTooSmall(states, container)
+	// fmt.Printf("  to %d (first page too small)\n", len(states))
+
+	states = filterTwoPagesAddToLessThanContainer(states, container)
+	fmt.Printf("  to %d (multiple pages can be combined into one)\n", len(states))
 
 	states = filterWithIncreasingBBoxesOnPages(states)
 	fmt.Printf("  to %d (pages must be decreasing)\n", len(states))
@@ -165,8 +218,8 @@ func consolidateSearchStates(states []*searchState, container primitives.BBox) [
 	// states = filterWithSameFootprint(states)
 	// fmt.Printf("to %d ", len(states))
 
-	states = filterSameBoxesWithMoreArea(states)
-	fmt.Printf("  to %d (remove states with more area)\n", len(states))
+	// states = filterSameBoxesWithMoreArea(states)
+	// fmt.Printf("  to %d (remove states with more area)\n", len(states))
 
 	// states = maps.Values(stateMap)
 	// // remove states that are identical

@@ -1,7 +1,6 @@
 package pack
 
 import (
-	"cmp"
 	"fmt"
 	"slices"
 
@@ -12,7 +11,7 @@ import (
 	"github.com/kelindar/bitmap"
 )
 
-const MAX_STATES = 10_000_000
+const MAX_STATES = 1_000_000
 
 type box struct {
 	primitives.BBox
@@ -90,17 +89,19 @@ func packingAlgo(bxs []primitives.BBox, container primitives.BBox, padding float
 	}
 	finalStates := []*searchState{}
 
+	pass := 1
 	for len(searchStates) > 0 {
 		newStates := []*searchState{} // append to this slice, then swap this out with searchStates at the end
-		fmt.Printf("have %d search states\n", len(searchStates))
+		fmt.Printf("Pass %d: have %d search states\n", pass, len(searchStates))
 		if len(searchStates) > MAX_STATES {
 			panic("Exceeded max allowed states, aborting")
 		}
 		searchStates = consolidateSearchStates(searchStates, container)
+		slices.SortFunc(searchStates, stateComparatorFunc) // sort slices so this pass starts with the best options so far
 		for _, state := range searchStates {
 			// fmt.Printf("%v, %v\n", state.processed, state.positions)
 			found := false
-			if len(state.unprocessed) == 0 {
+			if state.unprocessed.Count() == 0 {
 				// if there are no unprocessed boxes, we are done with this state
 				finalStates = append(finalStates, state)
 				continue
@@ -185,10 +186,9 @@ func packingAlgo(bxs []primitives.BBox, container primitives.BBox, padding float
 						unprocessed:    newUnprocessed, // strip out this box
 						processed:      newProcessed,
 					}
-					newState = newState.RemoveSuperfluousPositions()
+					newState = newState.RemoveSuperfluousPositions(container)
 					newStates = append(newStates, &newState)
 				})
-
 			}
 			if !found {
 				finalStates = append(finalStates, &searchState{
@@ -199,8 +199,14 @@ func packingAlgo(bxs []primitives.BBox, container primitives.BBox, padding float
 					processed:      maps.Clone(state.processed),
 				})
 			}
+			if len(newStates) > MAX_STATES {
+				fmt.Printf("Stopping pass early since we already have %d potential cases\n", len(newStates))
+				newStates = newStates[:MAX_STATES]
+				break // stop adding more candidates if max states is exceeded
+			}
 		}
 		searchStates = newStates
+		pass += 1
 	}
 	if len(finalStates) == 0 {
 		return PackingSolution{
@@ -210,19 +216,9 @@ func packingAlgo(bxs []primitives.BBox, container primitives.BBox, padding float
 		}
 	}
 	fmt.Printf("Got %d possible solutions\n", len(finalStates))
-	solution := slices.MinFunc(finalStates, func(a, b *searchState) int {
-		// fewer pages is better
-		if a.Pages() != b.Pages() {
-			return cmp.Compare(a.Pages(), b.Pages())
-		}
-		// there should be as few unprocessable rectangles
-		if len(a.unprocessables) != len(b.unprocessables) {
-			return cmp.Compare(a.unprocessedArea(), b.unprocessedArea())
-		}
-		// sort by total area of processed
-		return cmp.Compare(a.ProcessedAreaSum(), b.ProcessedAreaSum())
-	})
-	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", len(solution.unprocessables), len(solution.processed))
+	solution := slices.MinFunc(finalStates, stateComparatorFunc)
+	fmt.Printf("Best solution has %d unplaceable, %d placeable boxes\n", solution.unprocessables.Count(), len(solution.processed))
+
 	fmt.Printf("Boxes are:\n")
 	for i, v := range solution.processed {
 		fmt.Printf("\t%d: %v\n", v.Page, boxes[i].Translate(v.Vector))
