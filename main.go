@@ -24,7 +24,8 @@ func main() {
 		LowerRight: primitives.Point{X: sizePx * (12.0 / 9.0), Y: sizePx}, // make sure it spans the 9"x12" canvas
 	}
 	start := time.Now()
-	innerBox := outerBox.WithPadding(300) // enough to no hit the edges
+	innerBox := outerBox.WithPadding(500) // enough to no hit the edges
+	fmt.Printf("InnerBox %v\n", innerBox)
 	// scene := scenes.getCurlyScene(outerBox)
 	// scene := scenes.getLinesInsideScene(innerBox, 1000)
 	// scene := scenes.getLineFieldInObjects(innerBox)
