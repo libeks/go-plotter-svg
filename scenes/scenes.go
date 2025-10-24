@@ -694,35 +694,35 @@ func polygonScene(b primitives.BBox) Document {
 
 func foldableCubeIDScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	patterns := foldable.CubeID(b, foldableBase)
+	patterns := foldable.Cube(b, foldableBase)
 	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	patterns := foldable.RhombicuboctahedronID(b, foldableBase)
+	patterns := foldable.Rhombicuboctahedron(b, foldableBase)
 	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	patterns := foldable.RhombicuboctahedronWithoutCornersID(b, foldableBase)
+	patterns := foldable.RhombicuboctahedronWithoutCorners(b, foldableBase)
 	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	patterns := foldable.RightTrianglePrismID(b, foldableBase, foldableBase, foldableBase)
+	patterns := foldable.RightTrianglePrism(b, foldableBase, foldableBase, foldableBase)
 	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableCutCornerScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	patterns := foldable.CutCubeID(b, foldableBase, 0.5)
+	patterns := foldable.CutCube(b, foldableBase, 0.5)
 	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
