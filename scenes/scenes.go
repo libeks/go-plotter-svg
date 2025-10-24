@@ -693,62 +693,48 @@ func polygonScene(b primitives.BBox) Document {
 }
 
 func foldableCubeIDScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
 	foldableBase := 1500.0
 	pattern := foldable.CubeID(b, foldableBase)
 	// center in bbox
-	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	scene = scene.AddFoldableLayers(pattern)
+	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
 
 func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
 	foldableBase := 1500.0
 	pattern := foldable.RhombicuboctahedronID(b, foldableBase)
 	// center in bbox
-	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	scene = scene.AddFoldableLayers(pattern)
+	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
 
 func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
 	foldableBase := 1500.0
 	pattern := foldable.RhombicuboctahedronWithoutCornersID(b, foldableBase)
 	// center in bbox
-	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	scene = scene.AddFoldableLayers(pattern)
+	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
 
 func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
 	foldableBase := 1500.0
 	pattern := foldable.RightTrianglePrismID(b, foldableBase, foldableBase, foldableBase)
 	// center in bbox
-	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	scene = scene.AddFoldableLayers(pattern)
+	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
 
 func foldableCutCornerScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
 	foldableBase := 1500.0
 	pattern := foldable.CutCubeID(b, foldableBase, 0.5)
 	// center in bbox
-	pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	scene = scene.AddFoldableLayers(pattern)
+	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
+	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
 	return scene
 }
 

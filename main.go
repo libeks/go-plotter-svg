@@ -47,10 +47,10 @@ func main() {
 	// scene := scenes.FoldableRightTrianglePrismScene(innerBox)
 	// scene := scenes.FoldableRightTrianglePrismIDScene(innerBox)
 	// scene := scenes.FoldableCutCubeScene(innerBox)
-	// scene := scenes.FoldableRhombiSansCorner(innerBox)
+	scene := scenes.FoldableRhombiSansCorner(innerBox)
 	// scene := scenes.MazeScene(innerBox)
+	// scene := scenes.RectanglePackingScene(innerBox)
 
-	scene := scenes.RectanglePackingScene(innerBox)
 	scene.CalculateStatistics()
 	svg.SVG{
 		Fname:    fname,

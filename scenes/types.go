@@ -6,6 +6,7 @@ import (
 
 	"github.com/libeks/go-plotter-svg/foldable"
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/pack"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -55,21 +56,52 @@ func (d Document) Page(i int) Page {
 	return d.pages[i]
 }
 
-func (s Document) AddFoldableLayers(p foldable.FoldablePattern) Document {
+func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.BBox) Document {
 	// TODO: Customize brush width rendering
-	polygons := []lines.LineLike{}
-	for _, poly := range p.Polygons {
-		polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)
+	doc := Document{}.WithGuides()
+	bboxes := make([]primitives.BBox, len(shapes))
+	for i, shape := range shapes {
+		box := shape.BBox()
+		bboxes[i] = box.Translate(primitives.Origin.Subtract(box.UpperLeft))
 	}
-	s = s.AddLayer(NewLayer("black").WithLineLike(p.Edges).WithColor("black").WithWidth(20).MinimizePath(true))
-	s = s.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
-	s = s.AddLayer(NewLayer("green").WithLineLike(p.Annotations).WithColor("green").WithWidth(20).MinimizePath(true))
-	s = s.AddLayer(NewLayer("blue").WithLineLike(lines.LinesFromBBox(p.BBox())).WithColor("blue").WithWidth(20).MinimizePath(true))
-	for color, infill := range p.Fill {
-		layerName := fmt.Sprintf("fill-%s", color)
-		s = s.AddLayer(NewLayer(layerName).WithLineLike(infill).WithColor(color).WithWidth(20).MinimizePath(true))
+	boxPacking := pack.PackOnMultiplePages(bboxes, container, 200)
+	shapesByPage := map[int][]foldable.FoldablePattern{}
+	for i, v := range boxPacking.Translations {
+		shapesByPage[v.Page] = append(shapesByPage[v.Page], shapes[i].Translate(primitives.Origin.Subtract(shapes[i].BBox().UpperLeft).Add(v.Vector)))
 	}
-	return s
+	for i := range boxPacking.Pages {
+		page := Page{}
+		polygons := []lines.LineLike{}
+		edges := []lines.LineLike{}
+		annotations := []lines.LineLike{}
+		bboxLines := []lines.LineLike{}
+		fillColors := map[string][]lines.LineLike{}
+		objects := shapesByPage[i]
+		for _, p := range objects {
+			// p := p.Translate(primitives.Origin.Subtract(p.BBox().UpperLeft).Add())
+			for _, poly := range p.Polygons {
+				polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)
+			}
+			edges = append(edges, p.Edges...)
+			annotations = append(annotations, p.Annotations...)
+			bboxLines = append(bboxLines, lines.LinesFromBBox((p.BBox()))...)
+			for color, infill := range p.Fill {
+				fillColors[color] = append(fillColors[color], infill...)
+			}
+		}
+		page = page.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(container)).WithOffset(0, 0))
+		page = page.AddLayer(NewLayer("black").WithLineLike(edges).WithColor("black").WithWidth(20).MinimizePath(true))
+		page = page.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
+		page = page.AddLayer(NewLayer("green").WithLineLike(annotations).WithColor("green").WithWidth(20).MinimizePath(true))
+		page = page.AddLayer(NewLayer("blue").WithLineLike(bboxLines).WithColor("blue").WithWidth(20).MinimizePath(true))
+		for color, infill := range fillColors {
+			layerName := fmt.Sprintf("fill-%s", color)
+			page = page.AddLayer(NewLayer(layerName).WithLineLike(infill).WithColor(color).WithWidth(20).MinimizePath(true))
+		}
+		doc = doc.AddPage(page)
+	}
+	// fmt.Printf("document %v\n", s)
+	return doc
 }
 
 type Page struct {
