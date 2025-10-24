@@ -694,39 +694,36 @@ func polygonScene(b primitives.BBox) Document {
 
 func foldableCubeIDScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	pattern := foldable.CubeID(b, foldableBase)
-	// center in bbox
-	// pattern = pattern.Translate(b.Center().Subtract(pattern.BBox().Center()))
-	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
+	patterns := foldable.CubeID(b, foldableBase)
+	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	pattern := foldable.RhombicuboctahedronID(b, foldableBase)
-	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
+	patterns := foldable.RhombicuboctahedronID(b, foldableBase)
+	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	pattern := foldable.RhombicuboctahedronWithoutCornersID(b, foldableBase)
-	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
+	patterns := foldable.RhombicuboctahedronWithoutCornersID(b, foldableBase)
+	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
-
 	foldableBase := 1500.0
-	pattern := foldable.RightTrianglePrismID(b, foldableBase, foldableBase, foldableBase)
-	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
+	patterns := foldable.RightTrianglePrismID(b, foldableBase, foldableBase, foldableBase)
+	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
 func foldableCutCornerScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
-	pattern := foldable.CutCubeID(b, foldableBase, 0.5)
-	scene := FromFoldableLayers([]foldable.FoldablePattern{pattern}, b)
+	patterns := foldable.CutCubeID(b, foldableBase, 0.5)
+	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
@@ -759,7 +756,7 @@ func rectanglePackginScene(b primitives.BBox) Document {
 	}
 	blacks := map[int][]lines.LineLike{}
 	reds := map[int][]lines.LineLike{}
-	solution := pack.PackOnOnePage(rectangles, b, 200)
+	solution := pack.PackOnMultiplePages(rectangles, b, 200)
 	for _, v := range solution.DebugPositions {
 		reds[v.Page] = append(
 			reds[v.Page],

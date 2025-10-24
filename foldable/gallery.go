@@ -8,7 +8,7 @@ import (
 )
 
 // Cube does a cube with a certain side length.
-func CubeID(b primitives.BBox, side float64) FoldablePattern {
+func CubeID(b primitives.BBox, side float64) []FoldablePattern {
 	sq := Square(side)
 	c := NewCutOut(
 		[]FaceID{
@@ -84,7 +84,7 @@ func RightTrianglePrism(b primitives.BBox, height, leg1, leg2 float64) []lines.L
 	return c.Render(b.UpperLeft.Add(primitives.Vector{X: 0, Y: leg1}), 0).Lines
 }
 
-func RightTrianglePrismID(b primitives.BBox, height, leg1, leg2 float64) FoldablePattern {
+func RightTrianglePrismID(b primitives.BBox, height, leg1, leg2 float64) []FoldablePattern {
 	a := math.Sqrt(leg1*leg1 + leg2*leg2)
 	c := NewCutOut(
 		[]FaceID{
@@ -136,7 +136,7 @@ func RightTrianglePrismID(b primitives.BBox, height, leg1, leg2 float64) Foldabl
 	return c.Render(b)
 }
 
-func RhombicuboctahedronID(b primitives.BBox, side float64) FoldablePattern {
+func RhombicuboctahedronID(b primitives.BBox, side float64) []FoldablePattern {
 	sq := Square(side)
 	tri := EquiTriangle(side)
 	c := NewCutOut(
@@ -242,23 +242,23 @@ func RhombicuboctahedronID(b primitives.BBox, side float64) FoldablePattern {
 
 // RhombicuboctahedronWithoutCornersID is the same as RhombicuboctahedronID, but with the triangular corner pieces missing
 // The idea is to have a right-angle corner inserts in each space, but this requires a disconneced foldable
-func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) FoldablePattern {
+func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) []FoldablePattern {
 	// TODO: Add in corner pieces
 	fillSpacing := 40.0
-	triColor := "red"
+	// triColor := "red"
 	faceColor := "yellow"
 	sq := Square(side)
-	triSide := side / (math.Sqrt(2))
+	// triSide := side / (math.Sqrt(2))
 	tr := Shape{
 		Edges: []Edge{
 			{
-				Vector: primitives.Vector{X: triSide, Y: 0},
+				Vector: primitives.Vector{X: side / 2, Y: -side / 2},
 			},
 			{
-				Vector: primitives.Vector{X: -triSide, Y: math.Sqrt(2 * triSide * triSide)},
+				Vector: primitives.Vector{X: side / 2, Y: side / 2},
 			},
 			{
-				Vector: primitives.Vector{X: 0, Y: -math.Sqrt(2 * triSide * triSide)},
+				Vector: primitives.Vector{X: -side, Y: 0},
 			},
 		},
 	}
@@ -283,37 +283,37 @@ func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) Foldab
 			faceID(sq, "G+1").WithFill(faceColor, fillSpacing, 0, 0),
 			faceID(sq, "G-1").WithFill(faceColor, fillSpacing, 0, 0),
 
-			faceID(tr, "B+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B+a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B+b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B+c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "B-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B-a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B-b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B-c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "D+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D+a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D+b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D+c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "D-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D-a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D-b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D-c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "F+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F+a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F+b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F+c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "F-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F-a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F-b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F-c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "H+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H+a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H+b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H+c"), //.WithFill(triColor, fillSpacing, 0, 0),
 
-			faceID(tr, "H-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H-a"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H-b"), //.WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H-c"), //.WithFill(triColor, fillSpacing, 0, 0),
 		},
 		[]ConnectionID{
 			link("A", "B", 1, 3),
@@ -340,9 +340,67 @@ func RhombicuboctahedronWithoutCornersID(b primitives.BBox, side float64) Foldab
 
 			link("B+a", "B+b", 0, 1),
 			link("B+b", "B+c", 0, 1),
-			flap("B", "B+a", 0, 2),
-			flap("C+1", "B+b", 3, 2),
-			flap("A+1", "B+c", 1, 2),
+
+			flap("B+a", "B", 2, 0),
+			flap("B+b", "A+1", 2, 3),
+			flap("B+c", "C+1", 2, 1),
+			flap("B+a", "B+c", 1, 0),
+
+			link("B-a", "B-b", 1, 0),
+			link("B-b", "B-c", 1, 0),
+
+			flap("B-a", "B", 2, 2),
+			flap("B-b", "A-1", 2, 3),
+			flap("B-c", "C-1", 2, 1),
+			flap("B-a", "B-c", 0, 1),
+
+			link("D+a", "D+b", 0, 1),
+			link("D+b", "D+c", 0, 1),
+
+			flap("D+a", "D", 2, 0),
+			flap("D+b", "C+1", 2, 3),
+			flap("D+c", "E+1", 2, 1),
+			flap("D+a", "D+c", 1, 0),
+
+			link("D-a", "D-b", 1, 0),
+			link("D-b", "D-c", 1, 0),
+
+			flap("D-a", "D", 2, 2),
+			flap("D-b", "C-1", 2, 3),
+			flap("D-c", "E-1", 2, 1),
+			flap("D-a", "D-c", 0, 1),
+
+			link("F+a", "F+b", 0, 1),
+			link("F+b", "F+c", 0, 1),
+
+			flap("F+a", "F", 2, 0),
+			flap("F+b", "E+1", 2, 3),
+			flap("F+c", "G+1", 2, 1),
+			flap("F+a", "F+c", 1, 0),
+
+			link("F-a", "F-b", 1, 0),
+			link("F-b", "F-c", 1, 0),
+
+			flap("F-a", "F", 2, 2),
+			flap("F-b", "E-1", 2, 3),
+			flap("F-c", "G-1", 2, 1),
+			flap("F-a", "F-c", 0, 1),
+
+			link("H+a", "H+b", 0, 1),
+			link("H+b", "H+c", 0, 1),
+
+			flap("H+a", "H", 2, 0),
+			flap("H+b", "G+1", 2, 3),
+			flap("H+c", "A+1", 2, 1),
+			flap("H+a", "H+c", 1, 0),
+
+			link("H-a", "H-b", 1, 0),
+			link("H-b", "H-c", 1, 0),
+
+			flap("H-a", "H", 2, 2),
+			flap("H-b", "G-1", 2, 3),
+			flap("H-c", "A-1", 2, 1),
+			flap("H-a", "H-c", 0, 1),
 
 			flap("A", "H", 3, 1),
 			flap("A+2", "G+1", 3, 0),
@@ -494,7 +552,7 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) Foldable
 	}
 }
 
-func CutCubeID(b primitives.BBox, side float64, cutRatio float64) FoldablePattern {
+func CutCubeID(b primitives.BBox, side float64, cutRatio float64) []FoldablePattern {
 	sq := Square(side)
 	a := math.Sqrt(1 + cutRatio*cutRatio)
 	c := NewCutOut(

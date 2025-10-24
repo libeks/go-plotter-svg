@@ -134,7 +134,7 @@ func packingAlgo(bxs []primitives.BBox, container primitives.BBox, padding float
 						),
 						state.positions[posID+1:]...,
 					) // remove the current position
-					if pos.IsUpperLeftCorner {
+					if pos.IsUpperLeftCorner && multiPage {
 						// Add a new page to positions
 						positions = append(
 							positions,

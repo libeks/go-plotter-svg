@@ -99,10 +99,20 @@ type FaceEdge struct {
 	EdgeID int
 }
 
-func (c CutOut) Render(b primitives.BBox) FoldablePattern {
+// cutoutTrees represents all of the information necessary to render each pattern in the foldable
+type cutoutTrees struct {
+	faces map[string]*Face // the faces, keyed by their labels
+	heads []string         // a list of the roots of the trees, listing their labels
+}
+
+func (c CutOut) computeTrees(container primitives.BBox) cutoutTrees {
 	// first, convert from a list representation to a face-tree representation
 	faceByID := map[string]*Face{}
-	var initialFace *Face
+	// heads are the faces that start a distinct foldable pattern.
+	// Each is a face that only has outgoing direct connnections, no incoming
+	visitedFaces := map[string]struct{}{}
+	heads := []string{}
+	// var initialFace *Face
 	connectionsCompleted := map[FaceEdge]bool{} // tracks whether all edge connections are accounted for
 	for _, face := range c.Faces {
 		if _, ok := faceByID[face.Name]; ok {
@@ -128,6 +138,13 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 		if !ok {
 			fmt.Printf("Could not find face named %s for connection number %d\n", connection.FaceB, i)
 			panic("Couldn't render")
+		}
+		if connection.ConnectionType == FaceConnection {
+			if _, ok := visitedFaces[faceB.Name]; ok {
+				fmt.Printf("Face %s has already been connected to, this creates a cycle in the graph", faceB.Name)
+				panic("Couldn't render")
+			}
+			visitedFaces[faceB.Name] = struct{}{}
 		}
 
 		if connection.EdgeAID >= len(faceA.Shape.Edges) {
@@ -175,42 +192,67 @@ func (c CutOut) Render(b primitives.BBox) FoldablePattern {
 			fmt.Printf("Edge %s:%d is not connected to anything\n", edge.Face, edge.EdgeID)
 		}
 	}
-	// set the initial face
-	initialFace = faceByID[c.Connections[0].FaceA]
-	faceBundle := initialFace.Render(b.UpperLeft, 0)
-	polygons := []objects.Polygon{}
-	annotations := []lines.LineLike{}
-	fills := map[string][]lines.LineLike{}
-	minAnnotationSize := math.MaxFloat64
-	for key, polygon := range faceBundle.FacePolygons {
-		polygons = append(polygons, polygon)
-		bbox := polygon.LargestContainedSquareBBox()
-		bbox = bbox.WithPadding(100)
-		annotation := fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox())
-		// ensure that all annotations are rendered at the same size, which is the smallest size you can render
-		if annotation.Size < minAnnotationSize && annotation.Size > 0 {
-			minAnnotationSize = annotation.Size
+	// for each face that has never appeared as faceB in a face connection, it is a root/head of its own tree
+	for name := range faceByID {
+		if _, ok := visitedFaces[name]; !ok {
+			heads = append(heads, name)
 		}
-		face := faceByID[key]
-		if face.infill.color != "" {
-			if _, ok := fills[face.infill.color]; !ok {
-				fills[face.infill.color] = []lines.LineLike{}
+	}
+	return cutoutTrees{
+		faces: faceByID,
+		heads: heads,
+	}
+}
+
+// GeneratePatterns creates a list of foldable patterns, each of which represents a standalone component of the foldable
+// which can be placed somewhere on the page. Each pattern will have its bounding box start at the origin
+func (c CutOut) GeneratePatterns(container primitives.BBox) []FoldablePattern {
+	trees := c.computeTrees(container)
+	patterns := []FoldablePattern{}
+	for _, headLabel := range trees.heads {
+		head := trees.faces[headLabel]
+		faceBundle := head.Render(primitives.Origin, 0)
+		polygons := []objects.Polygon{}
+		annotations := []lines.LineLike{}
+		fills := map[string][]lines.LineLike{}
+		minAnnotationSize := math.MaxFloat64
+		for key, polygon := range faceBundle.FacePolygons {
+			polygons = append(polygons, polygon)
+			bbox := polygon.LargestContainedSquareBBox()
+			bbox = bbox.WithPadding(100)
+			annotation := fonts.RenderText(bbox, key, fonts.WithSize(2000), fonts.WithFitToBox())
+			// ensure that all annotations are rendered at the same size, which is the smallest size you can render
+			if annotation.Size < minAnnotationSize && annotation.Size > 0 {
+				minAnnotationSize = annotation.Size
 			}
-			infillPoly := polygon.Grow(-face.infill.gap)
-			fills[face.infill.color] = append(fills[face.infill.color], infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
+			face := trees.faces[key]
+			if face.infill.color != "" {
+				if _, ok := fills[face.infill.color]; !ok {
+					fills[face.infill.color] = []lines.LineLike{}
+				}
+				infillPoly := polygon.Grow(-face.infill.gap)
+				fills[face.infill.color] = append(fills[face.infill.color], infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
+			}
 		}
+		// redo it again with the min annotation size
+		for key, polygon := range faceBundle.FacePolygons {
+			bbox := polygon.LargestContainedSquareBBox()
+			bbox = bbox.WithPadding(100)
+			annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(minAnnotationSize)).CharCurves...)
+		}
+		polygons = append(polygons, faceBundle.FlapPolygons...)
+		patterns = append(patterns, FoldablePattern{
+			Edges:       faceBundle.Lines,
+			Polygons:    polygons,
+			Fill:        fills,
+			Annotations: annotations,
+		},
+		)
 	}
-	// redo it again with the min annotation size
-	for key, polygon := range faceBundle.FacePolygons {
-		bbox := polygon.LargestContainedSquareBBox()
-		bbox = bbox.WithPadding(100)
-		annotations = append(annotations, fonts.RenderText(bbox, key, fonts.WithSize(minAnnotationSize)).CharCurves...)
-	}
-	polygons = append(polygons, faceBundle.FlapPolygons...)
-	return FoldablePattern{
-		Edges:       faceBundle.Lines,
-		Polygons:    polygons,
-		Fill:        fills,
-		Annotations: annotations,
-	}
+	return patterns
+}
+
+func (c CutOut) Render(container primitives.BBox) []FoldablePattern {
+	patterns := c.GeneratePatterns(container)
+	return patterns
 }

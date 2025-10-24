@@ -211,8 +211,9 @@ func consolidateSearchStates(states []*searchState, container primitives.BBox) [
 	states = filterWithIncreasingBBoxesOnPages(states)
 	fmt.Printf("  to %d (pages must be decreasing)\n", len(states))
 
-	states = filterWithTooMuchUnusedSpace(states)
-	fmt.Printf("  to %d (too much unused space)\n", len(states))
+	// TODO: reinstate this back once it does a statistical approach
+	// states = filterWithTooMuchUnusedSpace(states)
+	// fmt.Printf("  to %d (too much unused space)\n", len(states))
 
 	// this doesn't seem to help at all
 	// states = filterWithSameFootprint(states)
