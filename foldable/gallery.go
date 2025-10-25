@@ -197,7 +197,7 @@ func Rhombicuboctahedron(b primitives.BBox, side float64) []FoldablePattern {
 // The idea is to have a right-angle corner inserts in each space, but this requires a disconneced foldable
 func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) []FoldablePattern {
 	// TODO: Add in corner pieces
-	fillSpacing := 40.0
+	fillSpacing := 20.0
 	triColor := "red"
 	faceColor := "yellow"
 	sq := Square(side)
