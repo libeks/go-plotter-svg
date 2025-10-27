@@ -154,8 +154,9 @@ func testDensityScene(b primitives.BBox) Document {
 		"blue",
 		"orange",
 	}
-	boxes := []lines.LineLike{}
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	boxes := lines.LinesFromBBox(b)
+
+	layers := []Layer{}
 	for i, quarter := range quarters {
 		lineLikes := []lines.LineLike{}
 		quarterBox := quarter.WithPadding(50)
@@ -187,9 +188,14 @@ func testDensityScene(b primitives.BBox) Document {
 			lineLikes = append(lineLikes, ls...)
 		}
 		layerName := fmt.Sprintf("pen %d", i)
-		scene = scene.AddLayer(NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
+		layers = append(layers, NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
+
 	}
-	scene = scene.AddLayer(NewLayer("boxes").WithLineLike(boxes).WithOffset(0,0).WithColor("grey"))
+	// ensure that the frame layer is rendered first, to make sure it isn't added to guides
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(boxes).WithOffset(0, 0).WithColor("grey"))
+	for _, layer := range layers {
+		scene = scene.AddLayer(layer)
+	}
 	return scene
 }
 
