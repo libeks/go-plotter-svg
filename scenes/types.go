@@ -127,7 +127,7 @@ func (s Page) GetLayers() []Layer {
 	ls := []lines.LineLike{}
 	increment := 25.0
 	for i := 1; i < len(s.layers); i++ {
-		ii := float64(i)
+		offset := primitives.Vector{X: float64(i) * 1000, Y: 0}
 
 		for j := 300.0; j <= 700.0; j += increment {
 			len := 75.0
@@ -135,7 +135,10 @@ func (s Page) GetLayers() []Layer {
 				len = 100.0
 			}
 			ls = append(ls,
-				lines.LineSegment{P1: primitives.Point{X: j + ii*1000, Y: 300 - len}, P2: primitives.Point{X: j + ii*1000, Y: 300}},
+				lines.LineSegment{
+					P1: primitives.Point{X: j, Y: 300 - len},
+					P2: primitives.Point{X: j, Y: 300},
+				}.Translate(offset),
 			)
 		}
 		for j := 300.0; j <= 700.0; j += increment {
@@ -144,7 +147,10 @@ func (s Page) GetLayers() []Layer {
 				len = 100.0
 			}
 			ls = append(ls,
-				lines.LineSegment{P1: primitives.Point{X: j + ii*1000, Y: 700}, P2: primitives.Point{X: j + ii*1000, Y: 700 + len}},
+				lines.LineSegment{
+					P1: primitives.Point{X: j, Y: 700},
+					P2: primitives.Point{X: j, Y: 700 + len},
+				}.Translate(offset),
 			)
 		}
 		for j := 300.0; j <= 700.0; j += increment {
@@ -153,7 +159,10 @@ func (s Page) GetLayers() []Layer {
 				len = 100.0
 			}
 			ls = append(ls,
-				lines.LineSegment{P1: primitives.Point{X: 300 - len + ii*1000, Y: j}, P2: primitives.Point{X: 300 + ii*1000, Y: j}},
+				lines.LineSegment{
+					P1: primitives.Point{X: 300 - len, Y: j},
+					P2: primitives.Point{X: 300, Y: j},
+				}.Translate(offset),
 			)
 		}
 		for j := 300.0; j <= 700.0; j += increment {
@@ -162,17 +171,36 @@ func (s Page) GetLayers() []Layer {
 				len = 100.0
 			}
 			ls = append(ls,
-				lines.LineSegment{P1: primitives.Point{X: 700 + ii*1000, Y: j}, P2: primitives.Point{X: 700 + len + ii*1000, Y: j}},
+				lines.LineSegment{
+					P1: primitives.Point{X: 700, Y: j},
+					P2: primitives.Point{X: 700 + len, Y: j},
+				}.Translate(offset),
 			)
 		}
+		ls = append(ls,
+			lines.LineSegment{
+				P1: primitives.Point{X: 450, Y: 500},
+				P2: primitives.Point{X: 550, Y: 500},
+			}.Translate(offset),
+			lines.LineSegment{
+				P1: primitives.Point{X: 500, Y: 450},
+				P2: primitives.Point{X: 500, Y: 550},
+			}.Translate(offset),
+		)
 
 	}
 	layers = append(layers, NewLayer("GUIDELINES-pen").WithLineLike(ls))
 	for i := 1; i < len(s.layers); i++ {
-		ii := float64(i)
+		offset := primitives.Vector{X: float64(i) * 1000, Y: 0}
 		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]lines.LineLike{
-			lines.LineSegment{P1: primitives.Point{X: 500.0 + ii*1000, Y: 300.0}, P2: primitives.Point{X: 500 + ii*1000, Y: 700}},
-			lines.LineSegment{P1: primitives.Point{X: 300 + ii*1000, Y: 500.0}, P2: primitives.Point{X: 700 + ii*1000, Y: 500}},
+			lines.LineSegment{
+				P1: primitives.Point{X: 500, Y: 300},
+				P2: primitives.Point{X: 500, Y: 700},
+			}.Translate(offset),
+			lines.LineSegment{
+				P1: primitives.Point{X: 300, Y: 500},
+				P2: primitives.Point{X: 700, Y: 500},
+			}.Translate(offset),
 		}).WithColor(layers[i].color).WithWidth(layers[i].width).WithOffset(layers[i].offsetX, layers[i].offsetY))
 	}
 	return layers

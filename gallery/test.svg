@@ -4103,6 +4103,8 @@
         <line x1="1700.0" x2="1775.0" y1="650.0" y2="650.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="1700.0" x2="1775.0" y1="675.0" y2="675.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="1700.0" x2="1775.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1450.0" x2="1550.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="1500.0" x2="1500.0" y1="450.0" y2="550.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="2300.0" x2="2300.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="2325.0" x2="2325.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="2350.0" x2="2350.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
@@ -4171,6 +4173,8 @@
         <line x1="2700.0" x2="2775.0" y1="650.0" y2="650.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="2700.0" x2="2775.0" y1="675.0" y2="675.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="2700.0" x2="2775.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2450.0" x2="2550.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="2500.0" x2="2500.0" y1="450.0" y2="550.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="3300.0" x2="3300.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="3325.0" x2="3325.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="3350.0" x2="3350.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
@@ -4239,6 +4243,8 @@
         <line x1="3700.0" x2="3775.0" y1="650.0" y2="650.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="3700.0" x2="3775.0" y1="675.0" y2="675.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="3700.0" x2="3775.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="3450.0" x2="3550.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="3500.0" x2="3500.0" y1="450.0" y2="550.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="4300.0" x2="4300.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="4325.0" x2="4325.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="4350.0" x2="4350.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
@@ -4307,6 +4313,8 @@
         <line x1="4700.0" x2="4775.0" y1="650.0" y2="650.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="4700.0" x2="4775.0" y1="675.0" y2="675.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="4700.0" x2="4775.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="4450.0" x2="4550.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="4500.0" x2="4500.0" y1="450.0" y2="550.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="5300.0" x2="5300.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="5325.0" x2="5325.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="5350.0" x2="5350.0" y1="225.0" y2="300.0" stroke="black" fill="none" stroke-width="3"/>
@@ -4375,6 +4383,8 @@
         <line x1="5700.0" x2="5775.0" y1="650.0" y2="650.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="5700.0" x2="5775.0" y1="675.0" y2="675.0" stroke="black" fill="none" stroke-width="3"/>
         <line x1="5700.0" x2="5775.0" y1="700.0" y2="700.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="5450.0" x2="5550.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="3"/>
+        <line x1="5500.0" x2="5500.0" y1="450.0" y2="550.0" stroke="black" fill="none" stroke-width="3"/>
     </g>
     <g inkscape:groupmode="layer" inkscape:label="7 - GUIDELINES-Layer 1" id="g5" transform="translate(0.0 0.0)"><line x1="1500.0" x2="1500.0" y1="300.0" y2="700.0" stroke="red" fill="none" stroke-width="3"/>
         <line x1="1300.0" x2="1700.0" y1="500.0" y2="500.0" stroke="red" fill="none" stroke-width="3"/>
