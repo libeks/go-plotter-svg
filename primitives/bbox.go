@@ -81,10 +81,11 @@ func (b BBox) Center() Point {
 	)
 }
 
+// returns the corner points, ordered in clockwise order starting from north-west
 func (b BBox) Corners() []Point {
 	return []Point{
 		b.NWCorner(), b.NECorner(),
-		b.SWCorner(), b.SECorner(),
+		b.SECorner(), b.SWCorner(),
 	}
 }
 
@@ -154,14 +155,15 @@ func BBoxAroundPoints(pts ...Point) BBox {
 	return BBox{UpperLeft: Point{X: minX, Y: minY}, LowerRight: Point{X: maxX, Y: maxY}}
 }
 
+// Partition the box into squares, returning a total of nHorizontal x nHorizontal squares, centered in the box
 func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
-	width := b.Width()
-	squareSide := width / (float64(nHorizontal))
+	width := math.Min(b.Width(), b.Height())
+
+	squareBox := BBox{UpperLeft: Origin, LowerRight: Origin.Add(Vector{X: width, Y: width})}
+	b = squareBox.Translate(b.Center().Subtract(squareBox.Center()))
+	squareSide := width/float64(nHorizontal)
 	boxes := []IndexedBox{}
-	verticalIterations := int(b.Height() / float64(squareSide))
-	if verticalIterations < nHorizontal && math.Abs(b.Height()-(float64(nHorizontal)*squareSide)) < 0.1 {
-		verticalIterations = nHorizontal
-	}
+	verticalIterations := nHorizontal
 	for v := range verticalIterations {
 		vv := float64(v)
 		for h := range nHorizontal {
@@ -176,6 +178,7 @@ func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
 			})
 		}
 	}
+	
 	return boxes
 }
 

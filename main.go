@@ -34,7 +34,7 @@ func main() {
 	// scene := scenes.parallelSineFieldsScene(innerBox)
 	// scene := scenes.ParallelCoherentScene(innerBox)
 	// scene := scenes.CirclesInSquareScene(innerBox)
-	// scene := scenes.TestDensityScene(innerBox)
+	scene := scenes.TestDensityScene(innerBox)
 	// scene := scenes.TruchetScene(innerBox)
 	// scene := scenes.SweepTruchetScene(innerBox)
 	// scene := scenes.RisingSunScene(innerBox)
@@ -48,7 +48,7 @@ func main() {
 	// scene := scenes.FoldableRightTrianglePrismScene(innerBox)
 	// scene := scenes.FoldableRightTrianglePrismIDScene(innerBox)
 	// scene := scenes.FoldableCutCubeScene(innerBox)
-	scene := scenes.FoldableRhombiSansCorner(innerBox)
+	// scene := scenes.FoldableRhombiSansCorner(innerBox)
 	// scene := scenes.MazeScene(innerBox)
 	// scene := scenes.RectanglePackingScene(innerBox)
 

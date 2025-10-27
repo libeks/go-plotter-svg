@@ -167,7 +167,7 @@ func ClipLineToObject(line lines.Line, obj objects.Object) []lines.LineSegment {
 		return nil
 	}
 	if len(ts) == 1 {
-		panic(fmt.Errorf("not sure what to do with only one intersection %v", ts))
+		// panic(fmt.Errorf("not sure what to do with only one intersection %v", ts))
 	}
 	slices.Sort(ts)
 	segments := []lines.LineSegment{}
@@ -215,6 +215,7 @@ func ClipCircleToObject(c objects.Circle, obj objects.Object) []lines.LineLike {
 		return []lines.LineLike{c}
 	}
 	slices.Sort(ts)
+	slices.Reverse(ts)
 	segments := []lines.LineLike{}
 	for i, t1 := range ts {
 		t2 := ts[(i+1)%len(ts)]

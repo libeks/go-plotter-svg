@@ -7,6 +7,7 @@ import (
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/objects"
+	"github.com/libeks/go-plotter-svg/pen"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -20,6 +21,7 @@ type FaceID struct {
 
 type infill struct {
 	color   string  // color for the infill, should be a csv defined color
+	pen.Pen         // either pen is defined, or spacing and gap are defined, never both
 	spacing float64 // spacing between lines
 	angle   float64 // angle of the lines
 	gap     float64 // distance from the edge of the polygon
@@ -31,6 +33,14 @@ func (f FaceID) WithFill(color string, spacing, angle, gap float64) FaceID {
 		spacing: spacing,
 		angle:   angle,
 		gap:     gap,
+	}
+	return f
+}
+
+func (f FaceID) WithBrushFill(color string, p pen.Pen) FaceID {
+	f.infill = infill{
+		color: color,
+		Pen:   p,
 	}
 	return f
 }

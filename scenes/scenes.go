@@ -154,17 +154,18 @@ func testDensityScene(b primitives.BBox) Document {
 		"blue",
 		"orange",
 	}
+	boxes := []lines.LineLike{}
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	for i, quarter := range quarters {
 		lineLikes := []lines.LineLike{}
 		quarterBox := quarter.WithPadding(50)
 		testBoxes := primitives.PartitionIntoSquares(quarterBox, 5)
-		fmt.Printf("got %d boxes\n", len(testBoxes))
 		for _, tbox := range testBoxes {
 			jj := float64(tbox.J)
 			ii := float64(tbox.I)
 			var ls []lines.LineLike
 			tboxx := tbox.WithPadding(50)
+			boxes = append(boxes, lines.LinesFromBBox(tboxx)...)
 			spacing := (jj + 1) * 10
 			if tbox.I < 4 {
 				ls = segmentsToLineLikes(
@@ -188,6 +189,7 @@ func testDensityScene(b primitives.BBox) Document {
 		layerName := fmt.Sprintf("pen %d", i)
 		scene = scene.AddLayer(NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
 	}
+	scene = scene.AddLayer(NewLayer("boxes").WithLineLike(boxes).WithOffset(0,0).WithColor("grey"))
 	return scene
 }
 

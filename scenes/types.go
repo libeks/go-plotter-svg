@@ -28,7 +28,7 @@ func (d Document) NumPages() int {
 func (d Document) AddLayer(layer Layer) Document {
 	if len(d.pages) == 0 {
 		d.pages = []Page{
-			Page{}.AddLayer(layer),
+			Page{guides: d.guides}.AddLayer(layer),
 		}
 	} else {
 		d.pages[0] = d.pages[0].AddLayer(layer)
