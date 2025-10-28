@@ -70,12 +70,12 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 		shapesByPage[v.Page] = append(shapesByPage[v.Page], shapes[i].Translate(primitives.Origin.Subtract(shapes[i].BBox().UpperLeft).Add(v.Vector)))
 	}
 	for i := range boxPacking.Pages {
-		page := Page{}
+		page := Page{}.WithGuides()
 		polygons := []lines.LineLike{}
 		edges := []lines.LineLike{}
 		annotations := []lines.LineLike{}
 		bboxLines := []lines.LineLike{}
-		fillColors := map[string][]lines.LineLike{}
+		fillColors := map[string]foldable.BrushLines{}
 		objects := shapesByPage[i]
 		for _, p := range objects {
 			for _, poly := range p.Polygons {
@@ -85,7 +85,16 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 			annotations = append(annotations, p.Annotations...)
 			bboxLines = append(bboxLines, lines.LinesFromBBox((p.BBox()))...)
 			for color, infill := range p.Fill {
-				fillColors[color] = append(fillColors[color], infill...)
+				if _, ok := fillColors[color]; !ok {
+					fillColors[color] = foldable.BrushLines{
+						Pen:   infill.Pen,
+						Color: infill.Color,
+						Lines: []lines.LineLike{},
+					}
+				}
+				clrs := fillColors[color]
+				clrs.Lines = append(clrs.Lines, infill.Lines...)
+				fillColors[color] = clrs
 			}
 		}
 		page = page.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(container)).WithOffset(0, 0))
@@ -95,7 +104,9 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 		page = page.AddLayer(NewLayer("blue").WithLineLike(bboxLines).WithColor("blue").WithWidth(20).MinimizePath(true))
 		for color, infill := range fillColors {
 			layerName := fmt.Sprintf("fill-%s", color)
-			page = page.AddLayer(NewLayer(layerName).WithLineLike(infill).WithColor(color).WithWidth(20).MinimizePath(true))
+			pen := infill.Pen
+			fmt.Printf("color %s\n", infill.Color)
+			page = page.AddLayer(NewLayer(layerName).WithLineLike(infill.Lines).WithOffset(pen.XOffset, pen.YOffset).WithColor(infill.Color).WithWidth(20).MinimizePath(true))
 		}
 		doc = doc.AddPage(page)
 	}

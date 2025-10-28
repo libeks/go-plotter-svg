@@ -3,6 +3,7 @@ package foldable
 import (
 	"math"
 
+	"github.com/libeks/go-plotter-svg/pen"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -197,9 +198,11 @@ func Rhombicuboctahedron(b primitives.BBox, side float64) []FoldablePattern {
 // The idea is to have a right-angle corner inserts in each space, but this requires a disconneced foldable
 func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) []FoldablePattern {
 	// TODO: Add in corner pieces
-	fillSpacing := 20.0
+	// fillSpacing := 20.0
 	triColor := "red"
 	faceColor := "yellow"
+	redPen := pen.BicIntensityBrushTip
+	yellowPen := pen.BicIntensityBrushTip
 	sq := Square(side)
 	tr := Shape{
 		Edges: []Edge{
@@ -216,56 +219,56 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) []Foldab
 	}
 	c := NewCutOut(
 		[]FaceID{
-			faceID(sq, "A"),
+			faceID(sq, "A").WithBrushFill(faceColor, yellowPen),
 			faceID(sq, "B"),
-			faceID(sq, "C"),
+			faceID(sq, "C").WithBrushFill(faceColor, yellowPen),
 			faceID(sq, "D"),
-			faceID(sq, "E"),
+			faceID(sq, "E").WithBrushFill(faceColor, yellowPen),
 			faceID(sq, "F"),
-			faceID(sq, "G"),
+			faceID(sq, "G").WithBrushFill(faceColor, yellowPen),
 			faceID(sq, "H"),
-			faceID(sq, "A+1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "A+2"),
-			faceID(sq, "A-1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "A-2"),
-			faceID(sq, "C+1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "C-1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "E+1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "E-1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "G+1").WithFill(faceColor, fillSpacing, 0, 0),
-			faceID(sq, "G-1").WithFill(faceColor, fillSpacing, 0, 0),
+			faceID(sq, "A+1"),
+			faceID(sq, "A+2").WithBrushFill(faceColor, yellowPen),
+			faceID(sq, "A-1"),
+			faceID(sq, "A-2").WithBrushFill(faceColor, yellowPen),
+			faceID(sq, "C+1"),
+			faceID(sq, "C-1"),
+			faceID(sq, "E+1"),
+			faceID(sq, "E-1"),
+			faceID(sq, "G+1"),
+			faceID(sq, "G-1"),
 
-			faceID(tr, "B+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B+a").WithBrushFill(triColor, redPen),
+			faceID(tr, "B+b").WithBrushFill(triColor, redPen),
+			faceID(tr, "B+c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "B-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "B-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "B-a").WithBrushFill(triColor, redPen),
+			faceID(tr, "B-b").WithBrushFill(triColor, redPen),
+			faceID(tr, "B-c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "D+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D+a").WithBrushFill(triColor, redPen),
+			faceID(tr, "D+b").WithBrushFill(triColor, redPen),
+			faceID(tr, "D+c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "D-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "D-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "D-a").WithBrushFill(triColor, redPen),
+			faceID(tr, "D-b").WithBrushFill(triColor, redPen),
+			faceID(tr, "D-c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "F+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F+a").WithBrushFill(triColor, redPen),
+			faceID(tr, "F+b").WithBrushFill(triColor, redPen),
+			faceID(tr, "F+c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "F-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "F-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "F-a").WithBrushFill(triColor, redPen),
+			faceID(tr, "F-b").WithBrushFill(triColor, redPen),
+			faceID(tr, "F-c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "H+a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H+b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H+c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H+a").WithBrushFill(triColor, redPen),
+			faceID(tr, "H+b").WithBrushFill(triColor, redPen),
+			faceID(tr, "H+c").WithBrushFill(triColor, redPen),
 
-			faceID(tr, "H-a").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H-b").WithFill(triColor, fillSpacing, 0, 0),
-			faceID(tr, "H-c").WithFill(triColor, fillSpacing, 0, 0),
+			faceID(tr, "H-a").WithBrushFill(triColor, redPen),
+			faceID(tr, "H-b").WithBrushFill(triColor, redPen),
+			faceID(tr, "H-c").WithBrushFill(triColor, redPen),
 		},
 		[]ConnectionID{
 			link("A", "B", 1, 3),

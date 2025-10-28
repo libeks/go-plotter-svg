@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/libeks/go-plotter-svg/collections"
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/objects"
@@ -214,6 +215,12 @@ func (c CutOut) computeTrees(container primitives.BBox) cutoutTrees {
 	}
 }
 
+type BrushLines struct {
+	pen.Pen
+	Color string
+	Lines []lines.LineLike
+}
+
 // GeneratePatterns creates a list of foldable patterns, each of which represents a standalone component of the foldable
 // which can be placed somewhere on the page. Each pattern will have its bounding box start at the origin
 func (c CutOut) GeneratePatterns(container primitives.BBox) []FoldablePattern {
@@ -224,7 +231,7 @@ func (c CutOut) GeneratePatterns(container primitives.BBox) []FoldablePattern {
 		faceBundle := head.Render(primitives.Origin, 0)
 		polygons := []objects.Polygon{}
 		annotations := []lines.LineLike{}
-		fills := map[string][]lines.LineLike{}
+		fills := map[string]BrushLines{}
 		minAnnotationSize := math.MaxFloat64
 		for key, polygon := range faceBundle.FacePolygons {
 			polygons = append(polygons, polygon)
@@ -237,11 +244,31 @@ func (c CutOut) GeneratePatterns(container primitives.BBox) []FoldablePattern {
 			}
 			face := trees.faces[key]
 			if face.infill.color != "" {
-				if _, ok := fills[face.infill.color]; !ok {
-					fills[face.infill.color] = []lines.LineLike{}
+				infillLabel := face.infill.color
+				if face.infill.Pen.Name != "" {
+					infillLabel = fmt.Sprintf("%s %s", face.infill.color, face.infill.Pen.Name)
 				}
-				infillPoly := polygon.Grow(-face.infill.gap)
-				fills[face.infill.color] = append(fills[face.infill.color], infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
+				if _, ok := fills[infillLabel]; !ok {
+					brush := BrushLines{
+						Lines: []lines.LineLike{},
+						Color: face.infill.color,
+					}
+
+					if face.infill.Pen.Name != "" {
+						brush.Pen = face.infill.Pen
+					}
+					fills[infillLabel] = brush
+				}
+				if face.infill.Pen.Name != "" {
+					brushLines := fills[infillLabel]
+					brushLines.Lines = append(brushLines.Lines, collections.FillPolygonWithPen(polygon, face.infill.Pen)...)
+					fills[infillLabel] = brushLines
+				} else {
+					infillPoly := polygon.Grow(-face.infill.gap)
+					brushLines := fills[infillLabel]
+					brushLines.Lines = append(brushLines.Lines, infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
+					fills[infillLabel] = brushLines
+				}
 			}
 		}
 		// redo it again with the min annotation size
