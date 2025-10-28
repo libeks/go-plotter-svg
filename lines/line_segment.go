@@ -134,3 +134,11 @@ func (l LineSegment) Bisect(t float64) (Path, Path) {
 			End:   l.P2,
 		})
 }
+
+func SegmentsToLineLikes(segments []LineSegment) []LineLike {
+	linelikes := make([]LineLike, len(segments))
+	for i, seg := range segments {
+		linelikes[i] = seg
+	}
+	return linelikes
+}

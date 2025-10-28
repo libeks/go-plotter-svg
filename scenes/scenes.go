@@ -13,6 +13,7 @@ import (
 	"github.com/libeks/go-plotter-svg/maze"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/pack"
+	"github.com/libeks/go-plotter-svg/pen"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 	"github.com/libeks/go-plotter-svg/truchet"
@@ -36,6 +37,7 @@ var (
 	Font                   = fontScene
 	Text                   = textScene
 	RectanglePackingScene  = rectanglePackginScene
+	BoxFillScene           = testBoxFillScene
 
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
@@ -84,11 +86,11 @@ func getLineFieldInObjects(b primitives.BBox) Document {
 	}
 	radial := collections.CircularLineField(3, primitives.Point{X: 5000, Y: 5000})
 	fmt.Printf("radial : %s\n", radial)
-	lines1 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly1))
+	lines1 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly1))
 	fmt.Printf("linelikes: %s\n", lines1)
-	lines2 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly2))
-	lines3 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly3))
-	lines4 := segmentsToLineLikes(collections.LimitLinesToShape(radial, poly4))
+	lines2 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly2))
+	lines3 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly3))
+	lines4 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly4))
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(lines1).WithOffset(0, 0).WithColor("red"))
 	scene = scene.AddLayer(NewLayer("content2").WithLineLike(lines2).WithOffset(0, 0).WithColor("blue"))
@@ -99,7 +101,7 @@ func getLineFieldInObjects(b primitives.BBox) Document {
 
 func parallelCoherentSineFieldsScene(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
-	layer1 := segmentsToLineLikes(
+	layer1 := lines.SegmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
 				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
@@ -107,7 +109,7 @@ func parallelCoherentSineFieldsScene(b primitives.BBox) Document {
 			objects.PolygonFromBBox(b),
 		),
 	)
-	layer2 := segmentsToLineLikes(
+	layer2 := lines.SegmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
 				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.1}.Density,
@@ -115,7 +117,7 @@ func parallelCoherentSineFieldsScene(b primitives.BBox) Document {
 			objects.PolygonFromBBox(b),
 		),
 	)
-	layer3 := segmentsToLineLikes(
+	layer3 := lines.SegmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
 				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0.2}.Density,
@@ -169,7 +171,7 @@ func testDensityScene(b primitives.BBox) Document {
 			boxes = append(boxes, lines.LinesFromBBox(tboxx)...)
 			spacing := (jj + 1) * 10
 			if tbox.I < 4 {
-				ls = segmentsToLineLikes(
+				ls = lines.SegmentsToLineLikes(
 					collections.LimitLinesToShape(
 						collections.LinearLineField(
 							tboxx, ii*math.Pi/4, spacing,
@@ -199,9 +201,79 @@ func testDensityScene(b primitives.BBox) Document {
 	return scene
 }
 
+func testBoxFillScene(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	pens := []pen.Pen{
+		pen.Micron10,
+		pen.SharpieCreativeMarker,
+		pen.BicIntensityFineTip,
+		pen.BicIntensityBrushTip,
+	}
+	colors := []string{
+		"red",
+		"orange",
+		"green",
+		"blue",
+	}
+	guides := lines.LinesFromBBox(b)
+	polygons := []objects.Polygon{
+		{
+			Points: []primitives.Point{
+				{X: 0, Y: 0},
+				{X: 1000, Y: 0},
+				{X: 1000, Y: 1000},
+				{X: 0, Y: 1000},
+			},
+		},
+		{
+			Points: []primitives.Point{
+				{X: 0, Y: 0},
+				{X: 2000, Y: 0},
+				{X: 2000, Y: 500},
+			},
+		},
+		{
+			Points: []primitives.Point{
+				primitives.Origin.Add(primitives.Vector{X: 300, Y: 0}.Mult(4)),
+				primitives.Origin.Add(primitives.Vector{X: 380, Y: 60}.Mult(4)),
+				primitives.Origin.Add(primitives.Vector{X: 80, Y: 460}.Mult(4)),
+				primitives.Origin.Add(primitives.Vector{X: 0, Y: 400}.Mult(4)),
+			},
+		},
+	}
+
+	layers := []Layer{}
+
+	lineLikes := make([][]lines.LineLike, len(pens))
+	testBoxes := primitives.PartitionIntoRectangles(b, len(pens), len(polygons))
+	for _, testBox := range testBoxes {
+		bx := testBox.BBox.WithPadding(50)
+
+		penID := testBox.J
+		pen := pens[penID]
+		polygon := polygons[testBox.I]
+		polygon = polygon.Translate(bx.Center().Subtract(polygon.BBox().Center()))
+		guides = append(guides, lines.SegmentsToLineLikes(polygon.EdgeLines())...)
+		guides = append(guides, lines.LinesFromBBox(bx)...)
+		fill := collections.FillPolygonWithPen(polygon, pen)
+		lineLikes[penID] = append(lineLikes[penID], fill...)
+
+	}
+	for i, pen := range pens {
+		layerName := fmt.Sprintf("pen %s", pen.Name)
+		layers = append(layers, NewLayer(layerName).WithLineLike(lineLikes[i]).WithOffset(pen.XOffset, pen.YOffset).WithColor(colors[i]))
+	}
+	// ensure that the frame layer is rendered first, to make sure it isn't added to guides
+	scene = scene.AddLayer(NewLayer("guides").WithLineLike(guides).WithOffset(0, 0).WithColor("grey"))
+	for _, layer := range layers {
+		scene = scene.AddLayer(layer)
+	}
+	return scene
+}
+
 func parallelSineFieldsScene(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
-	layer1 := segmentsToLineLikes(
+	layer1 := lines.SegmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
 				b, math.Pi/3, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 5, Offset: 0}.Density,
@@ -209,7 +281,7 @@ func parallelSineFieldsScene(b primitives.BBox) Document {
 			objects.PolygonFromBBox(b),
 		),
 	)
-	layer2 := segmentsToLineLikes(
+	layer2 := lines.SegmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
 				b, 0.6, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 3, Offset: 0}.Density,
@@ -217,7 +289,7 @@ func parallelSineFieldsScene(b primitives.BBox) Document {
 			objects.PolygonFromBBox(b),
 		),
 	)
-	layer3 := segmentsToLineLikes(
+	layer3 := lines.SegmentsToLineLikes(
 		collections.LimitLinesToShape(
 			collections.LinearDensityLineField(
 				b, 2.0, collections.SineDensity{Min: 20.0, Max: 200, Cycles: 7, Offset: 0}.Density,
@@ -243,9 +315,9 @@ func parallelBoxScene(b primitives.BBox) Document {
 	for _, minibox := range boxes {
 		spacing := maths.RandInRange(minLineWidth, maxLineWidth)
 		angle := maths.RandInRange(minAngle, maxAngle)
-		lines := collections.LinearLineField(minibox.BBox, angle, spacing)
-		lineseg := collections.LimitLinesToShape(lines, objects.PolygonFromBBox(minibox.WithPadding(50)))
-		segments = append(segments, segmentsToLineLikes(lineseg))
+		lns := collections.LinearLineField(minibox.BBox, angle, spacing)
+		lineseg := collections.LimitLinesToShape(lns, objects.PolygonFromBBox(minibox.WithPadding(50)))
+		segments = append(segments, lines.SegmentsToLineLikes(lineseg))
 	}
 	layer1, layer2 := collections.RandomlyAllocateSegments(segments, 0.5)
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
@@ -312,8 +384,7 @@ func getLinesInsideScene(b primitives.BBox, n int) Document {
 func radialBoxWithCircleExclusion(container objects.Object, center primitives.Point, nLines int, radius float64) []lines.LineLike {
 	radial := collections.CircularLineField(nLines, center)
 	compObject := objects.NewComposite().With(container).Without(objects.Circle{Center: center, Radius: radius})
-	lines := collections.LimitLinesToShape(radial, compObject)
-	segments := segmentsToLineLikes(lines)
+	segments := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, compObject))
 	return segments
 }
 
@@ -680,7 +751,7 @@ func polygonScene(b primitives.BBox) Document {
 	chars := []string{"A", "B", "C", "D", "E", "F", "G", "H"}
 
 	for i, poly := range polygons {
-		blacks = append(blacks, segmentsToLineLikes(poly.EdgeLines())...)
+		blacks = append(blacks, lines.SegmentsToLineLikes(poly.EdgeLines())...)
 		bbox := poly.LargestContainedSquareBBox()
 		reds = append(reds, lines.LinesFromBBox(bbox)...)
 		bbox = bbox.WithPadding(100)
@@ -689,7 +760,7 @@ func polygonScene(b primitives.BBox) Document {
 		grown := poly.Grow(-50)
 		fill := grown.LineFill(0.2, 50)
 		yellows = append(yellows, fill...)
-		greys = append(greys, segmentsToLineLikes(grown.EdgeLines())...)
+		greys = append(greys, lines.SegmentsToLineLikes(grown.EdgeLines())...)
 	}
 
 	scene = scene.AddLayer(NewLayer("black").WithLineLike(blacks).WithColor("black").WithWidth(20).MinimizePath(true))

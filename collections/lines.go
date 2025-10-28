@@ -9,6 +9,7 @@ import (
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/objects"
+	"github.com/libeks/go-plotter-svg/pen"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -278,4 +279,13 @@ func RandomlyAllocateSegments(segments [][]lines.LineLike, threshold float64) ([
 		}
 	}
 	return layer1, layer2
+}
+
+func FillPolygonWithPen(p objects.Polygon, pen pen.Pen) []lines.LineLike {
+	outline := p.Grow(-pen.Spacing)
+	innerPoly := outline.Grow(-pen.Spacing / 2)
+	ret := []lines.LineLike{}
+	ret = append(ret, lines.SegmentsToLineLikes(outline.EdgeLines())...)
+	ret = append(ret, innerPoly.LineFill(0.5, pen.Spacing)...)
+	return ret
 }

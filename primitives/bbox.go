@@ -81,6 +81,14 @@ func (b BBox) Center() Point {
 	)
 }
 
+// return a BBox that is square and is contained inside the parent box, also center it within the parent
+func (b BBox) Square() BBox {
+	size := math.Min(b.Height(), b.Width())
+	bb := BBox{UpperLeft: Origin, LowerRight: Point{X: size, Y: size}}
+	bb = bb.Translate(b.Center().Subtract(bb.Center()))
+	return bb
+}
+
 // returns the corner points, ordered in clockwise order starting from north-west
 func (b BBox) Corners() []Point {
 	return []Point{
@@ -157,11 +165,9 @@ func BBoxAroundPoints(pts ...Point) BBox {
 
 // Partition the box into squares, returning a total of nHorizontal x nHorizontal squares, centered in the box
 func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
-	width := math.Min(b.Width(), b.Height())
-
-	squareBox := BBox{UpperLeft: Origin, LowerRight: Origin.Add(Vector{X: width, Y: width})}
-	b = squareBox.Translate(b.Center().Subtract(squareBox.Center()))
-	squareSide := width/float64(nHorizontal)
+	// TODO: Use PartitionIntoRectangles instead
+	b = b.Square()
+	squareSide := b.Width() / float64(nHorizontal)
 	boxes := []IndexedBox{}
 	verticalIterations := nHorizontal
 	for v := range verticalIterations {
@@ -178,7 +184,28 @@ func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
 			})
 		}
 	}
-	
+	return boxes
+}
+
+func PartitionIntoRectangles(b BBox, hor, ver int) []IndexedBox {
+	width := b.Width() / float64(hor)
+	height := b.Height() / float64(ver)
+	boxes := []IndexedBox{}
+	for y := range ver {
+		yy := float64(y)
+		for x := range hor {
+			xx := float64(x)
+			corner := b.UpperLeft.Add(Vector{xx * width, yy * height})
+			boxes = append(boxes, IndexedBox{
+				BBox: BBox{
+					UpperLeft:  corner,
+					LowerRight: corner.Add(Vector{width, height}),
+				},
+				I: y,
+				J: x,
+			})
+		}
+	}
 	return boxes
 }
 

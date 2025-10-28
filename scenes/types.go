@@ -79,7 +79,7 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 		objects := shapesByPage[i]
 		for _, p := range objects {
 			for _, poly := range p.Polygons {
-				polygons = append(polygons, segmentsToLineLikes(poly.EdgeLines())...)
+				polygons = append(polygons, lines.SegmentsToLineLikes(poly.EdgeLines())...)
 			}
 			edges = append(edges, p.Edges...)
 			annotations = append(annotations, p.Annotations...)
