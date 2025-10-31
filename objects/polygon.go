@@ -208,6 +208,7 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 		V: vPerp,
 	}
 	lineLikes := []lines.LineLike{}
+	reverse := false
 	for i := range int((maxT-minT)/spacing) + 1 {
 		lineT := minT + float64(i)*spacing
 		line := lines.Line{
@@ -216,15 +217,25 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 		}
 		ts := p.IntersectTs(line)
 		if len(ts) == 2 {
-			lineLikes = append(lineLikes, lines.LineSegment{
-				P1: line.At(ts[0]),
-				P2: line.At(ts[1]),
-			})
+			var segment lines.LineSegment
+			if reverse {
+				segment = lines.LineSegment{
+					P1: line.At(ts[1]),
+					P2: line.At(ts[0]),
+				}
+			} else {
+				segment = lines.LineSegment{
+					P1: line.At(ts[0]),
+					P2: line.At(ts[1]),
+				}
+			}
+			lineLikes = append(lineLikes, segment)
 
 		} else if len(ts) > 2 {
 			fmt.Printf("ts %v\n", ts)
 			panic("Unexpected t-values for line and polygon intersection")
 		}
+		reverse = !reverse
 	}
 	return lineLikes
 }
