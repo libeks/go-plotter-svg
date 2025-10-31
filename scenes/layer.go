@@ -13,13 +13,17 @@ import (
 )
 
 func NewLayer(annotation string) Layer {
-	return Layer{name: annotation}
+	return Layer{
+		name:      annotation,
+		drawGuide: true,
+	}
 }
 
 type Layer struct {
 	name         string
 	linelikes    []lines.LineLike
 	controllines []lines.LineLike
+	drawGuide    bool
 	offsetX      float64
 	offsetY      float64
 	color        string
@@ -49,6 +53,11 @@ func (l Layer) WithColor(color string) Layer {
 
 func (l Layer) WithWidth(width float64) Layer {
 	l.width = width
+	return l
+}
+
+func (l Layer) WithNoGuide() Layer {
+	l.drawGuide = false
 	return l
 }
 
@@ -90,10 +99,10 @@ func (l Layer) RandomizedClosedCurves() Layer {
 }
 
 func (l Layer) MinimizePath(allowReverse bool) Layer {
-	fmt.Printf("Layer '%s' before %s\n", l.name, l.Statistics())
 	if len(l.linelikes) == 0 {
 		return l
 	}
+	fmt.Printf("Layer '%s' before %s\n", l.name, l.Statistics())
 	lns := []lines.LineLike{}
 	var inputLines []lines.LineLike
 	inputLines = append(inputLines, l.linelikes...)

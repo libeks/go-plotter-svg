@@ -97,16 +97,15 @@ func FromFoldableLayers(shapes []foldable.FoldablePattern, container primitives.
 				fillColors[color] = clrs
 			}
 		}
-		page = page.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(container)).WithOffset(0, 0))
-		page = page.AddLayer(NewLayer("black").WithLineLike(edges).WithColor("black").WithWidth(20).MinimizePath(true))
-		page = page.AddLayer(NewLayer("red").WithLineLike(polygons).WithColor("red").WithWidth(20).MinimizePath(true))
-		page = page.AddLayer(NewLayer("green").WithLineLike(annotations).WithColor("green").WithWidth(20).MinimizePath(true))
-		page = page.AddLayer(NewLayer("blue").WithLineLike(bboxLines).WithColor("blue").WithWidth(20).MinimizePath(true))
+		page = page.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(container)).WithOffset(0, 0).WithNoGuide())
+		page = page.AddLayer(NewLayer("outlines").WithLineLike(edges).WithColor("black").WithWidth(20).MinimizePath(true))
+		page = page.AddLayer(NewLayer("polygons").WithLineLike(polygons).WithColor("red").WithWidth(20).WithNoGuide())
+		page = page.AddLayer(NewLayer("annotations").WithLineLike(annotations).WithColor("green").WithWidth(20).WithNoGuide())
+		page = page.AddLayer(NewLayer("bboxes").WithLineLike(bboxLines).WithColor("blue").WithWidth(20).WithNoGuide())
 		for color, infill := range fillColors {
-			layerName := fmt.Sprintf("fill-%s", color)
+			layerName := fmt.Sprintf("FILL-%s", color)
 			pen := infill.Pen
-			fmt.Printf("color %s\n", infill.Color)
-			page = page.AddLayer(NewLayer(layerName).WithLineLike(infill.Lines).WithOffset(pen.XOffset, pen.YOffset).WithColor(infill.Color).WithWidth(20).MinimizePath(true))
+			page = page.AddLayer(NewLayer(layerName).WithLineLike(infill.Lines).WithOffset(pen.XOffset, pen.YOffset).WithColor(infill.Color).WithWidth(pen.Spacing))
 		}
 		doc = doc.AddPage(page)
 	}
@@ -128,16 +127,25 @@ func (s Page) WithGuides() Page {
 	return s
 }
 
+func (s Page) GetGuidedLayers() []Layer {
+	ret := []Layer{}
+	for _, layer := range s.layers {
+		if layer.drawGuide {
+			ret = append(ret, layer)
+		}
+	}
+	return ret
+}
+
 func (s Page) GetLayers() []Layer {
 	if !s.guides || len(s.layers) < 2 {
 		return s.layers
 	}
 	// draw guides on the upper edge of the image
 	// assume that the 0th layer contains the guidelines
-	layers := s.layers
 	ls := []lines.LineLike{}
 	increment := 25.0
-	for i := 1; i < len(s.layers); i++ {
+	for i := range s.GetGuidedLayers() {
 		offset := primitives.Vector{X: float64(i) * 1000, Y: 0}
 
 		for j := 300.0; j <= 700.0; j += increment {
@@ -200,10 +208,17 @@ func (s Page) GetLayers() []Layer {
 		)
 
 	}
-	layers = append(layers, NewLayer("GUIDELINES-pen").WithLineLike(ls))
-	for i := 1; i < len(s.layers); i++ {
-		offset := primitives.Vector{X: float64(i) * 1000, Y: 0}
-		layers = append(layers, NewLayer(fmt.Sprintf("GUIDELINES-Layer %d", i)).WithLineLike([]lines.LineLike{
+	combLayer := NewLayer("GUIDES-comb").WithLineLike(ls)
+	newLayers := []Layer{combLayer}
+	outlineOffset := 0
+	for _, layer := range s.layers {
+		if !layer.drawGuide {
+			newLayers = append(newLayers, layer)
+			continue
+		}
+		offset := primitives.Vector{X: float64(outlineOffset) * 1000, Y: 0}
+		newLayers = append(newLayers, layer)
+		newLayers = append(newLayers, NewLayer(fmt.Sprintf("GUIDES-%s", layer.name)).WithLineLike([]lines.LineLike{ // FIXME: this index is now wrong, probably
 			lines.LineSegment{
 				P1: primitives.Point{X: 500, Y: 300},
 				P2: primitives.Point{X: 500, Y: 700},
@@ -212,9 +227,10 @@ func (s Page) GetLayers() []Layer {
 				P1: primitives.Point{X: 300, Y: 500},
 				P2: primitives.Point{X: 700, Y: 500},
 			}.Translate(offset),
-		}).WithColor(layers[i].color).WithWidth(layers[i].width).WithOffset(layers[i].offsetX, layers[i].offsetY))
+		}).WithColor(layer.color).WithWidth(layer.width).WithOffset(layer.offsetX, layer.offsetY))
+		outlineOffset += 1
 	}
-	return layers
+	return newLayers
 }
 
 func (s Page) CalculateStatistics() {
