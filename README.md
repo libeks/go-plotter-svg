@@ -25,9 +25,11 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   * Detect face overlap, such as with flaps being too wide, etc.
   * Allow connections between foldable objects, i.e. have a scene contain multiple foldables with interlinking
   * See what damage comes from mixing clockwise- and counter-clockwise faces
+  * Voronoi - add a double flap that renders on both sides of the edge
+  * Voronoi - add rendering of the box sides
+  * Voronoi - add some way to output the input parameters, when rendering around random points
+  * Voronoi - respect original input point order for polygons and edges
 * Rectangle-packing: Optimized coveraged-based filter to preserve 10% no matter what
-* Curve optimization - don't apply to fill layers, when the ink dries and is covered yet again, it becomes darker. All fill should be applied in order, preferably with alternating directions
-* Allow not rendering guide for certain layers
 
 # Plot ideas
 
