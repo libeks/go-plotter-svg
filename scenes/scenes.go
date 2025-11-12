@@ -44,6 +44,7 @@ var (
 	FoldableRhombiSansCorner          = foldableRhombicuboctahedronSansCornersScene
 	FoldableCubeIDScene               = foldableCubeIDScene
 	FoldableCutCubeScene              = foldableCutCornerScene
+	FoldableVoronoi                   = foldableVoronoiScene
 
 	MazeScene       = mazeScene
 	PolygonBoxScene = polygonScene
@@ -815,6 +816,18 @@ func mazeScene(b primitives.BBox) Document {
 
 	scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("walls").WithLineLike(mazeLines.Walls).WithColor("black").WithWidth(20).MinimizePath(true))
+	return scene
+}
+
+func foldableVoronoiScene(b primitives.BBox) Document {
+	// scene := Document{}.WithGuides()
+	// scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+
+	// maze := maze.NewMaze(30)
+	// mazeLines := maze.Render(b)
+
+	patterns := foldable.VoronoiFoldable(b)
+	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 

@@ -1,10 +1,12 @@
 package foldable
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/pen"
 	"github.com/libeks/go-plotter-svg/primitives"
+	"github.com/libeks/go-plotter-svg/voronoi"
 )
 
 // Cube does a cube with a certain side length.
@@ -431,4 +433,20 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []FoldablePatter
 		},
 	)
 	return c.Render(b)
+}
+
+func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
+	points := []primitives.Point{
+		{X: 1000, Y: 1000},
+		{X: 1500, Y: 2000},
+		{X: 4500, Y: 1500},
+	}
+	bbox := primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Point{X: 5000, Y: 5000}}
+	polygons := voronoi.ComputeVoronoi(bbox, points)
+	faces := []FaceID{}
+	connections := []ConnectionID{}
+	for i, poly := range polygons {
+		faces = append(faces, faceID(PolygonToShape(poly), fmt.Sprintf("%d", i)))
+	}
+	return NewCutOut(faces, connections).Render(b)
 }

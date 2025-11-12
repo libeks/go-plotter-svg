@@ -131,7 +131,8 @@ func (p Polygon) findCenterBBox() primitives.BBox {
 
 		size = size * 0.95
 		if size < 1.0 {
-			panic("Bounding box too small")
+			// panic("Bounding box too small")
+			return primitives.BBox{}
 		}
 	}
 }

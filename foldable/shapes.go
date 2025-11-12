@@ -100,6 +100,7 @@ func EquiTriangle(side float64) Shape {
 }
 
 func PolygonToShape(p objects.Polygon) Shape {
+	fmt.Printf("polygon %v\n", p)
 	edges := []Edge{}
 	for i, point := range p.Points {
 		if i == 0 {

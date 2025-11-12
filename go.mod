@@ -3,6 +3,7 @@ module github.com/libeks/go-plotter-svg
 go 1.25
 
 require (
+	github.com/derekmu/voronoi v1.0.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.7.0
 	github.com/kelindar/bitmap v1.5.3
