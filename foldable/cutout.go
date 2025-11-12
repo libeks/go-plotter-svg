@@ -16,8 +16,8 @@ const MATH_PRECISION = 0.001
 
 type FaceID struct {
 	Shape
-	infill
-	Name string
+	infills []infill
+	Name    string
 }
 
 type infill struct {
@@ -29,20 +29,20 @@ type infill struct {
 }
 
 func (f FaceID) WithFill(color string, spacing, angle, gap float64) FaceID {
-	f.infill = infill{
+	f.infills = append(f.infills, infill{
 		color:   color,
 		spacing: spacing,
 		angle:   angle,
 		gap:     gap,
-	}
+	})
 	return f
 }
 
 func (f FaceID) WithBrushFill(color string, p pen.Pen) FaceID {
-	f.infill = infill{
+	f.infills = append(f.infills, infill{
 		color: color,
 		Pen:   p,
-	}
+	})
 	return f
 }
 
@@ -132,7 +132,7 @@ func (c CutOut) computeTrees(container primitives.BBox) cutoutTrees {
 		faceByID[face.Name] = &Face{
 			Shape:    face.Shape,
 			Name:     face.Name,
-			infill:   face.infill,
+			infills:  face.infills,
 			Connects: map[int]Connection{},
 		}
 		for i := range face.Shape.Edges {
@@ -243,30 +243,30 @@ func (c CutOut) GeneratePatterns(container primitives.BBox) []FoldablePattern {
 				minAnnotationSize = annotation.Size
 			}
 			face := trees.faces[key]
-			if face.infill.color != "" {
-				infillLabel := face.infill.color
-				if face.infill.Pen.Name != "" {
-					infillLabel = fmt.Sprintf("%s %s", face.infill.color, face.infill.Pen.Name)
+			for _, infill := range face.infills {
+				infillLabel := infill.color
+				if infill.Pen.Name != "" {
+					infillLabel = fmt.Sprintf("%s %s", infill.color, infill.Pen.Name)
 				}
 				if _, ok := fills[infillLabel]; !ok {
 					brush := BrushLines{
 						Lines: []lines.LineLike{},
-						Color: face.infill.color,
+						Color: infill.color,
 					}
 
-					if face.infill.Pen.Name != "" {
-						brush.Pen = face.infill.Pen
+					if infill.Pen.Name != "" {
+						brush.Pen = infill.Pen
 					}
 					fills[infillLabel] = brush
 				}
-				if face.infill.Pen.Name != "" {
+				if infill.Pen.Name != "" {
 					brushLines := fills[infillLabel]
-					brushLines.Lines = append(brushLines.Lines, collections.FillPolygonWithPen(polygon, face.infill.Pen)...)
+					brushLines.Lines = append(brushLines.Lines, collections.FillPolygonWithPen(polygon, infill.Pen)...)
 					fills[infillLabel] = brushLines
 				} else {
-					infillPoly := polygon.Grow(-face.infill.gap)
+					infillPoly := polygon.Grow(-infill.gap)
 					brushLines := fills[infillLabel]
-					brushLines.Lines = append(brushLines.Lines, infillPoly.LineFill(face.infill.angle, face.infill.spacing)...)
+					brushLines.Lines = append(brushLines.Lines, infillPoly.LineFill(infill.angle, infill.spacing)...)
 					fills[infillLabel] = brushLines
 				}
 			}

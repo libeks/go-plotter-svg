@@ -372,6 +372,185 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) []Foldab
 	return c.Render(b)
 }
 
+// RhombicuboctahedronWithoutCorners is the same as RhombicuboctahedronID, but with the triangular corner pieces missing
+// The idea is to have a right-angle corner inserts in each space, but this requires a disconneced foldable
+func RhombicuboctahedronWithoutCornersTricolor(b primitives.BBox, side float64) []FoldablePattern {
+	// TODO: Add in corner pieces
+	// fillSpacing := 20.0
+	cyanColor := "cyan"
+	magentaColor := "magenta"
+	yellowColor := "yellow"
+	cyanPen := pen.BicIntensityBrushTip
+	magentaPen := pen.BicIntensityBrushTip
+	yellowPen := pen.BicIntensityBrushTip
+
+	sq := Square(side)
+	tr := Shape{
+		Edges: []Edge{
+			{
+				Vector: primitives.Vector{X: side / 2, Y: -side / 2},
+			},
+			{
+				Vector: primitives.Vector{X: side / 2, Y: side / 2},
+			},
+			{
+				Vector: primitives.Vector{X: -side, Y: 0},
+			},
+		},
+	}
+	c := NewCutOut(
+		[]FaceID{
+			faceID(sq, "A").WithBrushFill(cyanColor, cyanPen).WithBrushFill(magentaColor, magentaPen),
+			faceID(sq, "B").WithBrushFill(magentaColor, magentaPen),
+			faceID(sq, "C").WithBrushFill(magentaColor, magentaPen).WithBrushFill(yellowColor, yellowPen),
+			faceID(sq, "D").WithBrushFill(magentaColor, magentaPen),
+			faceID(sq, "E").WithBrushFill(cyanColor, cyanPen).WithBrushFill(magentaColor, magentaPen),
+			faceID(sq, "F").WithBrushFill(magentaColor, magentaPen),
+			faceID(sq, "G").WithBrushFill(magentaColor, magentaPen).WithBrushFill(yellowColor, yellowPen),
+			faceID(sq, "H").WithBrushFill(magentaColor, magentaPen),
+			faceID(sq, "A+1").WithBrushFill(cyanColor, cyanPen),
+			faceID(sq, "A+2").WithBrushFill(cyanColor, cyanPen),
+			faceID(sq, "A-1").WithBrushFill(cyanColor, cyanPen),
+			faceID(sq, "A-2").WithBrushFill(cyanColor, cyanPen),
+			faceID(sq, "C+1").WithBrushFill(yellowColor, yellowPen),
+			faceID(sq, "C-1").WithBrushFill(yellowColor, yellowPen),
+			faceID(sq, "E+1").WithBrushFill(cyanColor, cyanPen),
+			faceID(sq, "E-1").WithBrushFill(cyanColor, cyanPen),
+			faceID(sq, "G+1").WithBrushFill(yellowColor, yellowPen),
+			faceID(sq, "G-1").WithBrushFill(yellowColor, yellowPen),
+
+			faceID(tr, "B+a"),
+			faceID(tr, "B+b"),
+			faceID(tr, "B+c"),
+
+			faceID(tr, "B-a"),
+			faceID(tr, "B-b"),
+			faceID(tr, "B-c"),
+
+			faceID(tr, "D+a"),
+			faceID(tr, "D+b"),
+			faceID(tr, "D+c"),
+
+			faceID(tr, "D-a"),
+			faceID(tr, "D-b"),
+			faceID(tr, "D-c"),
+
+			faceID(tr, "F+a"),
+			faceID(tr, "F+b"),
+			faceID(tr, "F+c"),
+
+			faceID(tr, "F-a"),
+			faceID(tr, "F-b"),
+			faceID(tr, "F-c"),
+
+			faceID(tr, "H+a"),
+			faceID(tr, "H+b"),
+			faceID(tr, "H+c"),
+
+			faceID(tr, "H-a"),
+			faceID(tr, "H-b"),
+			faceID(tr, "H-c"),
+		},
+		[]ConnectionID{
+			link("A", "B", 1, 3),
+			link("B", "C", 1, 3),
+			link("C", "D", 1, 3),
+			link("D", "E", 1, 3),
+			link("E", "F", 1, 3),
+			link("F", "G", 1, 3),
+			link("G", "H", 1, 3),
+
+			link("A", "A+1", 0, 2),
+			link("A+1", "A+2", 0, 2),
+			link("A", "A-1", 2, 0),
+			link("A-1", "A-2", 2, 0),
+
+			link("C", "C+1", 0, 2),
+			link("C", "C-1", 2, 0),
+
+			link("E", "E+1", 0, 2),
+			link("E", "E-1", 2, 0),
+
+			link("G", "G+1", 0, 2),
+			link("G", "G-1", 2, 0),
+
+			link("B+a", "B+b", 0, 1),
+			link("B+b", "B+c", 0, 1),
+
+			flap("B+a", "B", 2, 0),
+			flap("B+b", "A+1", 2, 3),
+			flap("B+c", "C+1", 2, 1),
+			flap("B+a", "B+c", 1, 0),
+
+			link("B-a", "B-b", 1, 0),
+			link("B-b", "B-c", 1, 0),
+
+			flap("B-a", "B", 2, 2),
+			flap("B-b", "A-1", 2, 3),
+			flap("B-c", "C-1", 2, 1),
+			flap("B-a", "B-c", 0, 1),
+
+			link("D+a", "D+b", 0, 1),
+			link("D+b", "D+c", 0, 1),
+
+			flap("D+a", "D", 2, 0),
+			flap("D+b", "C+1", 2, 3),
+			flap("D+c", "E+1", 2, 1),
+			flap("D+a", "D+c", 1, 0),
+
+			link("D-a", "D-b", 1, 0),
+			link("D-b", "D-c", 1, 0),
+
+			flap("D-a", "D", 2, 2),
+			flap("D-b", "C-1", 2, 3),
+			flap("D-c", "E-1", 2, 1),
+			flap("D-a", "D-c", 0, 1),
+
+			link("F+a", "F+b", 0, 1),
+			link("F+b", "F+c", 0, 1),
+
+			flap("F+a", "F", 2, 0),
+			flap("F+b", "E+1", 2, 3),
+			flap("F+c", "G+1", 2, 1),
+			flap("F+a", "F+c", 1, 0),
+
+			link("F-a", "F-b", 1, 0),
+			link("F-b", "F-c", 1, 0),
+
+			flap("F-a", "F", 2, 2),
+			flap("F-b", "E-1", 2, 3),
+			flap("F-c", "G-1", 2, 1),
+			flap("F-a", "F-c", 0, 1),
+
+			link("H+a", "H+b", 0, 1),
+			link("H+b", "H+c", 0, 1),
+
+			flap("H+a", "H", 2, 0),
+			flap("H+b", "G+1", 2, 3),
+			flap("H+c", "A+1", 2, 1),
+			flap("H+a", "H+c", 1, 0),
+
+			link("H-a", "H-b", 1, 0),
+			link("H-b", "H-c", 1, 0),
+
+			flap("H-a", "H", 2, 2),
+			flap("H-b", "G-1", 2, 3),
+			flap("H-c", "A-1", 2, 1),
+			flap("H-a", "H-c", 0, 1),
+
+			flap("A", "H", 3, 1),
+			flap("A+2", "G+1", 3, 0),
+			flap("A+2", "C+1", 1, 0),
+			flap("A-2", "G-1", 3, 2),
+			flap("A-2", "C-1", 1, 2),
+
+			flap("E+1", "A+2", 0, 0),
+			flap("E-1", "A-2", 2, 2),
+		},
+	)
+	return c.Render(b)
+}
+
 func CutCube(b primitives.BBox, side float64, cutRatio float64) []FoldablePattern {
 	sq := Square(side)
 	a := math.Sqrt(1 + cutRatio*cutRatio)
@@ -440,6 +619,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 		{X: 1000, Y: 1000},
 		{X: 1500, Y: 2000},
 		{X: 4500, Y: 1500},
+		{X: 3000, Y: 4500},
 	}
 	bbox := primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Point{X: 5000, Y: 5000}}
 	vor := voronoi.ComputeVoronoiConnections(bbox, points)

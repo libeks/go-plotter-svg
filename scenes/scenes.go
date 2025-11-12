@@ -42,6 +42,7 @@ var (
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
 	FoldableRhombiSansCorner          = foldableRhombicuboctahedronSansCornersScene
+	FoldableRhombiSansCornerTricolor  = foldableRhombicuboctahedronSansCornersTricolorScene
 	FoldableCubeIDScene               = foldableCubeIDScene
 	FoldableCutCubeScene              = foldableCutCornerScene
 	FoldableVoronoi                   = foldableVoronoiScene
@@ -789,6 +790,13 @@ func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
 func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
 	foldableBase := 1500.0
 	patterns := foldable.RhombicuboctahedronWithoutCorners(b, foldableBase)
+	scene := FromFoldableLayers(patterns, b)
+	return scene
+}
+
+func foldableRhombicuboctahedronSansCornersTricolorScene(b primitives.BBox) Document {
+	foldableBase := 1500.0
+	patterns := foldable.RhombicuboctahedronWithoutCornersTricolor(b, foldableBase)
 	scene := FromFoldableLayers(patterns, b)
 	return scene
 }

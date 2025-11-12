@@ -91,8 +91,8 @@ func NewFace(shape Shape) Face {
 
 type Face struct {
 	Shape
-	Name string
-	infill
+	Name     string
+	infills  []infill
 	Connects map[int]Connection
 }
 
