@@ -4,6 +4,7 @@ Generate SVG files for AxiDraw plotter
 `go run ./...`
 
 See the generated outputs in [the gallery](https://github.com/libeks/go-plotter-svg/tree/main/gallery).
+
 See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 
 # TODOs
@@ -23,6 +24,7 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   https://pkg.go.dev/github.com/benoitkugler/go-opentype#section-readme
 * Foldable:
   * Detect face overlap, such as with flaps being too wide, etc.
+  * Set up automating layout planning (i.e. you don't have to say which faces are connected, which have flaps, it all gets figured out automatically)
   * Allow connections between foldable objects, i.e. have a scene contain multiple foldables with interlinking
   * See what damage comes from mixing clockwise- and counter-clockwise faces
   * Voronoi - add a double flap that renders on both sides of the edge
