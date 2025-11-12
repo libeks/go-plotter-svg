@@ -442,11 +442,33 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 		{X: 4500, Y: 1500},
 	}
 	bbox := primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Point{X: 5000, Y: 5000}}
-	polygons := voronoi.ComputeVoronoi(bbox, points)
+	vor := voronoi.ComputeVoronoiConnections(bbox, points)
 	faces := []FaceID{}
 	connections := []ConnectionID{}
-	for i, poly := range polygons {
-		faces = append(faces, faceID(PolygonToShape(poly), fmt.Sprintf("%d", i)))
+	faceNames := make([]string, len(vor.Polygons))
+	for i, poly := range vor.Polygons {
+		name := fmt.Sprintf("%d", i)
+		fmt.Printf("Shape %d %v\n", i, PolygonToShape(poly))
+		faces = append(faces, faceID(PolygonToShape(poly), name))
+		faceNames[i] = name
+	}
+	for i, conn := range vor.EdgeMap {
+		fmt.Printf("Connection %d from %v to %v\n", i, conn.From, conn.To)
+		connections = append(connections, ConnectionID{
+			FaceA:          faceNames[conn.From.PolyIndex],
+			FaceB:          faceNames[conn.To.PolyIndex],
+			EdgeAID:        conn.From.EdgeIndex,
+			EdgeBID:        conn.To.EdgeIndex,
+			ConnectionType: FlapConnection,
+		})
+		// FIXME: The following is for debugging only, should be turned into a double-flap
+		connections = append(connections, ConnectionID{
+			FaceA:          faceNames[conn.To.PolyIndex],
+			FaceB:          faceNames[conn.From.PolyIndex],
+			EdgeAID:        conn.To.EdgeIndex,
+			EdgeBID:        conn.From.EdgeIndex,
+			ConnectionType: FlapConnection,
+		})
 	}
 	return NewCutOut(faces, connections).Render(b)
 }

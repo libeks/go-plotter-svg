@@ -71,34 +71,64 @@
         <line x1="500.0" x2="500.0" y1="450.0" y2="550.0" stroke="black" fill="none" stroke-width="3"/>
     </g>
     <g inkscape:groupmode="layer" inkscape:label="1 - frame" id="g5" transform="translate(0.0 0.0)"><path d="M 500.0 1300.0 L 500.0 9500.0 L 12833.3 9500.0 L 12833.3 1300.0 L 500.0 1300.0" stroke="black" fill="none" stroke-width="3" stroke-opacity="0.5"/></g>
-    <g inkscape:groupmode="layer" inkscape:label="2 - outlines" id="g5" transform="translate(0.0 0.0)"><path d="M 6001.6 5588.5 L 6001.6 2713.5 L 8828.6 1300.0 L 9543.3 5588.5 L 6001.6 5588.5" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 3628.6 2011.5 L 4343.3 6300.0 L 5801.6 6300.0 L 5801.6 1300.0 L 3730.2 1300.0 L 3628.6 2011.5" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="2 - outlines" id="g5" transform="translate(0.0 0.0)"><path d="M 500.0 5172.6 L 567.1 4971.4 L 3125.7 3692.1 L 3326.9 3759.2" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3326.9 3759.2 L 3499.5 3882.5 L 4165.0 7875.0 L 4041.7 8047.6" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 5207.0 6300.0 L 5034.4 6176.7 L 4368.9 2184.2 L 4492.2 2011.5" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 4492.2 2011.5 L 4365.0 1841.8 L 4424.2 1427.3 L 4593.9 1300.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 4593.9 1300.0 L 4492.2 2011.5 L 5207.0 6300.0 L 6665.3 6300.0 L 6665.3 1300.0 L 4593.9 1300.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3428.6 1300.0 L 3555.9 1469.7 L 3496.6 1884.3 L 3326.9 2011.5" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 3326.9 2011.5 L 3259.8 2212.8 L 701.2 3492.1 L 500.0 3425.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
         <path d="M 500.0 1300.0 L 3428.6 1300.0 L 3326.9 2011.5 L 500.0 3425.0 L 500.0 1300.0" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 500.0 8047.6 L 4041.7 8047.6 L 3326.9 3759.2 L 500.0 5172.6 L 500.0 8047.6" stroke="black" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
     <g inkscape:groupmode="layer" inkscape:label="3 - GUIDES-outlines" id="g5" transform="translate(0.0 0.0)"><line x1="500.0" x2="500.0" y1="300.0" y2="700.0" stroke="black" fill="none" stroke-width="20.0"/>
         <line x1="300.0" x2="700.0" y1="500.0" y2="500.0" stroke="black" fill="none" stroke-width="20.0"/>
     </g>
-    <g inkscape:groupmode="layer" inkscape:label="4 - polygons" id="g5" transform="translate(0.0 0.0)"><line x1="6001.6" x2="6001.6" y1="5588.5" y2="2713.5" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="6001.6" x2="8828.6" y1="2713.5" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="8828.6" x2="9543.3" y1="1300.0" y2="5588.5" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="9543.3" x2="6001.6" y1="5588.5" y2="5588.5" stroke="red" fill="none" stroke-width="20.0"/>
+    <g inkscape:groupmode="layer" inkscape:label="4 - polygons" id="g5" transform="translate(0.0 0.0)"><line x1="500.0" x2="500.0" y1="8047.6" y2="5172.6" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="500.0" x2="3326.9" y1="5172.6" y2="3759.2" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3326.9" x2="4041.7" y1="3759.2" y2="8047.6" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4041.7" x2="500.0" y1="8047.6" y2="8047.6" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="500.0" x2="567.1" y1="5172.6" y2="4971.4" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="567.1" x2="3125.7" y1="4971.4" y2="3692.1" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3125.7" x2="3326.9" y1="3692.1" y2="3759.2" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3326.9" x2="500.0" y1="3759.2" y2="5172.6" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3326.9" x2="3499.5" y1="3759.2" y2="3882.5" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3499.5" x2="4165.0" y1="3882.5" y2="7875.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4165.0" x2="4041.7" y1="7875.0" y2="8047.6" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4041.7" x2="3326.9" y1="8047.6" y2="3759.2" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4593.9" x2="6665.3" y1="1300.0" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="6665.3" x2="6665.3" y1="1300.0" y2="6300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="6665.3" x2="5207.0" y1="6300.0" y2="6300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="5207.0" x2="4492.2" y1="6300.0" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4492.2" x2="4593.9" y1="2011.5" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="5207.0" x2="5034.4" y1="6300.0" y2="6176.7" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="5034.4" x2="4368.9" y1="6176.7" y2="2184.2" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4368.9" x2="4492.2" y1="2184.2" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4492.2" x2="5207.0" y1="2011.5" y2="6300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4492.2" x2="4365.0" y1="2011.5" y2="1841.8" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4365.0" x2="4424.2" y1="1841.8" y2="1427.3" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4424.2" x2="4593.9" y1="1427.3" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="4593.9" x2="4492.2" y1="1300.0" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
         <line x1="500.0" x2="3428.6" y1="1300.0" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
         <line x1="3428.6" x2="3326.9" y1="1300.0" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
         <line x1="3326.9" x2="500.0" y1="2011.5" y2="3425.0" stroke="red" fill="none" stroke-width="20.0"/>
         <line x1="500.0" x2="500.0" y1="3425.0" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="3628.6" x2="4343.3" y1="2011.5" y2="6300.0" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="4343.3" x2="5801.6" y1="6300.0" y2="6300.0" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="5801.6" x2="5801.6" y1="6300.0" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="5801.6" x2="3730.2" y1="1300.0" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
-        <line x1="3730.2" x2="3628.6" y1="1300.0" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3428.6" x2="3555.9" y1="1300.0" y2="1469.7" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3555.9" x2="3496.6" y1="1469.7" y2="1884.3" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3496.6" x2="3326.9" y1="1884.3" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3326.9" x2="3428.6" y1="2011.5" y2="1300.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3326.9" x2="3259.8" y1="2011.5" y2="2212.8" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="3259.8" x2="701.2" y1="2212.8" y2="3492.1" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="701.2" x2="500.0" y1="3492.1" y2="3425.0" stroke="red" fill="none" stroke-width="20.0"/>
+        <line x1="500.0" x2="3326.9" y1="3425.0" y2="2011.5" stroke="red" fill="none" stroke-width="20.0"/>
     </g>
-    <g inkscape:groupmode="layer" inkscape:label="5 - annotations" id="g5" transform="translate(0.0 0.0)"><path d="M 7143.9 4819.5 L 7143.9 4764.8 Q 7174.2 4726.7, 7253.3 4645.8 L 7471.1 4419.2 Q 7496.4 4392.6, 7595.2 4281.4 Q 7669.6 4196.4, 7711.4 4126.5 Q 7753.3 4056.7, 7772.8 3990.8 Q 7792.4 3924.8, 7792.4 3865.4 Q 7792.4 3763.9, 7735.8 3689.5 Q 7662.7 3591.1, 7523.0 3591.1 Q 7444.9 3591.1, 7386.3 3616.4 Q 7327.7 3641.7, 7307.7 3672.5 Q 7287.7 3703.3, 7248.6 3848.9 L 7189.9 3848.9 Q 7213.3 3717.9, 7223.0 3579.2 Q 7284.6 3520.8, 7326.1 3495.3 Q 7367.7 3469.8, 7428.2 3454.7 Q 7488.6 3439.5, 7560.2 3439.5 Q 7688.0 3439.5, 7775.8 3482.9 Q 7863.6 3526.4, 7916.4 3612.3 Q 7969.2 3698.3, 7969.2 3806.7 Q 7969.2 3923.9, 7909.2 4037.6 Q 7849.2 4151.4, 7659.6 4340.1 L 7492.7 4506.1 Q 7401.7 4596.7, 7354.9 4650.4 L 7783.6 4650.4 Q 7912.7 4650.4, 8036.7 4637.9 L 8043.3 4645.8 Q 8037.7 4682.6, 8037.7 4732.6 Q 8037.7 4777.6, 8043.3 4808.9 L 8036.7 4819.5 Q 7967.4 4815.4, 7878.3 4813.6 Q 7679.2 4809.8, 7611.7 4809.8 Q 7526.7 4809.8, 7325.8 4813.6 Q 7215.2 4815.4, 7143.9 4819.5" stroke="green" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="5 - annotations" id="g5" transform="translate(0.0 0.0)"><path d="M 1642.3 7278.7 L 1642.3 7224.0 Q 1672.6 7185.9, 1751.7 7104.9 L 1969.5 6878.4 Q 1994.8 6851.8, 2093.5 6740.5 Q 2167.9 6655.5, 2209.8 6585.7 Q 2251.7 6515.9, 2271.2 6449.9 Q 2290.7 6384.0, 2290.7 6324.6 Q 2290.7 6223.0, 2234.2 6148.7 Q 2161.0 6050.2, 2021.3 6050.2 Q 1943.2 6050.2, 1884.6 6075.5 Q 1826.0 6100.9, 1806.0 6131.6 Q 1786.0 6162.4, 1747.0 6308.0 L 1688.2 6308.0 Q 1711.7 6177.1, 1721.3 6038.4 Q 1782.9 5979.9, 1824.5 5954.4 Q 1866.0 5929.0, 1926.5 5913.8 Q 1987.0 5898.7, 2058.5 5898.7 Q 2186.3 5898.7, 2274.2 5942.1 Q 2362.0 5985.5, 2414.8 6071.5 Q 2467.6 6157.4, 2467.6 6265.9 Q 2467.6 6383.0, 2407.6 6496.8 Q 2347.6 6610.5, 2157.9 6799.3 L 1991.0 6965.2 Q 1900.1 7055.9, 1853.2 7109.6 L 2282.0 7109.6 Q 2411.0 7109.6, 2535.1 7097.1 L 2541.7 7104.9 Q 2536.0 7141.8, 2536.0 7191.8 Q 2536.0 7236.8, 2541.7 7268.0 L 2535.1 7278.7 Q 2465.7 7274.6, 2376.7 7272.7 Q 2177.6 7269.0, 2110.1 7269.0 Q 2025.1 7269.0, 1824.2 7272.7 Q 1713.5 7274.6, 1642.3 7278.7" stroke="green" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 5458.5 3232.9 L 5441.0 3227.9 L 5431.3 3147.9 L 5441.0 3137.9 Q 5545.4 3107.9, 5668.5 3055.1 Q 5850.1 2977.9, 5901.9 2951.6 L 5927.2 2961.3 Q 5911.6 3408.5, 5911.6 3475.1 L 5911.6 3837.3 Q 5911.6 4054.1, 5916.6 4165.4 Q 5919.4 4230.7, 5932.7 4247.9 Q 5946.0 4265.1, 5971.8 4272.4 Q 5997.6 4279.8, 6141.3 4285.4 L 6141.3 4345.1 Q 5894.1 4337.3, 5831.6 4337.3 Q 5784.7 4337.3, 5500.7 4345.1 L 5500.7 4285.4 Q 5649.1 4276.6, 5671.9 4271.3 Q 5694.7 4266.0, 5706.0 4255.2 Q 5717.2 4244.5, 5722.2 4225.1 Q 5730.1 4194.8, 5735.8 4050.7 Q 5741.6 3906.6, 5741.6 3832.3 L 5741.6 3447.6 Q 5741.6 3212.3, 5740.7 3152.6 Q 5740.7 3126.3, 5733.8 3119.5 Q 5730.1 3115.7, 5723.2 3115.7 Q 5714.4 3115.7, 5678.2 3131.3 Q 5512.2 3205.4, 5458.5 3232.9" stroke="green" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
         <path d="M 969.4 2045.1 Q 969.4 1815.4, 1002.4 1690.5 Q 1035.4 1565.6, 1122.4 1484.3 Q 1209.4 1403.0, 1343.1 1403.0 Q 1410.7 1403.0, 1468.3 1425.9 Q 1525.9 1448.9, 1562.6 1483.9 Q 1599.3 1519.0, 1624.6 1570.2 Q 1649.9 1621.3, 1660.4 1672.9 Q 1684.7 1790.4, 1684.7 1929.1 Q 1684.7 2109.5, 1656.3 2238.4 Q 1640.3 2311.6, 1610.6 2372.4 Q 1580.8 2433.2, 1539.7 2475.9 Q 1498.6 2518.5, 1440.6 2543.9 Q 1382.6 2569.3, 1310.2 2569.3 Q 1222.3 2569.3, 1159.5 2532.2 Q 1096.7 2495.1, 1059.6 2437.1 Q 1008.1 2354.3, 988.7 2247.5 Q 969.4 2140.7, 969.4 2045.1" stroke="green" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
         <path d="M 1107.8 1998.1 Q 1107.8 2114.1, 1123.2 2225.7 Q 1138.5 2337.3, 1171.5 2406.7 Q 1194.2 2453.3, 1237.6 2483.1 Q 1281.0 2512.9, 1335.2 2512.9 Q 1426.9 2512.9, 1475.9 2436.3 Q 1546.8 2326.8, 1546.8 2000.7 Q 1546.8 1860.5, 1531.9 1748.9 Q 1517.1 1637.3, 1482.3 1565.6 Q 1459.9 1519.8, 1419.2 1490.4 Q 1378.5 1461.0, 1321.2 1461.0 Q 1258.6 1461.0, 1209.0 1501.2 Q 1159.4 1541.4, 1133.6 1647.3 Q 1107.8 1753.3, 1107.8 1998.1" stroke="green" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 4594.8 3232.9 L 4577.3 3227.9 L 4567.6 3147.9 L 4577.3 3137.9 Q 4681.7 3107.9, 4804.8 3055.1 Q 4986.4 2977.9, 5038.3 2951.6 L 5063.6 2961.3 Q 5047.9 3408.5, 5047.9 3475.1 L 5047.9 3837.3 Q 5047.9 4054.1, 5052.9 4165.4 Q 5055.8 4230.7, 5069.0 4247.9 Q 5082.3 4265.1, 5108.1 4272.4 Q 5133.9 4279.8, 5277.6 4285.4 L 5277.6 4345.1 Q 5030.4 4337.3, 4967.9 4337.3 Q 4921.1 4337.3, 4637.0 4345.1 L 4637.0 4285.4 Q 4785.4 4276.6, 4808.3 4271.3 Q 4831.1 4266.0, 4842.3 4255.2 Q 4853.6 4244.5, 4858.6 4225.1 Q 4866.4 4194.8, 4872.2 4050.7 Q 4877.9 3906.6, 4877.9 3832.3 L 4877.9 3447.6 Q 4877.9 3212.3, 4877.0 3152.6 Q 4877.0 3126.3, 4870.1 3119.5 Q 4866.4 3115.7, 4859.5 3115.7 Q 4850.8 3115.7, 4814.5 3131.3 Q 4648.6 3205.4, 4594.8 3232.9" stroke="green" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
-    <g inkscape:groupmode="layer" inkscape:label="6 - bboxes" id="g5" transform="translate(0.0 0.0)"><path d="M 6001.6 1300.0 L 6001.6 5588.5 L 9543.3 5588.5 L 9543.3 1300.0 L 6001.6 1300.0" stroke="blue" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 500.0 1300.0 L 500.0 3425.0 L 3428.6 3425.0 L 3428.6 1300.0 L 500.0 1300.0" stroke="blue" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
-        <path d="M 3628.6 1300.0 L 3628.6 6300.0 L 5801.6 6300.0 L 5801.6 1300.0 L 3628.6 1300.0" stroke="blue" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+    <g inkscape:groupmode="layer" inkscape:label="6 - bboxes" id="g5" transform="translate(0.0 0.0)"><path d="M 500.0 3692.1 L 500.0 8047.6 L 4165.0 8047.6 L 4165.0 3692.1 L 500.0 3692.1" stroke="blue" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 4365.0 1300.0 L 4365.0 6300.0 L 6665.3 6300.0 L 6665.3 1300.0 L 4365.0 1300.0" stroke="blue" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
+        <path d="M 500.0 1300.0 L 500.0 3492.1 L 3555.9 3492.1 L 3555.9 1300.0 L 500.0 1300.0" stroke="blue" fill="none" stroke-width="20.0" stroke-opacity="0.5"/>
     </g>
 </svg>

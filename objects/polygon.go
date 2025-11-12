@@ -245,7 +245,7 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 func (p Polygon) EdgeSegments() []lines.LineSegment {
 	edges := make([]lines.LineSegment, len(p.Points))
 	for i := range len(p.Points) {
-		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beatifully
+		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beautifully
 		pointB := p.Points[i]
 		edges[i] = lines.LineSegment{P1: pointA, P2: pointB}
 	}
@@ -274,7 +274,7 @@ func (p Polygon) Grow(d float64) Polygon {
 	}
 	edges := make([]lines.Line, len(p.Points))
 	for i := range len(p.Points) {
-		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beatifully
+		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beautifully
 		pointB := p.Points[i]
 
 		edges[i] = lines.Line{P: pointA, V: pointB.Subtract(pointA).Unit()}
@@ -284,7 +284,7 @@ func (p Polygon) Grow(d float64) Polygon {
 	}
 	points := []primitives.Point{}
 	for i := range edges {
-		edgeA := edges[mod(i-1, len(edges))] // ensure that it wraps around beatifully
+		edgeA := edges[mod(i-1, len(edges))] // ensure that it wraps around beautifully
 		edgeB := edges[i]
 		intersection := edgeA.Intersect(edgeB)
 		if intersection == nil {
