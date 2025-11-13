@@ -142,6 +142,11 @@ func (c CutOut) computeTrees(container primitives.BBox) cutoutTrees {
 	for i, connection := range c.Connections {
 		if connection.ConnectionType == NoneConnection {
 			// noop, there is no connection
+			edge := FaceEdge{
+				connection.FaceA,
+				connection.EdgeAID,
+			}
+			connectionsCompleted[edge] = true
 			continue
 		}
 		faceA, ok := faceByID[connection.FaceA]
@@ -180,10 +185,25 @@ func (c CutOut) computeTrees(container primitives.BBox) cutoutTrees {
 				aLen, bLen, math.Abs(aLen-bLen),
 			)
 		}
-		faceA.Connects[connection.EdgeAID] = Connection{
-			Face:      faceB,
-			Type:      connection.ConnectionType,
-			OtherEdge: connection.EdgeBID,
+
+		if connection.ConnectionType == DoubleConnection {
+			faceA.Connects[connection.EdgeAID] = Connection{
+				Face:      faceB,
+				Type:      FlapConnection, // make sure this is a flap, not DoubleConnection
+				OtherEdge: connection.EdgeBID,
+			}
+			// add a full flap on the other side as well
+			faceB.Connects[connection.EdgeBID] = Connection{
+				Face:      faceA,
+				Type:      FlapConnection,
+				OtherEdge: connection.EdgeAID,
+			}
+		} else {
+			faceA.Connects[connection.EdgeAID] = Connection{
+				Face:      faceB,
+				Type:      connection.ConnectionType,
+				OtherEdge: connection.EdgeBID,
+			}
 		}
 		edges := []FaceEdge{
 			{

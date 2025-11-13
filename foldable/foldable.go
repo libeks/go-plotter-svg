@@ -70,10 +70,11 @@ type Edge struct {
 type ConnectionType int
 
 const (
-	NoneConnection      ConnectionType = 0
-	FlapConnection      ConnectionType = 1
-	FlapSmallConnection ConnectionType = 2
-	FaceConnection      ConnectionType = 3
+	NoneConnection      ConnectionType = 0 // This flap is not connected to anything on the other side
+	FlapConnection      ConnectionType = 1 // a standard 45° flap
+	FlapSmallConnection ConnectionType = 2 // a smaller, 30° flap
+	FaceConnection      ConnectionType = 3 // The faces should be directly connected, face to face
+	DoubleConnection    ConnectionType = 4 // Add a full 45° flap on both sides of the connection
 )
 
 type Connection struct {

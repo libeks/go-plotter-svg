@@ -38,12 +38,7 @@ func ComputeVoronoiConnections(b primitives.BBox, points []primitives.Point) Vor
 	polygonIndices := make(map[*voronoi.Cell]int)
 	edgeMap := []EdgeMap{}
 	for i, cell := range diagram.Cells {
-		// fmt.Printf("cell %d %v with %d edges\n", i, cell, len(cell.Halfedges))
 		pointEdges := getEdgePoints(cell.Halfedges)
-		// for j, edge := range sortEdges(cell.Halfedges) {
-		// 	fmt.Printf("\tEdge %d (%v) from %v to %v\n", j, edge.reverse, edge.Edge.Va.Vertex, edge.Edge.Vb.Vertex)
-		// }
-		// fmt.Printf("pointedges %v\n", pointEdges.EdgeMap)
 		polygons[cell] = pointEdges
 		polygonIndices[cell] = i
 		polys[i] = objects.Polygon{Points: pointEdges.Points}
