@@ -27,10 +27,7 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   * Set up automating layout planning (i.e. you don't have to say which faces are connected, which have flaps, it all gets figured out automatically)
   * Allow connections between foldable objects, i.e. have a scene contain multiple foldables with interlinking
   * See what damage comes from mixing clockwise- and counter-clockwise faces
-  * Voronoi - add a double flap that renders on both sides of the edge
-  * Voronoi - add rendering of the box sides
   * Voronoi - add some way to output the input parameters, when rendering around random points
-  * Voronoi - respect original input point order for polygons and edges
 * Rectangle-packing: Optimized coveraged-based filter to preserve 10% no matter what
 
 # Plot ideas
