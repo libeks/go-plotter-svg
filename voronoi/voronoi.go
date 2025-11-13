@@ -1,8 +1,7 @@
 package voronoi
 
 import (
-	"fmt"
-
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/objects"
 	"github.com/libeks/go-plotter-svg/primitives"
 
@@ -29,26 +28,32 @@ func ComputeVoronoiConnections(b primitives.BBox, points []primitives.Point) Vor
 	for i, point := range points {
 		sites[i] = voronoi.Vertex{X: point.X, Y: point.Y}
 	}
-	fmt.Printf("Sites %v\n", sites)
+	// fmt.Printf("Sites %v\n", sites)
+	pointIndex := map[primitives.Point]int{}
+	for i, point := range points {
+		pointIndex[point] = i
+	}
 	bbox := voronoi.BBox{Xl: b.UpperLeft.X, Xr: b.LowerRight.X, Yt: b.UpperLeft.Y, Yb: b.LowerRight.Y}
-	fmt.Printf("BBox %v\n", bbox)
 	diagram := voronoi.ComputeDiagram(sites, bbox, true)
 	polys := make([]objects.Polygon, len(points))
 	polygons := make(map[*voronoi.Cell]PointEdges, len(diagram.Cells))
 	polygonIndices := make(map[*voronoi.Cell]int)
 	edgeMap := []EdgeMap{}
-	for i, cell := range diagram.Cells {
+	// reorder cells to match the input point order
+	cells := make([]*voronoi.Cell, len(diagram.Cells))
+	for _, cell := range diagram.Cells {
+		i := pointIndex[primitives.Point{X: cell.Site.X, Y: cell.Site.Y}]
+		cells[i] = cell
+	}
+	for i, cell := range cells {
 		pointEdges := getEdgePoints(cell.Halfedges)
 		polygons[cell] = pointEdges
 		polygonIndices[cell] = i
 		polys[i] = objects.Polygon{Points: pointEdges.Points}
 	}
 	visitedCells := make(map[*voronoi.Edge]struct{})
-	for i, cell := range diagram.Cells {
-		// fmt.Printf("Face %d\n", i)
+	for i, cell := range cells {
 		for _, edge := range sortEdges(cell.Halfedges) {
-			// fmt.Printf("\tEdge %d %v\n", j, edge.Edge)
-			// fmt.Printf("\tEdge %d (%v) from %v to %v\n", j, edge.reverse, edge.Edge.Va.Vertex, edge.Edge.Vb.Vertex)
 			if _, ok := visitedCells[edge.Edge]; ok {
 				continue
 			}
@@ -63,12 +68,10 @@ func ComputeVoronoiConnections(b primitives.BBox, points []primitives.Point) Vor
 						EdgeIndex: polygons[otherCell].EdgeMap[edge.Edge],
 					},
 				})
-				// fmt.Printf("Just added edge map from %d %d to %d %d\n", i, polygons[cell].EdgeMap[edge.Edge], polygonIndices[otherCell], polygons[otherCell].EdgeMap[edge.Edge])
 			}
 			visitedCells[edge.Edge] = struct{}{}
 		}
 	}
-	// fmt.Printf("Polygons %v\n", polygons)
 	return VoronoiSet{
 		Polygons: polys,
 		EdgeMap:  edgeMap,
@@ -89,12 +92,6 @@ type Halfedge struct {
 	reverse bool
 }
 
-// https://stackoverflow.com/a/59299881
-// go doesn't do the expected thing for modding, since (-1%5) = -1, but we want to get 4 (to wrap around the index)
-func mod(a, b int) int {
-	return (a%b + b) % b
-}
-
 func sortEdges(edges []*voronoi.Halfedge) []Halfedge {
 	// reverse edges first
 	// slices.Reverse(edges)
@@ -104,7 +101,7 @@ func sortEdges(edges []*voronoi.Halfedge) []Halfedge {
 	}
 	halfEdges := make([]Halfedge, len(reverseEdges))
 	for i, edge := range reverseEdges {
-		nextEdge := reverseEdges[mod(i+1, len(reverseEdges))] // ensure that it wraps around beautifully
+		nextEdge := reverseEdges[maths.Mod(i+1, len(reverseEdges))] // ensure that it wraps around beautifully
 		var reverse bool
 		// if the first vertex points to the following edge, flip the order
 		if edge.Edge.Va.Vertex == nextEdge.Edge.Va.Vertex || edge.Edge.Va.Vertex == nextEdge.Edge.Vb.Vertex {
@@ -125,7 +122,7 @@ func getEdgePoints(edges []*voronoi.Halfedge) PointEdges {
 	hedges := sortEdges(edges)
 	for i, edge := range hedges {
 		// fmt.Printf("GG \tEdge %d (%v) from %v to %v\n", i, edge.reverse, edge.Edge.Va.Vertex, edge.Edge.Vb.Vertex)
-		edgeMap[edge.Edge] = mod(i-1, len(hedges))
+		edgeMap[edge.Edge] = maths.Mod(i-1, len(hedges))
 		var pt primitives.Point
 		if edge.reverse {
 			pt = primitives.Point{X: edge.Edge.Va.X, Y: edge.Edge.Va.Y}

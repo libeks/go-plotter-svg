@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/pen"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/voronoi"
@@ -614,12 +615,6 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []FoldablePatter
 	return c.Render(b)
 }
 
-// https://stackoverflow.com/a/59299881
-// go doesn't do the expected thing for modding, since (-1%5) = -1, but we want to get 4 (to wrap around the index)
-func mod(a, b int) int {
-	return (a%b + b) % b
-}
-
 func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 	edgeWidth := 400.0
 	points := []primitives.Point{
@@ -685,7 +680,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 					EdgeBID:        -1,
 					ConnectionType: NoneConnection,
 				})
-				nextEdgeName := fmt.Sprintf("%s-%d", faceName, mod(j+1, len(shape.Edges)))
+				nextEdgeName := fmt.Sprintf("%s-%d", faceName, maths.Mod(j+1, len(shape.Edges)))
 				if visited := edgesVisited[nextEdgeName]; !visited {
 					connections = append(connections, ConnectionID{
 						FaceA:          edgeName,

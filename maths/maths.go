@@ -57,3 +57,9 @@ func RandInRange(min, max float64) float64 {
 func Interpolate(a, b, t float64) float64 {
 	return (b-a)*t + a
 }
+
+// https://stackoverflow.com/a/59299881
+// go doesn't do the expected thing for modding, since (-1%5) = -1, but we want to get 4 (to wrap around the index)
+func Mod(a, b int) int {
+	return (a%b + b) % b
+}

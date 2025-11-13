@@ -43,19 +43,19 @@ func (p Polygon) pointWindingAngle(pt primitives.Point) float64 {
 func (p Polygon) Reverse() Polygon {
 	points := make([]primitives.Point, len(p.Points))
 	for i := range len(p.Points) {
-		points[i] = p.Points[mod(-i, len(p.Points))]
+		points[i] = p.Points[maths.Mod(-i, len(p.Points))]
 	}
 	return Polygon{Points: points}
 }
 
 // Given a face index, return the index of the next face, wrapping around
 func (p Polygon) NextFaceIndex(i int) int {
-	return mod(i+1, len(p.Points))
+	return maths.Mod(i+1, len(p.Points))
 }
 
 // Given a face index, return the index of the next face, wrapping around
 func (p Polygon) PreviousFaceIndex(i int) int {
-	return mod(i-1, len(p.Points))
+	return maths.Mod(i-1, len(p.Points))
 }
 
 // Inside returns true if the point is inside the polygon, false otherwise
@@ -255,17 +255,11 @@ func (p Polygon) LineFill(angle, spacing float64) []lines.LineLike {
 func (p Polygon) EdgeSegments() []lines.LineSegment {
 	edges := make([]lines.LineSegment, len(p.Points))
 	for i := range len(p.Points) {
-		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beautifully
+		pointA := p.Points[maths.Mod(i-1, len(p.Points))] // ensure that it wraps around beautifully
 		pointB := p.Points[i]
 		edges[i] = lines.LineSegment{P1: pointA, P2: pointB}
 	}
 	return edges
-}
-
-// https://stackoverflow.com/a/59299881
-// go doesn't do the expected thing for modding, since (-1%5) = -1, but we want to get 4 (to wrap around the index)
-func mod(a, b int) int {
-	return (a%b + b) % b
 }
 
 // Grow increases the polygon outwards (or inwards, if d is negative), by moving every
@@ -284,7 +278,7 @@ func (p Polygon) Grow(d float64) Polygon {
 	}
 	edges := make([]lines.Line, len(p.Points))
 	for i := range len(p.Points) {
-		pointA := p.Points[mod(i-1, len(p.Points))] // ensure that it wraps around beautifully
+		pointA := p.Points[maths.Mod(i-1, len(p.Points))] // ensure that it wraps around beautifully
 		pointB := p.Points[i]
 
 		edges[i] = lines.Line{P: pointA, V: pointB.Subtract(pointA).Unit()}
@@ -294,7 +288,7 @@ func (p Polygon) Grow(d float64) Polygon {
 	}
 	points := []primitives.Point{}
 	for i := range edges {
-		edgeA := edges[mod(i-1, len(edges))] // ensure that it wraps around beautifully
+		edgeA := edges[maths.Mod(i-1, len(edges))] // ensure that it wraps around beautifully
 		edgeB := edges[i]
 		intersection := edgeA.Intersect(edgeB)
 		if intersection == nil {
