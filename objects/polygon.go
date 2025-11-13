@@ -48,6 +48,16 @@ func (p Polygon) Reverse() Polygon {
 	return Polygon{Points: points}
 }
 
+// Given a face index, return the index of the next face, wrapping around
+func (p Polygon) NextFaceIndex(i int) int {
+	return mod(i+1, len(p.Points))
+}
+
+// Given a face index, return the index of the next face, wrapping around
+func (p Polygon) PreviousFaceIndex(i int) int {
+	return mod(i-1, len(p.Points))
+}
+
 // Inside returns true if the point is inside the polygon, false otherwise
 func (p Polygon) Inside(pt primitives.Point) bool {
 	totalAngle := p.pointWindingAngle(pt)

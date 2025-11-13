@@ -614,7 +614,15 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []FoldablePatter
 	return c.Render(b)
 }
 
+// https://stackoverflow.com/a/59299881
+// go doesn't do the expected thing for modding, since (-1%5) = -1, but we want to get 4 (to wrap around the index)
+func mod(a, b int) int {
+	return (a%b + b) % b
+}
+
 func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
+	edgeWidth := 400.0
+	fmt.Printf("edgeWidth %f\n", edgeWidth)
 	points := []primitives.Point{
 		{X: 1000, Y: 1000},
 		{X: 1500, Y: 2000},
@@ -626,14 +634,18 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 	faces := []FaceID{}
 	connections := []ConnectionID{}
 	faceNames := make([]string, len(vor.Polygons))
+	edgesVisited := make(map[string]bool)
 	for i, poly := range vor.Polygons {
 		name := fmt.Sprintf("%d", i)
-		fmt.Printf("Shape %d %v\n", i, PolygonToShape(poly))
+		// fmt.Printf("Shape %d %v\n", i, PolygonToShape(poly))
 		faces = append(faces, faceID(PolygonToShape(poly), name))
 		faceNames[i] = name
+		for j := range len(poly.Points) {
+			edgesVisited[fmt.Sprintf("%s-%d", name, j)] = false
+		}
 	}
-	for i, conn := range vor.EdgeMap {
-		fmt.Printf("Connection %d from %v to %v\n", i, conn.From, conn.To)
+	for _, conn := range vor.EdgeMap {
+		// fmt.Printf("Connection %d from %v to %v\n", i, conn.From, conn.To)
 		connections = append(connections, ConnectionID{
 			FaceA:          faceNames[conn.From.PolyIndex],
 			FaceB:          faceNames[conn.To.PolyIndex],
@@ -641,6 +653,8 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 			EdgeBID:        conn.To.EdgeIndex,
 			ConnectionType: FlapConnection,
 		})
+		edgesVisited[fmt.Sprintf("%s-%d", faceNames[conn.From.PolyIndex], conn.From.EdgeIndex)] = true
+		edgesVisited[fmt.Sprintf("%s-%d", faceNames[conn.To.PolyIndex], conn.To.EdgeIndex)] = true
 		// FIXME: The following is for debugging only, should be turned into a double-flap
 		connections = append(connections, ConnectionID{
 			FaceA:          faceNames[conn.To.PolyIndex],
@@ -649,6 +663,91 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 			EdgeBID:        conn.From.EdgeIndex,
 			ConnectionType: FlapConnection,
 		})
+	}
+	fmt.Printf("edgesVisited %v\n", edgesVisited)
+	for i, poly := range vor.Polygons {
+		shape := PolygonToShape(poly)
+		for j, edge := range shape.Edges {
+			faceName := faceNames[i]
+			edgeName := fmt.Sprintf("%s-%d", faceName, j)
+			if visited := edgesVisited[edgeName]; !visited {
+				// this is an outer edge
+				fmt.Printf("Not visited %s %v\n", edgeName, edge)
+				edgeShape := Shape{
+					Edges: []Edge{
+						{edge.Mult(-1)},
+						{edge.Perp().Unit().Mult(-edgeWidth)},
+						edge,
+						{edge.Perp().Unit().Mult(edgeWidth)},
+					},
+				}
+				faces = append(faces, faceID(edgeShape, edgeName))
+				connections = append(connections, ConnectionID{
+					FaceA:          faceName,
+					FaceB:          edgeName,
+					EdgeAID:        j,
+					EdgeBID:        0,
+					ConnectionType: FaceConnection,
+				})
+				connections = append(connections, ConnectionID{
+					FaceA:          edgeName,
+					FaceB:          "",
+					EdgeAID:        2,
+					EdgeBID:        -1,
+					ConnectionType: NoneConnection,
+				})
+				nextEdgeName := fmt.Sprintf("%s-%d", faceName, mod(j, len(shape.Edges)))
+				if visited := edgesVisited[nextEdgeName]; !visited {
+					connections = append(connections, ConnectionID{
+						FaceA:          edgeName,
+						FaceB:          nextEdgeName,
+						EdgeAID:        3,
+						EdgeBID:        1,
+						ConnectionType: FlapConnection,
+					})
+				}
+			} else {
+				fmt.Printf("Already visited %s\n", edgeName)
+			}
+		}
+	}
+	for _, conn := range vor.EdgeMap {
+		faceA := faceNames[conn.From.PolyIndex]
+		faceB := faceNames[conn.To.PolyIndex]
+		faceAPreviousEdgeIndex := mod(conn.From.EdgeIndex-1, len(vor.Polygons[conn.From.PolyIndex].Points))
+		faceANextEdgeIndex := mod(conn.From.EdgeIndex+1, len(vor.Polygons[conn.From.PolyIndex].Points))
+		faceAPreviousEdge := fmt.Sprintf("%s-%d", faceA, faceAPreviousEdgeIndex)
+		faceANextEdge := fmt.Sprintf("%s-%d", faceA, faceANextEdgeIndex)
+		faceBPreviousEdgeIndex := mod(conn.To.EdgeIndex-1, len(vor.Polygons[conn.To.PolyIndex].Points))
+		faceBNextEdgeIndex := mod(conn.To.EdgeIndex+1, len(vor.Polygons[conn.To.PolyIndex].Points))
+		// faceBPreviousEdge := fmt.Sprintf("%s-%d", faceB, faceBPreviousEdgeIndex)
+		// faceBNextEdge := fmt.Sprintf("%s-%d", faceB, faceBNextEdgeIndex)
+		if visited := edgesVisited[faceAPreviousEdge]; !visited {
+			connections = append(connections, ConnectionID{
+				FaceA:          fmt.Sprintf("%s-%d", faceA, faceAPreviousEdgeIndex),
+				FaceB:          fmt.Sprintf("%s-%d", faceB, faceBNextEdgeIndex),
+				EdgeAID:        3,
+				EdgeBID:        1,
+				ConnectionType: FlapConnection,
+			})
+		}
+		if visited := edgesVisited[faceANextEdge]; !visited {
+			connections = append(connections, ConnectionID{
+				FaceA:          fmt.Sprintf("%s-%d", faceA, faceANextEdgeIndex),
+				FaceB:          fmt.Sprintf("%s-%d", faceB, faceBPreviousEdgeIndex),
+				EdgeAID:        1,
+				EdgeBID:        3,
+				ConnectionType: FlapConnection,
+			})
+		}
+		// // FIXME: The following is for debugging only, should be turned into a double-flap
+		// connections = append(connections, ConnectionID{
+		// 	FaceA:          faceNames[conn.To.PolyIndex],
+		// 	FaceB:          faceNames[conn.From.PolyIndex],
+		// 	EdgeAID:        conn.To.EdgeIndex,
+		// 	EdgeBID:        conn.From.EdgeIndex,
+		// 	ConnectionType: FlapConnection,
+		// })
 	}
 	return NewCutOut(faces, connections).Render(b)
 }

@@ -140,6 +140,10 @@ func (c CutOut) computeTrees(container primitives.BBox) cutoutTrees {
 		}
 	}
 	for i, connection := range c.Connections {
+		if connection.ConnectionType == NoneConnection {
+			// noop, there is no connection
+			continue
+		}
 		faceA, ok := faceByID[connection.FaceA]
 		if !ok {
 			fmt.Printf("Could not find face named %s for connection number %d\n", connection.FaceA, i)
