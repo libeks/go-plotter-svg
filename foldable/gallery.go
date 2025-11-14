@@ -3,6 +3,7 @@ package foldable
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
 
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/pen"
@@ -616,30 +617,101 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []FoldablePatter
 }
 
 func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
-	edgeWidth := 400.0
-	points := []primitives.Point{
-		{X: 1000, Y: 1000},
-		{X: 1500, Y: 2000},
-		{X: 4500, Y: 1500},
-		{X: 3000, Y: 4500},
-	}
 	bbox := primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Point{X: 5000, Y: 5000}}
+	edgeWidth := 400.0
+	// points := []primitives.Point{
+	// 	{X: 1000, Y: 1000},
+	// 	{X: 1500, Y: 2000},
+	// 	{X: 4500, Y: 1500},
+	// 	{X: 3000, Y: 4500},
+	// }
+	// points := []primitives.Point{
+	// 	{X: 2803.0, Y: 1061.1},
+	// 	{X: 2288.1, Y: 3567.1},
+	// 	{X: 2800.8, Y: 3797.2},
+	// 	{X: 3377.6, Y: 1596.4},
+	// }
+	// points := []primitives.Point{
+	// 	{3939.3, 3469.2},
+	// 	{3860.3, 2980.4},
+	// 	{1301.9, 2714.9},
+	// 	{2320.7, 3376.5},
+	// 	{2884.2, 2017.6},
+	// 	{1692.4, 1053.9},
+	// }
+	// points := []primitives.Point{
+	// 	{2629.9, 1649.7},
+	// 	{3400.8, 2265.2},
+	// 	{2385.6, 2281.2},
+	// 	{1485.5, 1855.5},
+	// 	{1806.5, 2754.3},
+	// 	{2038.0, 3307.8},
+	// }
+	// points := []primitives.Point{
+	// 	{1962.3, 3098.7},
+	// 	{2962.1, 1710.6},
+	// 	{688.7, 4222.8},
+	// 	{2804.3, 1045.3},
+	// 	{2904.4, 579.4},
+	// }
+	// points := []primitives.Point{
+	// 	{1685.5, 1226.8},
+	// 	{1396.8, 3673.7},
+	// 	{3100.1, 2711.9},
+	// 	{2300.4, 2249.0},
+	// 	{3378.5, 712.4},
+	// }
+	// points := []primitives.Point{
+	// 	{2026.8, 1272.8},
+	// 	{3389.8, 2680.9},
+	// 	{4302.4, 1969.8},
+	// 	{4308.0, 3301.0},
+	// 	{4449.9, 3944.1},
+	// }
+	// points := []primitives.Point{
+	// 	{1577.2, 987.1},
+	// 	{1932.1, 3904.1},
+	// 	{759.6, 4256.4},
+	// 	{1427.1, 2965.9},
+	// 	{3026.7, 1864.5},
+	// 	{1551.9, 2038.8},
+	// 	{2963.5, 1649.6},
+	// }
+	nPoints := 7
+	points := make([]primitives.Point, nPoints)
+	fmt.Printf("points := []primitives.Point{\n")
+	for i := range nPoints {
+		points[i] = primitives.Point{
+			X: rand.Float64()*4000 + 500.0,
+			Y: rand.Float64()*4000 + 500.0,
+		}
+		fmt.Printf("    {%.1f, %.1f},\n", points[i].X, points[i].Y)
+	}
+	fmt.Printf("}\n")
+
 	vor := voronoi.ComputeVoronoiConnections(bbox, points)
 	faces := []FaceID{}
 	connections := []ConnectionID{}
 	faceNames := make([]string, len(vor.Polygons))
 	edgesVisited := make(map[string]bool)
+	minEdge := math.MaxFloat64
 	for i, poly := range vor.Polygons {
 		name := fmt.Sprintf("%d", i)
-		// fmt.Printf("Shape %d %v\n", i, PolygonToShape(poly))
-		faces = append(faces, faceID(PolygonToShape(poly), name))
+		shape := PolygonToShape(poly)
+		for _, edge := range shape.Edges {
+			length := edge.Len()
+			if length < minEdge {
+				minEdge = length
+			}
+		}
+		faces = append(faces, faceID(shape, name))
 		faceNames[i] = name
 		for j := range len(poly.Points) {
 			edgesVisited[fmt.Sprintf("%s-%d", name, j)] = false
 		}
 	}
+	fmt.Printf("Min Edge is %.1f\n", minEdge)
 	for _, conn := range vor.EdgeMap {
-		// fmt.Printf("Connection %d from %v to %v\n", i, conn.From, conn.To)
 		connections = append(connections, ConnectionID{
 			FaceA:          faceNames[conn.From.PolyIndex],
 			FaceB:          faceNames[conn.To.PolyIndex],
@@ -666,6 +738,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 					},
 				}
 				faces = append(faces, faceID(edgeShape, edgeName))
+				// connect the edge to the original face
 				connections = append(connections, ConnectionID{
 					FaceA:          faceName,
 					FaceB:          edgeName,
@@ -673,6 +746,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 					EdgeBID:        0,
 					ConnectionType: FaceConnection,
 				})
+				// mark the outer edge as not connected to anything
 				connections = append(connections, ConnectionID{
 					FaceA:          edgeName,
 					FaceB:          "",
@@ -682,6 +756,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 				})
 				nextEdgeName := fmt.Sprintf("%s-%d", faceName, maths.Mod(j+1, len(shape.Edges)))
 				if visited := edgesVisited[nextEdgeName]; !visited {
+					// if the next edge is also not connected to anything, add a flap between the edge elements
 					connections = append(connections, ConnectionID{
 						FaceA:          edgeName,
 						FaceB:          nextEdgeName,
@@ -703,6 +778,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 		faceBPreviousEdgeIndex := vor.Polygons[conn.To.PolyIndex].PreviousFaceIndex(conn.To.EdgeIndex)
 		faceBNextEdgeIndex := vor.Polygons[conn.To.PolyIndex].NextFaceIndex(conn.To.EdgeIndex)
 		if visited := edgesVisited[faceAPreviousEdge]; !visited {
+			// if faces are connected, and the previous edge is not connected to anything, add a flap between the edge elements
 			connections = append(connections, ConnectionID{
 				FaceA:          fmt.Sprintf("%s-%d", faceA, faceAPreviousEdgeIndex),
 				FaceB:          fmt.Sprintf("%s-%d", faceB, faceBNextEdgeIndex),
@@ -712,6 +788,7 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 			})
 		}
 		if visited := edgesVisited[faceANextEdge]; !visited {
+			// if faces are connected, and the next edge is not connected to anything, add a flap between the edge elements
 			connections = append(connections, ConnectionID{
 				FaceA:          fmt.Sprintf("%s-%d", faceA, faceANextEdgeIndex),
 				FaceB:          fmt.Sprintf("%s-%d", faceB, faceBPreviousEdgeIndex),

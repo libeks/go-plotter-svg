@@ -101,7 +101,6 @@ func EquiTriangle(side float64) Shape {
 
 // turns a polygon into a shape. The first vector is between point [0] and [1], the last vector is between [n-1] and [0]
 func PolygonToShape(p objects.Polygon) Shape {
-	fmt.Printf("polygon %v\n", p)
 	edges := []Edge{}
 	for i, point := range p.Points {
 		if i == 0 {
