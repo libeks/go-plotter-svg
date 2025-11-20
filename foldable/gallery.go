@@ -362,13 +362,13 @@ func RhombicuboctahedronWithoutCorners(b primitives.BBox, side float64) []Foldab
 			flap("H-a", "H-c", 0, 1),
 
 			flap("A", "H", 3, 1),
-			flap("A+2", "G+1", 3, 0),
-			flap("A+2", "C+1", 1, 0),
-			flap("A-2", "G-1", 3, 2),
-			flap("A-2", "C-1", 1, 2),
+			smallFlap("A+2", "G+1", 3, 0),
+			smallFlap("A+2", "C+1", 1, 0),
+			smallFlap("A-2", "G-1", 3, 2),
+			smallFlap("A-2", "C-1", 1, 2),
 
-			flap("E+1", "A+2", 0, 0),
-			flap("E-1", "A-2", 2, 2),
+			smallFlap("E+1", "A+2", 0, 0),
+			smallFlap("E-1", "A-2", 2, 2),
 		},
 	)
 	return c.Render(b)
@@ -382,9 +382,9 @@ func RhombicuboctahedronWithoutCornersTricolor(b primitives.BBox, side float64) 
 	cyanColor := "cyan"
 	magentaColor := "magenta"
 	yellowColor := "yellow"
-	cyanPen := pen.BicIntensityBrushTip
-	magentaPen := pen.BicIntensityBrushTip
-	yellowPen := pen.BicIntensityBrushTip
+	cyanPen := pen.CrayolaSuperTips
+	magentaPen := pen.CrayolaSuperTips
+	yellowPen := pen.CrayolaSuperTips
 
 	sq := Square(side)
 	tr := Shape{
@@ -541,13 +541,13 @@ func RhombicuboctahedronWithoutCornersTricolor(b primitives.BBox, side float64) 
 			flap("H-a", "H-c", 0, 1),
 
 			flap("A", "H", 3, 1),
-			flap("A+2", "G+1", 3, 0),
-			flap("A+2", "C+1", 1, 0),
-			flap("A-2", "G-1", 3, 2),
-			flap("A-2", "C-1", 1, 2),
+			smallFlap("A+2", "G+1", 3, 0),
+			smallFlap("A+2", "C+1", 1, 0),
+			smallFlap("A-2", "G-1", 3, 2),
+			smallFlap("A-2", "C-1", 1, 2),
 
-			flap("E+1", "A+2", 0, 0),
-			flap("E-1", "A-2", 2, 2),
+			smallFlap("E+1", "A+2", 0, 0),
+			smallFlap("E-1", "A-2", 2, 2),
 		},
 	)
 	return c.Render(b)
