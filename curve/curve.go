@@ -155,3 +155,13 @@ func (c *Curve) GetOtherEnd(endpoint connectionEnd) *connectionEnd {
 	}
 	return nil
 }
+
+type EndpointMidpoint struct {
+	endpoint connectionEnd
+	tValue   float64
+}
+
+func (e EndpointMidpoint) String() string {
+	return fmt.Sprintf("%s %.1f", e.endpoint, e.tValue)
+
+}
