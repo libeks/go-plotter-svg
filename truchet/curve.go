@@ -102,35 +102,35 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 	}
 }
 
-func (c *Curve) XMLChunk(curveMapper CurveMapper, from endPointTuple) lines.PathChunk {
+func (c *Curve) XMLChunk(curveMapper CurveMapper, from connectionEnd) lines.PathChunk {
 	if !c.HasEndpoint(from) {
 		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
 	}
-	to := c.GetOtherDirection(from)
+	to := c.GetOtherEnd(from)
 	if to == nil {
 		panic("No 'to' direction")
 	}
-	mTo := c.GetMidpoint(*to)
-	mFrom := c.GetMidpoint(from)
+	mTo := c.GetTValue(*to)
+	mFrom := c.GetTValue(from)
 	tFrom := *mFrom
 	tTo := *mTo
-	startPoint := c.Cell.AtEdge(from, tFrom)
-	endPoint := c.Cell.AtEdge(*to, tTo)
+	startPoint := c.Cell.AtEdge(from.NWSE, tFrom)
+	endPoint := c.Cell.AtEdge(to.NWSE, tTo)
 	curveType := GetCurveType(from.NWSE, to.NWSE, tFrom, tTo)
 
 	return curveMapper.GetPathChunk(c, curveType, tFrom, tTo, startPoint, endPoint)
 }
 
-func (c *Curve) GetMidpoint(endpoint endPointTuple) *float64 {
+func (c *Curve) GetTValue(endpoint connectionEnd) *float64 {
 	for _, pt := range c.endpoints {
 		if pt.endpoint.endpoint == endpoint.endpoint {
-			return &pt.midpoint
+			return &pt.tValue
 		}
 	}
 	return nil
 }
 
-func (c Curve) HasEndpoint(endpoint endPointTuple) bool {
+func (c Curve) HasEndpoint(endpoint connectionEnd) bool {
 	for _, pt := range c.endpoints {
 		if pt.endpoint.endpoint == endpoint.endpoint {
 			return true
@@ -139,9 +139,9 @@ func (c Curve) HasEndpoint(endpoint endPointTuple) bool {
 	return false
 }
 
-// return the index of the other end of this curve, in corrdinates relative to this cell
-func (c *Curve) GetOtherDirection(endpoint endPointTuple) *endPointTuple {
-	var other *endPointTuple
+// return the index of the other end of this curve within the same cell
+func (c *Curve) GetOtherEnd(endpoint connectionEnd) *connectionEnd {
+	var other *connectionEnd
 	found := false
 	for _, pt := range c.endpoints {
 		if pt.endpoint.endpoint == endpoint.endpoint {

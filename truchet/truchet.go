@@ -2,6 +2,9 @@ package truchet
 
 import (
 	"fmt"
+
+	"github.com/libeks/go-plotter-svg/primitives"
+	"github.com/libeks/go-plotter-svg/samplers"
 )
 
 var (
@@ -20,6 +23,136 @@ var (
 		EdgePointMapping: EndpointMapping6Side,
 	}
 )
+
+func NewTruchetGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *TruchetGrid {
+	boxes := primitives.PartitionIntoSquares(b, nx)
+	cells := make(map[cellCoord]*Cell, len(boxes))
+	grid := &TruchetGrid{
+		TruchetTileSet: tileSet,
+	}
+	if len(boxes) != nx*nx {
+		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
+	}
+	horPoints := tileSet.EdgePointMapping.getHorizontal()
+	vertPoints := tileSet.EdgePointMapping.getVertical()
+
+	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
+	for i := range nx + 1 { // for each of horizontal edges
+		for j := range nx { // for each cell
+			intersects := getSourcedIntersects(horPoints, edgeSource, float64(j)/float64(nx+1), float64(i)/float64(nx+1))
+			grid.rowEdges[cellCoord{j, i}] = Edge{intersects} // flipped order is intentional
+		}
+	}
+	grid.columnEdges = make(map[cellCoord]Edge, nx+1)
+	for i := range nx + 1 { // for each of vertical edges
+		for j := range nx { // for each cell
+			intersects := getSourcedIntersects(vertPoints, edgeSource, float64(i)/float64(nx+1), float64(j)/float64(nx+1))
+			grid.columnEdges[cellCoord{i, j}] = Edge{intersects}
+		}
+	}
+	grid.Grid = Grid{
+		nX:               nx,
+		nY:               nx,
+		cells:            cells,
+		edgePointMapping: &tileSet.EdgePointMapping,
+		curveMapper:      curveMapper,
+	}
+	for _, childBox := range boxes {
+		cell := &Cell{
+			Grid: &grid.Grid,
+			BBox: childBox.BBox,
+			x:    childBox.I,
+			y:    childBox.J,
+		}
+		grid.PopulateCurves(cell, tilePicker)
+		cells[cellCoord{childBox.I, childBox.J}] = cell
+	}
+	return grid
+}
+
+type TruchetGrid struct {
+	Grid
+	// edge containers, specifying the position of cell border points
+	columnEdges map[cellCoord]Edge
+	rowEdges    map[cellCoord]Edge
+	TruchetTileSet
+	// CurveMapper
+	endpointWiggle samplers.DataSource
+}
+
+// PopulateCurves decides which Truchet tile to use, and populates the curve fragments that fall inside of this cell
+func (g *TruchetGrid) PopulateCurves(c *Cell, dataSource samplers.DataSource) {
+	rand := dataSource.GetValue(relativeCenter(c.BBox)) // evaluate dataSource in absolute image coordinates
+	l := len(g.TruchetTileSet.Tiles)
+	n := int(rand * float64(l))
+	// rand could produce a value of 1.0, which would map to be outside of the range. We cap this to the last element, since this is a weird edge case
+	if n == l {
+		n = n - 1
+	}
+	tile := g.TruchetTileSet.Tiles[n]
+	g.generateCurves(c, tile)
+}
+
+// getSourcedIntersections returns the intersection points for coordinates in unit square
+func getSourcedIntersects(pointDef []connectionPair, edgeSource samplers.DataSource, xCoord, yCoord float64) []edgeMap {
+	var intersects = make([]edgeMap, len(pointDef))
+	spacing := 1 / float64(len(pointDef)+1)
+	variance := 0.5 / float64(len(pointDef))
+	for i, pt := range pointDef {
+		center := spacing * float64(i+1)
+		sourceVal := edgeSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
+		valPlusMinus := sourceVal*2 - 1
+		intersects[i] = edgeMap{
+			point: pt,
+			val:   center + valPlusMinus*variance/2,
+		}
+	}
+	return intersects
+}
+
+func (g *TruchetGrid) generateCurves(c *Cell, tile tile) {
+	edgePointMap := g.GetEdgePoints(c)
+	curves := make([]*Curve, len(tile.pairs))
+	for i, pair := range tile.pairs {
+		a := pair.a
+		aDir := g.TruchetTileSet.EdgePointMapping.getDirection(a)
+		b := pair.b
+		bDir := g.TruchetTileSet.EdgePointMapping.getDirection(b)
+		curves[i] = &Curve{
+			endpoints: []EndpointMidpoint{
+				{
+					endpoint: aDir,
+					tValue:   edgePointMap[a],
+				},
+				{
+					endpoint: bDir,
+					tValue:   edgePointMap[b],
+				},
+			},
+			visited: false,
+			Cell:    c,
+		}
+	}
+	c.curves = curves
+}
+
+// GetEdgePoints returns a map from the edge index to its corresponding t-values
+func (g TruchetGrid) GetEdgePoints(c *Cell) map[int]float64 {
+	// edges contains the t-values on each of the edges of this cell
+	edges := map[NWSE]Edge{}
+	edges[North] = g.rowEdges[cellCoord{c.x, c.y}]
+	edges[South] = g.rowEdges[cellCoord{c.x, c.y + 1}]
+	edges[West] = g.columnEdges[cellCoord{c.x, c.y}]
+	edges[East] = g.columnEdges[cellCoord{c.x + 1, c.y}]
+
+	vals := map[int]float64{}
+	for _, edgePointMapping := range g.edgePointMapping.pairs {
+		for _, endPointTuple := range edgePointMapping.bothEnds() {
+			vals[endPointTuple.endpoint] = edges[endPointTuple.NWSE].GetPoint(endPointTuple.endpoint)
+		}
+	}
+	return vals
+}
 
 func NewPair(a, b int) pair {
 	return pair{a: a, b: b}
@@ -143,117 +276,24 @@ var Truchet6Pairs = []tile{
 	},
 }
 
-// endPointTuple represents the indexed point of a curve fragment within a cell
-type endPointTuple struct {
-	endpoint int
-	NWSE
-}
-
-func (e endPointTuple) isEmpty() bool {
-	return e.endpoint == 0
-}
-
-type endPointPair struct {
-	a endPointTuple
-	b endPointTuple
-}
-
-// Has returns true if this pair contains the indexed endpoint
-func (p endPointPair) Has(q int) bool {
-	if p.a.endpoint == q {
-		return true
-	} else if p.b.endpoint == q {
-		return true
-	}
-	return false
-}
-
-func (p endPointPair) Other(q int) endPointTuple {
-	if p.a.endpoint == q {
-		return p.b
-	} else if p.b.endpoint == q {
-		return p.a
-	}
-	return endPointTuple{}
-}
-
-type edgePointMapping struct {
-	pairs []endPointPair
-}
-
-func (e edgePointMapping) getHorizontal() []endPointPair {
-	ret := []endPointPair{}
-	for _, pair := range e.pairs {
-		if pair.a.NWSE == North || pair.a.NWSE == South {
-			ret = append(ret, pair)
-		}
-	}
-	return ret
-}
-
-func (e edgePointMapping) getVertical() []endPointPair {
-	ret := []endPointPair{}
-	for _, pair := range e.pairs {
-		if pair.a.NWSE == East || pair.a.NWSE == West {
-			ret = append(ret, pair)
-		}
-	}
-	return ret
-}
-
-func (e edgePointMapping) getDirection(i int) endPointTuple {
-	for _, pair := range e.pairs {
-		if pair.a.endpoint == i {
-			return pair.a
-		}
-		if pair.b.endpoint == i {
-			return pair.b
-		}
-	}
-	return endPointTuple{}
-}
-
-func (e edgePointMapping) other(i int) endPointTuple {
-	for _, pair := range e.pairs {
-		other := pair.Other(i)
-		if !other.isEmpty() {
-			return other
-		}
-	}
-	return endPointTuple{}
-}
-
-func (e edgePointMapping) endpointsFrom(direction NWSE) []endPointTuple {
-	ret := []endPointTuple{}
-	for _, pair := range e.pairs {
-		if pair.a.NWSE == direction {
-			ret = append(ret, pair.a)
-		}
-		if pair.b.NWSE == direction {
-			ret = append(ret, pair.b)
-		}
-	}
-	return ret
-}
-
 var EndpointMapping4 = edgePointMapping{
-	[]endPointPair{
+	[]connectionPair{
 		{
-			a: endPointTuple{
+			a: connectionEnd{
 				endpoint: 1,
 				NWSE:     North,
 			},
-			b: endPointTuple{
+			b: connectionEnd{
 				endpoint: 3,
 				NWSE:     South,
 			},
 		},
 		{
-			a: endPointTuple{
+			a: connectionEnd{
 				endpoint: 2,
 				NWSE:     East,
 			},
-			b: endPointTuple{
+			b: connectionEnd{
 				endpoint: 4,
 				NWSE:     West,
 			},
@@ -262,33 +302,33 @@ var EndpointMapping4 = edgePointMapping{
 }
 
 var EndpointMapping6Side = edgePointMapping{
-	[]endPointPair{
+	[]connectionPair{
 		{
-			a: endPointTuple{
+			a: connectionEnd{
 				endpoint: 1,
 				NWSE:     North,
 			},
-			b: endPointTuple{
+			b: connectionEnd{
 				endpoint: 4,
 				NWSE:     South,
 			},
 		},
 		{
-			a: endPointTuple{
+			a: connectionEnd{
 				endpoint: 2,
 				NWSE:     East,
 			},
-			b: endPointTuple{
+			b: connectionEnd{
 				endpoint: 6,
 				NWSE:     West,
 			},
 		},
 		{
-			a: endPointTuple{
+			a: connectionEnd{
 				endpoint: 3,
 				NWSE:     East,
 			},
-			b: endPointTuple{
+			b: connectionEnd{
 				endpoint: 5,
 				NWSE:     West,
 			},
@@ -297,16 +337,10 @@ var EndpointMapping6Side = edgePointMapping{
 }
 
 type EndpointMidpoint struct {
-	endpoint endPointTuple
-	midpoint float64
+	endpoint connectionEnd
+	tValue   float64
 }
 
 func (e EndpointMidpoint) String() string {
-	return fmt.Sprintf("%s %.1f", e.endpoint, e.midpoint)
-}
-
-// cellCoord represents the indexed coordinates of a specific cell in a grid
-type cellCoord struct {
-	x int
-	y int
+	return fmt.Sprintf("%s %.1f", e.endpoint, e.tValue)
 }
