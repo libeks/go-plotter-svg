@@ -1,5 +1,4 @@
-package truchet 
-
+package curve
 
 // connection represents the indexed point of a curve fragment within a cell
 type connectionEnd struct {

@@ -1,4 +1,4 @@
-package truchet
+package curve
 
 import (
 	"github.com/libeks/go-plotter-svg/samplers"

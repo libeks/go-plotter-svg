@@ -1,4 +1,4 @@
-package truchet
+package curve
 
 import (
 	"fmt"

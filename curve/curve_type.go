@@ -1,4 +1,4 @@
-package truchet
+package curve
 
 type CurveMetaType int
 type CurveType int
