@@ -1,6 +1,5 @@
 package truchet
 
-type CurveTypeB int // to be deprecated
 type CurveMetaType int
 type CurveType int
 

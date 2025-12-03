@@ -2,6 +2,7 @@ package truchet
 
 import "fmt"
 
+// NWSE represents the cardinal directions
 type NWSE int
 
 const (
@@ -17,6 +18,7 @@ func (d NWSE) String() string {
 	return []string{"North", "West", "South", "East", "UnknownNWSE"}[d]
 }
 
+// Opposite returns the opposite direction of the one given
 func (d NWSE) Opposite() NWSE {
 	switch d {
 	case North:
@@ -32,6 +34,7 @@ func (d NWSE) Opposite() NWSE {
 	}
 }
 
+// CurveMetaType categorizes a curve that starts at 'd' and ends at 'next'
 func (d NWSE) CurveMetaType(next NWSE) CurveMetaType {
 	if d == next {
 		return Loopback

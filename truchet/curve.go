@@ -102,7 +102,7 @@ func (c *Curve) GetClockIntersectDiagonal(curveType CurveType, from, to float64)
 	}
 }
 
-func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
+func (c *Curve) XMLChunk(curveMapper CurveMapper, from endPointTuple) lines.PathChunk {
 	if !c.HasEndpoint(from) {
 		panic(fmt.Errorf("curve %s doesn't have endpoint %s", c, from))
 	}
@@ -118,7 +118,7 @@ func (c *Curve) XMLChunk(from endPointTuple) lines.PathChunk {
 	endPoint := c.Cell.AtEdge(*to, tTo)
 	curveType := GetCurveType(from.NWSE, to.NWSE, tFrom, tTo)
 
-	return c.Cell.Grid.CurveMapper.GetPathChunk(c, curveType, tFrom, tTo, startPoint, endPoint)
+	return curveMapper.GetPathChunk(c, curveType, tFrom, tTo, startPoint, endPoint)
 }
 
 func (c *Curve) GetMidpoint(endpoint endPointTuple) *float64 {

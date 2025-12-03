@@ -25,6 +25,7 @@ func NewPair(a, b int) pair {
 	return pair{a: a, b: b}
 }
 
+// A pair is a set of indices that define a curve fragment. 0-index means the connection has no other endpoint
 type pair struct {
 	a int
 	b int
@@ -39,11 +40,13 @@ func (p pair) Other(q int) int {
 	return -1
 }
 
+// TruchetTileSet is a definition of what tiles are available for this Truchet configuration
 type TruchetTileSet struct {
 	Tiles            []tile
 	EdgePointMapping edgePointMapping
 }
 
+// A tile consists of pairs of indexes for which edges should be connected
 type tile struct {
 	pairs []pair
 }
@@ -73,7 +76,7 @@ var TruchetPairs = []tile{
 	},
 }
 
-// all links for 4-set
+// all links for 4-set, including a straight-through intersection in the middle
 var TruchetUnderPairs = []tile{
 	{
 		pairs: []pair{
@@ -140,6 +143,7 @@ var Truchet6Pairs = []tile{
 	},
 }
 
+// endPointTuple represents the indexed point of a curve fragment within a cell
 type endPointTuple struct {
 	endpoint int
 	NWSE
@@ -154,6 +158,7 @@ type endPointPair struct {
 	b endPointTuple
 }
 
+// Has returns true if this pair contains the indexed endpoint
 func (p endPointPair) Has(q int) bool {
 	if p.a.endpoint == q {
 		return true
@@ -300,6 +305,7 @@ func (e EndpointMidpoint) String() string {
 	return fmt.Sprintf("%s %.1f", e.endpoint, e.midpoint)
 }
 
+// cellCoord represents the indexed coordinates of a specific cell in a grid
 type cellCoord struct {
 	x int
 	y int

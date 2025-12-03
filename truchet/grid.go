@@ -8,10 +8,10 @@ import (
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-func NewGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *Grid {
+func NewTruchetGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *TruchetGrid {
 	boxes := primitives.PartitionIntoSquares(b, nx)
 	cells := make(map[cellCoord]*Cell, len(boxes))
-	grid := &Grid{
+	grid := &TruchetGrid{
 		TruchetTileSet: tileSet,
 		CurveMapper:    curveMapper,
 	}
@@ -21,34 +21,35 @@ func NewGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edge
 	horPoints := tileSet.EdgePointMapping.getHorizontal()
 	vertPoints := tileSet.EdgePointMapping.getVertical()
 
-	getIntersects := getSourcedIntersects
 	grid.rowEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of horizontal edges
 		for j := range nx { // for each cell
-			intersects := getIntersects(horPoints, edgeSource, float64(j)/float64(nx+1), float64(i)/float64(nx+1))
+			intersects := getSourcedIntersects(horPoints, edgeSource, float64(j)/float64(nx+1), float64(i)/float64(nx+1))
 			grid.rowEdges[cellCoord{j, i}] = Edge{intersects} // flipped order is intentional
 		}
 	}
 	grid.columnEdges = make(map[cellCoord]Edge, nx+1)
 	for i := range nx + 1 { // for each of vertical edges
 		for j := range nx { // for each cell
-			intersects := getIntersects(vertPoints, edgeSource, float64(i)/float64(nx+1), float64(j)/float64(nx+1))
+			intersects := getSourcedIntersects(vertPoints, edgeSource, float64(i)/float64(nx+1), float64(j)/float64(nx+1))
 			grid.columnEdges[cellCoord{i, j}] = Edge{intersects}
 		}
 	}
+	grid.Grid = Grid{
+		nX:    nx,
+		nY:    nx,
+		cells: cells,
+	}
 	for _, childBox := range boxes {
 		cell := &Cell{
-			Grid: grid,
+			Grid: &grid.Grid,
 			BBox: childBox.BBox,
 			x:    childBox.I,
 			y:    childBox.J,
 		}
-		cell.PopulateCurves(tilePicker)
+		grid.PopulateCurves(cell, tilePicker)
 		cells[cellCoord{childBox.I, childBox.J}] = cell
 	}
-	grid.nX = nx
-	grid.nY = nx
-	grid.cells = cells
 	return grid
 }
 
@@ -61,7 +62,6 @@ func getSourcedIntersects(pointDef []endPointPair, edgeSource samplers.DataSourc
 		center := spacing * float64(i+1)
 		sourceVal := edgeSource.GetValue(primitives.Point{X: xCoord*2 - 1, Y: yCoord*2 - 1})
 		valPlusMinus := sourceVal*2 - 1
-		// fmt.Printf("val %.1f\n", valPlusMinus)
 		intersects[i] = edgeMap{
 			point: pt,
 			val:   center + valPlusMinus*variance/2,
@@ -75,6 +75,7 @@ type edgeMap struct {
 	val   float64
 }
 
+// Edge represents the edge of a cell,
 type Edge struct {
 	intersects []edgeMap
 }
@@ -92,12 +93,6 @@ type Grid struct {
 	nX    int
 	nY    int
 	cells map[cellCoord]*Cell
-	// edge containers, specifying the position of cell border points
-	columnEdges map[cellCoord]Edge
-	rowEdges    map[cellCoord]Edge
-	TruchetTileSet
-	CurveMapper
-	endpointWiggle samplers.DataSource
 }
 
 func (g Grid) At(x, y int) *Cell {
@@ -107,14 +102,24 @@ func (g Grid) At(x, y int) *Cell {
 	return g.cells[cellCoord{x, y}]
 }
 
-func (g Grid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike {
-	startPoint := cell.AtEdge(direction, cell.GetEdgePoint(direction.endpoint))
+type TruchetGrid struct {
+	Grid
+	// edge containers, specifying the position of cell border points
+	columnEdges map[cellCoord]Edge
+	rowEdges    map[cellCoord]Edge
+	TruchetTileSet
+	CurveMapper
+	endpointWiggle samplers.DataSource
+}
+
+func (g TruchetGrid) GenerateCurve(cell *Cell, direction endPointTuple) lines.LineLike {
+	startPoint := cell.AtEdge(direction, g.GetEdgePoint(cell, direction.endpoint))
 	path := lines.NewPath(startPoint)
 	for {
 		if !cell.IsDone() {
 			curve, nextCell, nextDirection := cell.VisitFrom(direction) // *Curve, *Cell, *NWSE
 			if curve != nil {
-				path = path.AddPathChunk(curve.XMLChunk(direction))
+				path = path.AddPathChunk(curve.XMLChunk(g.CurveMapper, direction))
 				if nextCell == nil {
 					return path
 				}
@@ -137,7 +142,7 @@ func (g Grid) GetGridLines() []lines.LineLike {
 	return ls
 }
 
-func (g Grid) GererateCurves() []lines.LineLike {
+func (g TruchetGrid) GererateCurves() []lines.LineLike {
 	curves := []lines.LineLike{}
 	// start with perimeter
 	// first from the top

@@ -8,6 +8,7 @@ import (
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
+// Cell represents a Truchet cell in a bigger grid, along with the curve fragments that it corresponds to
 type Cell struct {
 	*Grid
 	primitives.BBox
@@ -21,6 +22,7 @@ func (c *Cell) String() string {
 	return fmt.Sprintf("Cell (%d, %d)", c.x, c.y)
 }
 
+// IsDone returns true if all curve fragments are done/visited for this cell
 func (c *Cell) IsDone() bool {
 	for _, curve := range c.curves {
 		if !curve.visited {
@@ -30,6 +32,7 @@ func (c *Cell) IsDone() bool {
 	return true
 }
 
+// NextUnseen returns the next curve fragment in this cell that still hasn't been visited, if any
 func (c *Cell) NextUnseen() *Curve {
 	for _, curve := range c.curves {
 		if !curve.visited {
@@ -40,16 +43,16 @@ func (c *Cell) NextUnseen() *Curve {
 	return nil
 }
 
-func (c *Cell) generateCurves(tileset tile) {
+func (g *TruchetGrid) generateCurves(c *Cell, tileset tile) {
 	// TODO: rename tileset to tile
 	c.tile = tileset
-	edgePointMap := c.GetEdgePoints()
+	edgePointMap := g.GetEdgePoints(c)
 	curves := make([]*Curve, len(tileset.pairs))
 	for i, pair := range tileset.pairs {
 		a := pair.a
-		aDir := c.Grid.TruchetTileSet.EdgePointMapping.getDirection(a)
+		aDir := g.TruchetTileSet.EdgePointMapping.getDirection(a)
 		b := pair.b
-		bDir := c.Grid.TruchetTileSet.EdgePointMapping.getDirection(b)
+		bDir := g.TruchetTileSet.EdgePointMapping.getDirection(b)
 		curves[i] = &Curve{
 			endpoints: []EndpointMidpoint{
 				{
@@ -68,14 +71,18 @@ func (c *Cell) generateCurves(tileset tile) {
 	c.curves = curves
 }
 
-func (c *Cell) GetEdgePoints() map[int]float64 {
+// GetEdgePoints returns a map from the edge index to its corresponding t-values
+func (g TruchetGrid) GetEdgePoints(c *Cell) map[int]float64 {
+	// edges contains the t-values on each of the edges of this cell
 	edges := map[NWSE]Edge{}
-	edges[North] = c.Grid.rowEdges[cellCoord{c.x, c.y}]
-	edges[South] = c.Grid.rowEdges[cellCoord{c.x, c.y + 1}]
-	edges[West] = c.Grid.columnEdges[cellCoord{c.x, c.y}]
-	edges[East] = c.Grid.columnEdges[cellCoord{c.x + 1, c.y}]
+	edges[North] = g.rowEdges[cellCoord{c.x, c.y}]
+	edges[South] = g.rowEdges[cellCoord{c.x, c.y + 1}]
+	edges[West] = g.columnEdges[cellCoord{c.x, c.y}]
+	edges[East] = g.columnEdges[cellCoord{c.x + 1, c.y}]
+	fmt.Printf("edges %v\n", edges)
+
 	vals := map[int]float64{}
-	for _, edgePointMapping := range c.Grid.TruchetTileSet.EdgePointMapping.pairs {
+	for _, edgePointMapping := range g.TruchetTileSet.EdgePointMapping.pairs {
 		for _, endPointTuple := range []endPointTuple{edgePointMapping.a, edgePointMapping.b} {
 			vals[endPointTuple.endpoint] = edges[endPointTuple.NWSE].GetPoint(endPointTuple.endpoint)
 		}
@@ -83,12 +90,17 @@ func (c *Cell) GetEdgePoints() map[int]float64 {
 	return vals
 }
 
-func (c *Cell) GetEdgePoint(i int) float64 {
+// GetEdgePoints returns the t-value of the indexed edge connection
+func (g TruchetGrid) GetEdgePoint(c *Cell, i int) float64 {
 	// TODO: optimize this here code to not have to calculate the whole map
-	return c.GetEdgePoints()[i]
+	return g.GetEdgePoints(c)[i]
 }
 
+// GetCellInDirection returns the cell in the specified direction, if it exists, otherwise nil
 func (c *Cell) GetCellInDirection(direction endPointTuple) *Cell {
+	if c.Grid == nil {
+		panic("NIL")
+	}
 	switch direction.NWSE {
 	case North:
 		return c.Grid.At(c.x, c.y-1)
@@ -130,32 +142,36 @@ func relativeCenter(b primitives.BBox) primitives.Point {
 	}
 }
 
-func (c *Cell) PopulateCurves(dataSource samplers.DataSource) {
+// PopulateCurves decides which Truchet tile to use, and populates the curve fragments that fall inside of this cell
+func (g *TruchetGrid) PopulateCurves(c *Cell, dataSource samplers.DataSource) {
 	rand := dataSource.GetValue(relativeCenter(c.BBox)) // evaluate dataSource in absolute image coordinates
-	l := len(c.Grid.TruchetTileSet.Tiles)
+	l := len(g.TruchetTileSet.Tiles)
 	n := int(rand * float64(l))
+	// rand could produce a value of 1.0, which would map to be outside of the range. We cap this to the last element, since this is a weird edge case
 	if n == l {
 		n = n - 1
 	}
-	tile := c.Grid.TruchetTileSet.Tiles[n]
-	c.generateCurves(tile)
+	tile := g.TruchetTileSet.Tiles[n]
+	g.generateCurves(c, tile)
 }
 
+// AtEdge returns a point on the edge of the cell specified at 'direction', interpolated at 't' on the edge
 func (c *Cell) AtEdge(direction endPointTuple, t float64) primitives.Point {
 	switch direction.NWSE {
 	case North:
-		return primitives.Point{X: maths.Interpolate(c.BBox.UpperLeft.X, c.BBox.LowerRight.X, t), Y: c.BBox.UpperLeft.Y}
+		return c.At(t, 0)
 	case West:
-		return primitives.Point{X: c.BBox.UpperLeft.X, Y: maths.Interpolate(c.BBox.UpperLeft.Y, c.BBox.LowerRight.Y, t)}
+		return c.At(0, t)
 	case South:
-		return primitives.Point{X: maths.Interpolate(c.BBox.UpperLeft.X, c.BBox.LowerRight.X, t), Y: c.BBox.LowerRight.Y}
+		return c.At(t, 1)
 	case East:
-		return primitives.Point{X: c.BBox.LowerRight.X, Y: maths.Interpolate(c.BBox.UpperLeft.Y, c.BBox.LowerRight.Y, t)}
+		return c.At(1, t)
 	default:
 		panic(fmt.Errorf("got composite direction %d", direction))
 	}
 }
 
+// At returns the point inside cell, with relative coordinates in the range [0.0, 1.0]
 func (c *Cell) At(horizontal, vertical float64) primitives.Point {
 	return primitives.Point{
 		X: maths.Interpolate(c.BBox.UpperLeft.X, c.BBox.LowerRight.X, horizontal),

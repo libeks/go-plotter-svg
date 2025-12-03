@@ -1,19 +1,21 @@
 package truchet
 
-// TODO: get back to this one
+import (
+	"github.com/libeks/go-plotter-svg/samplers"
+)
 
-// type MarchingSquares struct {
-// 	nX    int
-// 	nY    int
-// 	cells map[cellCoord]*Cell
-// 	// edge containers, specifying the position of cell border points
-// 	// columnEdges map[cellCoord]Edge
-// 	// rowEdges    map[cellCoord]Edge
-// 	source samplers.DataSource
-// }
+type MarchingSquaresGrid struct {
+	nX    int
+	nY    int
+	cells map[cellCoord]*Cell
+	// edge containers, specifying the position of cell border points
+	// columnEdges map[cellCoord]Edge
+	// rowEdges    map[cellCoord]Edge
+	source samplers.DataSource
+}
 
-// func NewMarchingGrid(b box.Box, nx int, source samplers.DataSource, threshold float64) MarchingSquares {
-// 	boxes := b.PartitionIntoSquares(nx)
+// func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, threshold float64) MarchingSquares {
+// 	boxes := primitives.PartitionIntoSquares(b, nx)
 // 	cells := make(map[cellCoord]*Cell, len(boxes))
 // 	if len(boxes) != nx*nx {
 // 		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))

@@ -461,14 +461,14 @@ func getTruchetScene(b primitives.BBox) Document {
 	// 	Outside: samplers.ConstantDataSource{Val: 0.5},
 	// }
 	// edgeSource := samplers.RandomDataSource{}
-	// edgeSource := samplers.ConstantDataSource{Val: .2} // 0.5 means we'll use default edge values
-	edgeSource := samplers.RandomChooser{Values: []float64{-.25, 1.25}}
-	// edgeSource := samplers.RandomChooser{Values: []float64{.2, .8}}
+	edgeSource := samplers.ConstantDataSource{Val: .5} // 0.5 means we'll use default edge values
+	// edgeSource := samplers.RandomChooser{Values: []float64{-.25, 1.25}}
+	// edgeSource := samplers.RandomChooser{Values: []float64{.3, .7}}
 	// edgeSource := samplers.RandomChooser{Values: []float64{0, 1}}
-	truch := truchet.Truchet4NonCrossing
+	// truch := truchet.Truchet4NonCrossing
 	// truch := truchet.Truchet4Crossing
-	// truch := truchet.Truchet6NonCrossingSide
-	grid := truchet.NewGrid(b, 30, truch, tileSource, edgeSource, truchet.MapCircularCurve)
+	truch := truchet.Truchet6NonCrossingSide
+	grid := truchet.NewTruchetGrid(b, 30, truch, tileSource, edgeSource, truchet.MapCircularCurve)
 	curves := grid.GererateCurves()
 	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
 	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
@@ -493,10 +493,10 @@ func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []line
 func getSweepTruchet(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	grid1 := truchet.NewGrid(b, 3, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
+	grid1 := truchet.NewTruchetGrid(b, 3, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve)
 	curves1 := grid1.GererateCurves()
-	curves2 := truchet.NewGrid(b, 6, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
-	curves3 := truchet.NewGrid(b, 12, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
+	curves2 := truchet.NewTruchetGrid(b, 6, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
+	curves3 := truchet.NewTruchetGrid(b, 12, truchet.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, truchet.MapCircularCircleCurve).GererateCurves()
 	distance := 20.0
 
 	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
