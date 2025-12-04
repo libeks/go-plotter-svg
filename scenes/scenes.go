@@ -519,10 +519,11 @@ func getCircleMarchingSquares(b primitives.BBox) Document {
 			SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 2500, Y: 5000}},
 		},
 	}
-	marchingGrid1 := curve.NewMarchingGrid(b, 200, sampler, 1103)
+	marchingResolution := 200
+	marchingGrid1 := curve.NewMarchingGrid(b, marchingResolution, sampler, 1103)
 	curves1 := marchingGrid1.GenerateCurves()
 	// control1 := marchingGrid1.GetControlPoints()
-	marchingGrid2 := curve.NewMarchingGrid(b, 200, sampler, 1115)
+	marchingGrid2 := curve.NewMarchingGrid(b, marchingResolution, sampler, 1115)
 	curves2 := marchingGrid2.GenerateCurves()
 
 	scene = scene.AddLayer(NewLayer("curve1").WithLineLike(curves1).WithColor("red").WithWidth(10.0))
@@ -533,16 +534,35 @@ func getCircleMarchingSquares(b primitives.BBox) Document {
 func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	sampler := samplers.Min{
-		SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
-		SamplerB: samplers.Min{
-			SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
-			SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 5500}},
+	sampler := samplers.Add{
+		SamplerA: samplers.MinSlice{
+			Samplers: []samplers.DataSource{
+				samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}},
+				samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 3500}},
+				samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 2000}},
+				samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 5300}},
+				samplers.CircleRadius{Center: primitives.Point{X: 5443, Y: 5300}},
+			},
+		},
+		SamplerB: samplers.Lambda{
+			Function: func(p primitives.Point) float64 {
+				// return math.Sin(p.X)*10 + math.Sin(p.Y*0.0125)*10
+				return 0.0
+			},
 		},
 	}
+	// sampler := samplers.MinSlice{
+	// 	Samplers: []samplers.DataSource{
+	// 		samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
+	// 		samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 5500}},
+	// 		samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+	// 	},
+	// }
+	marchingResolution := 49
+	spacing := 18
 	var curves = []lines.LineLike{}
-	for i := range 40 {
-		curves = append(curves, curve.NewMarchingGrid(b, 50, sampler, 1080+19*float64(i)).GenerateCurves()...)
+	for i := range 50 {
+		curves = append(curves, curve.NewMarchingGrid(b, marchingResolution, sampler, 1080+float64(spacing*i)).GenerateCurves()...)
 
 	}
 	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))

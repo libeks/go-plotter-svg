@@ -1,6 +1,7 @@
 package samplers
 
 import (
+	"math"
 	"math/rand"
 
 	"github.com/libeks/go-plotter-svg/primitives"
@@ -146,6 +147,18 @@ func (s Add) GetValue(p primitives.Point) float64 {
 	return s.SamplerA.GetValue(p) + s.SamplerB.GetValue(p)
 }
 
+type AddSlice struct {
+	Samplers []DataSource
+}
+
+func (s AddSlice) GetValue(p primitives.Point) float64 {
+	total := 0.0
+	for _, sampler := range s.Samplers {
+		total += sampler.GetValue(p)
+	}
+	return total
+}
+
 type Min struct {
 	SamplerA DataSource
 	SamplerB DataSource
@@ -153,4 +166,27 @@ type Min struct {
 
 func (s Min) GetValue(p primitives.Point) float64 {
 	return min(s.SamplerA.GetValue(p), s.SamplerB.GetValue(p))
+}
+
+type MinSlice struct {
+	Samplers []DataSource
+}
+
+func (s MinSlice) GetValue(p primitives.Point) float64 {
+	min := math.MaxFloat64
+	for _, sampler := range s.Samplers {
+		val := sampler.GetValue(p)
+		if val < min {
+			min = val
+		}
+	}
+	return min
+}
+
+type Lambda struct {
+	Function func(p primitives.Point) float64
+}
+
+func (c Lambda) GetValue(p primitives.Point) float64 {
+	return c.Function(p)
 }
