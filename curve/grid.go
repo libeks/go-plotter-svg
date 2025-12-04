@@ -1,6 +1,8 @@
 package curve
 
 import (
+	"fmt"
+
 	"github.com/libeks/go-plotter-svg/lines"
 )
 
@@ -48,15 +50,30 @@ func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike 
 	}
 	startPoint := cell.AtEdge(direction.NWSE, edgeTValue)
 	path := lines.NewPath(startPoint)
+	fmt.Printf("Starting at %v\n", startPoint)
 	for {
 		// continue until all path chunks for this curve are exhausted
 		if !cell.IsDone() {
 			curve, nextCell, nextDirection := cell.VisitFrom(direction) // *Curve, *Cell, *NWSE
 			if curve != nil {
-				path = path.AddPathChunk(curve.XMLChunk(g.curveMapper, direction))
+
+				xml := curve.XMLChunk(g.curveMapper, direction)
+				fmt.Printf("From %v to %v\n", xml.Startpoint(), xml.Endpoint())
+				if !cell.PointInside(xml.Startpoint()) {
+					panic(fmt.Sprintf("Startpoint %v is not inside bounding box %v\n", xml.Startpoint(), cell.BBox))
+				}
+				if !cell.PointInside(xml.Endpoint()) {
+					panic(fmt.Sprintf("Endpoint %v is not inside bounding box %v\n", xml.Endpoint(), cell.BBox))
+				}
+				if xml.Startpoint().Subtract(startPoint).Len() > 1.0 {
+					panic(fmt.Sprintf("Distance is %.2f\n", xml.Endpoint().Subtract(startPoint).Len()))
+				}
+
+				path = path.AddPathChunk(xml)
 				if nextCell == nil {
 					return path
 				}
+				startPoint = xml.Endpoint()
 				cell = nextCell
 				direction = g.edgePointMapping.other(nextDirection.endpoint)
 			} else {
@@ -78,7 +95,7 @@ func (g Grid) GetGridLines() []lines.LineLike {
 	return ls
 }
 
-func (g Grid) GererateCurves() []lines.LineLike {
+func (g Grid) GenerateCurves() []lines.LineLike {
 	curves := []lines.LineLike{}
 	// start with perimeter
 	// first from the top
@@ -116,7 +133,7 @@ func (g Grid) GererateCurves() []lines.LineLike {
 			for _, direction := range []NWSE{North, West, South, East} {
 				for _, dirIndex := range g.edgePointMapping.endpointsFrom(direction) {
 					c := g.GenerateCurve(cell, dirIndex)
-					if !c.IsEmpty() {
+					if c != nil && !c.IsEmpty() {
 						curves = append(curves, c)
 					}
 				}

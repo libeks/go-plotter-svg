@@ -70,10 +70,13 @@ func (l Layer) Statistics() string {
 	upDistances := []float64{}
 	start := primitives.Origin
 	for _, linelike := range l.linelikes {
-		lengths = append(lengths, linelike.Len())
+		if linelike != nil {
+			// fmt.Printf("Linelike %v\n", linelike)
+			lengths = append(lengths, linelike.Len())
 
-		upDistances = append(upDistances, start.Subtract(linelike.Start()).Len())
-		start = linelike.End()
+			upDistances = append(upDistances, start.Subtract(linelike.Start()).Len())
+			start = linelike.End()
+		}
 	}
 
 	upDistances = append(upDistances, start.Subtract(primitives.Origin).Len())
@@ -157,7 +160,9 @@ func (l Layer) XML(i int) xmlwriter.Elem {
 	}
 	contents := []xmlwriter.Writable{}
 	for _, line := range l.linelikes {
-		contents = append(contents, line.XML(color, width))
+		if line != nil {
+			contents = append(contents, line.XML(color, width))
+		}
 	}
 	for _, line := range l.controllines {
 		contents = append(contents, line.ControlLineXML(color, width))

@@ -32,6 +32,7 @@ var (
 	TestDensityScene       = func(b primitives.BBox) Document { return testDensityScene(b) }
 	TruchetScene           = func(b primitives.BBox) Document { return getTruchetScene(b) }
 	SweepTruchetScene      = func(b primitives.BBox) Document { return getSweepTruchet(b) }
+	CircleMarchingScene    = getCircleMarchingSquares
 	RisingSunScene         = func(b primitives.BBox) Document { return getRisingSun(b) }
 	CCircleLineSegments    = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
@@ -469,7 +470,7 @@ func getTruchetScene(b primitives.BBox) Document {
 	// truch := curve.Truchet4Crossing
 	truch := curve.Truchet6NonCrossingSide
 	grid := curve.NewTruchetGrid(b, 30, truch, tileSource, edgeSource, curve.MapCircularCurve)
-	curves := grid.GererateCurves()
+	curves := grid.GenerateCurves()
 	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
 	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
@@ -493,16 +494,38 @@ func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []line
 func getSweepTruchet(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	grid1 := curve.NewTruchetGrid(b, 3, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve)
-	curves1 := grid1.GererateCurves()
-	curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GererateCurves()
-	curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GererateCurves()
+	curves1 := curve.NewTruchetGrid(b, 3, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GenerateCurves()
+	curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GenerateCurves()
+	curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GenerateCurves()
 	distance := 20.0
 
 	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
 	scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithLineLike(getOffsetForCurves(curves1, distance, 10)).WithColor("red").WithWidth(distance))
 	scene = scene.AddLayer(NewLayer("truchet_offsets_2").WithLineLike(getOffsetForCurves(curves2, distance, 7)).WithColor("green").WithWidth(distance))
 	scene = scene.AddLayer(NewLayer("truchet_offsets_3").WithLineLike(getOffsetForCurves(curves3, distance, 5)).WithColor("blue").WithWidth(distance))
+	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	return scene
+}
+
+func getCircleMarchingSquares(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	marchingGrid1 := curve.NewMarchingGrid(b, 20, samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}, 2000)
+	curves1 := marchingGrid1.GenerateCurves()
+	// control1 := marchingGrid1.GetControlPoints()
+	marchingGrid2 := curve.NewMarchingGrid(b, 60, samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}, 2000)
+	curves2 := marchingGrid2.GenerateCurves()
+	// control2 := marchingGrid2.GetControlPoints()
+	// curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GererateCurves()
+	// curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GererateCurves()
+	// distance := 20.0
+
+	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
+	scene = scene.AddLayer(NewLayer("curve1").WithLineLike(curves1).WithColor("red").WithWidth(10.0))
+	scene = scene.AddLayer(NewLayer("curve2").WithLineLike(curves2).WithColor("green").WithWidth(10.0))
+	// scene = scene.AddLayer(NewLayer("control_points1").WithLineLike(control1).WithColor("blue"))
+	// scene = scene.AddLayer(NewLayer("truchet_offsets_2").WithLineLike(getOffsetForCurves(curves2, distance, 7)).WithColor("green").WithWidth(distance))
+	// scene = scene.AddLayer(NewLayer("truchet_offsets_3").WithLineLike(getOffsetForCurves(curves3, distance, 5)).WithColor("blue").WithWidth(distance))
 	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
 	return scene
 }
