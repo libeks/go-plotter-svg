@@ -514,7 +514,10 @@ func getCircleMarchingSquares(b primitives.BBox) Document {
 	// sampler := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}
 	sampler := samplers.Min{
 		SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
-		SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+		SamplerB: samplers.Min{
+			SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+			SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 2500, Y: 5000}},
+		},
 	}
 	marchingGrid1 := curve.NewMarchingGrid(b, 200, sampler, 1103)
 	curves1 := marchingGrid1.GenerateCurves()
@@ -532,7 +535,10 @@ func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	sampler := samplers.Min{
 		SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
-		SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+		SamplerB: samplers.Min{
+			SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+			SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 5500}},
+		},
 	}
 	var curves = []lines.LineLike{}
 	for i := range 40 {
