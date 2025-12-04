@@ -136,3 +136,21 @@ type TurnAngleByRightAngle struct {
 func (c TurnAngleByRightAngle) GetValue(p primitives.Point) float64 {
 	return c.Center.Subtract(p).Perp().Atan()
 }
+
+type Add struct {
+	SamplerA DataSource
+	SamplerB DataSource
+}
+
+func (s Add) GetValue(p primitives.Point) float64 {
+	return s.SamplerA.GetValue(p) + s.SamplerB.GetValue(p)
+}
+
+type Min struct {
+	SamplerA DataSource
+	SamplerB DataSource
+}
+
+func (s Min) GetValue(p primitives.Point) float64 {
+	return min(s.SamplerA.GetValue(p), s.SamplerB.GetValue(p))
+}

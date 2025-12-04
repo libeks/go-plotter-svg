@@ -326,11 +326,11 @@ func (g *marchingSquaresGrid) PopulateCellCurveFragments(cell *Cell) {
 	}
 	// the only remainder is the x-pattern, the saddle point option. ideally we should be checking the centerpoint
 	// but i'll skip that for now
-	fmt.Printf("Saddle\n")
+	// fmt.Printf("Saddle\n")
 	addWNConnection(cell, wT, nT)
-	fmt.Printf("Added WN\n")
+	// fmt.Printf("Added WN\n")
 	addESConnection(cell, eT, sT)
-	fmt.Printf("Added ES\n")
+	// fmt.Printf("Added ES\n")
 }
 
 func (g *marchingSquaresGrid) GetControlPoints() []lines.LineLike {

@@ -50,7 +50,7 @@ func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike 
 	}
 	startPoint := cell.AtEdge(direction.NWSE, edgeTValue)
 	path := lines.NewPath(startPoint)
-	fmt.Printf("Starting at %v\n", startPoint)
+	// fmt.Printf("Starting at %v\n", startPoint)
 	for {
 		// continue until all path chunks for this curve are exhausted
 		if !cell.IsDone() {
@@ -58,7 +58,7 @@ func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike 
 			if curve != nil {
 
 				xml := curve.XMLChunk(g.curveMapper, direction)
-				fmt.Printf("From %v to %v\n", xml.Startpoint(), xml.Endpoint())
+				// fmt.Printf("From %v to %v\n", xml.Startpoint(), xml.Endpoint())
 				if !cell.PointInside(xml.Startpoint()) {
 					panic(fmt.Sprintf("Startpoint %v is not inside bounding box %v\n", xml.Startpoint(), cell.BBox))
 				}

@@ -33,6 +33,7 @@ var (
 	TruchetScene           = func(b primitives.BBox) Document { return getTruchetScene(b) }
 	SweepTruchetScene      = func(b primitives.BBox) Document { return getSweepTruchet(b) }
 	CircleMarchingScene    = getCircleMarchingSquares
+	CircleArtifactScene    = getCircleArtifactMarchingSquares
 	RisingSunScene         = func(b primitives.BBox) Document { return getRisingSun(b) }
 	CCircleLineSegments    = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
@@ -510,23 +511,35 @@ func getSweepTruchet(b primitives.BBox) Document {
 func getCircleMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	marchingGrid1 := curve.NewMarchingGrid(b, 20, samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}, 2000)
+	// sampler := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}
+	sampler := samplers.Min{
+		SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
+		SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+	}
+	marchingGrid1 := curve.NewMarchingGrid(b, 200, sampler, 1103)
 	curves1 := marchingGrid1.GenerateCurves()
 	// control1 := marchingGrid1.GetControlPoints()
-	marchingGrid2 := curve.NewMarchingGrid(b, 60, samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}, 2000)
+	marchingGrid2 := curve.NewMarchingGrid(b, 200, sampler, 1115)
 	curves2 := marchingGrid2.GenerateCurves()
-	// control2 := marchingGrid2.GetControlPoints()
-	// curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GererateCurves()
-	// curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GererateCurves()
-	// distance := 20.0
 
-	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
 	scene = scene.AddLayer(NewLayer("curve1").WithLineLike(curves1).WithColor("red").WithWidth(10.0))
 	scene = scene.AddLayer(NewLayer("curve2").WithLineLike(curves2).WithColor("green").WithWidth(10.0))
-	// scene = scene.AddLayer(NewLayer("control_points1").WithLineLike(control1).WithColor("blue"))
-	// scene = scene.AddLayer(NewLayer("truchet_offsets_2").WithLineLike(getOffsetForCurves(curves2, distance, 7)).WithColor("green").WithWidth(distance))
-	// scene = scene.AddLayer(NewLayer("truchet_offsets_3").WithLineLike(getOffsetForCurves(curves3, distance, 5)).WithColor("blue").WithWidth(distance))
-	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
+	return scene
+}
+
+func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	sampler := samplers.Min{
+		SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
+		SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+	}
+	var curves = []lines.LineLike{}
+	for i := range 40 {
+		curves = append(curves, curve.NewMarchingGrid(b, 50, sampler, 1080+19*float64(i)).GenerateCurves()...)
+
+	}
+	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
 	return scene
 }
 
