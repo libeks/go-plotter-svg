@@ -36,10 +36,6 @@ type marchingSquaresGrid struct {
 	threshold  float64
 }
 
-// func (g marchingSquaresGrid) GererateCurves() []lines.LineLike {
-// 	return g.Grid.GererateCurves()
-// }
-
 func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, threshold float64) marchingSquaresGrid {
 	boxes := primitives.PartitionIntoSquares(b, nx)
 	cells := make(map[cellCoord]*Cell, len(boxes.BoxIterator()))
@@ -49,9 +45,6 @@ func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, thre
 		gridValues: map[cellCoord]float64{},
 		gridStates: map[cellCoord]bool{},
 	}
-	// if len(boxes) != nx*nx {
-	// 	panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
-	// }
 	grid.Grid = Grid{
 		nX:               boxes.NX,
 		nY:               boxes.NY,
@@ -297,13 +290,11 @@ func (g *marchingSquaresGrid) PopulateCellCurveFragments(cell *Cell) {
 	diagonal := primitives.Vector{X: side * .5, Y: side * .5}
 	val := g.source.GetValue(cell.UpperLeft.Add(diagonal))
 	pCenter := val > g.threshold
-	// fmt.Printf("p00 %v, pCenter %v\n", p00, pCenter)
-	if pCenter == p00 {
-		// fmt.Printf("NE and SW\n")
+	if pCenter == p00 { // if the upper left and lower right are the same as the center, the lines go "\\""
 		// NE and SW
 		addWEConnection(cell, wT, eT)
 		addWSConnection(cell, wT, sT)
-	} else {
+	} else { // if the center is different from upper left (and lower right), the lines go "//"
 		// NW and SE
 		addWNConnection(cell, wT, nT)
 		addESConnection(cell, eT, sT)
@@ -315,7 +306,6 @@ func (g *marchingSquaresGrid) GetControlPoints() []lines.LineLike {
 	lnes := []lines.LineLike{}
 	for coord, state := range g.gridStates {
 		cell := g.cells[coord]
-		// fmt.Printf("cell %v %v\n", coord, cell)
 		if cell != nil {
 			pt := g.cells[coord].UpperLeft
 			if state {
