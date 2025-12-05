@@ -71,7 +71,6 @@ func (l Layer) Statistics() string {
 	start := primitives.Origin
 	for _, linelike := range l.linelikes {
 		if linelike != nil {
-			// fmt.Printf("Linelike %v\n", linelike)
 			lengths = append(lengths, linelike.Len())
 
 			upDistances = append(upDistances, start.Subtract(linelike.Start()).Len())

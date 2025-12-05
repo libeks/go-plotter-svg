@@ -34,6 +34,7 @@ var (
 	SweepTruchetScene      = func(b primitives.BBox) Document { return getSweepTruchet(b) }
 	CircleMarchingScene    = getCircleMarchingSquares
 	CircleArtifactScene    = getCircleArtifactMarchingSquares
+	CircleTricolorScene    = getThreeColorCircleMarchingSquares
 	RisingSunScene         = func(b primitives.BBox) Document { return getRisingSun(b) }
 	CCircleLineSegments    = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
 	Font                   = fontScene
@@ -546,19 +547,12 @@ func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 		},
 		SamplerB: samplers.Lambda{
 			Function: func(p primitives.Point) float64 {
-				// return math.Sin(p.X)*10 + math.Sin(p.Y*0.0125)*10
-				return 0.0
+				return math.Sin(p.X*0.0125)*10 + math.Sin(p.Y*0.0125)*10
+				// return 0.0
 			},
 		},
 	}
-	// sampler := samplers.MinSlice{
-	// 	Samplers: []samplers.DataSource{
-	// 		samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
-	// 		samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 5500}},
-	// 		samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
-	// 	},
-	// }
-	marchingResolution := 49
+	marchingResolution := 250
 	spacing := 18
 	var curves = []lines.LineLike{}
 	for i := range 50 {
@@ -566,6 +560,48 @@ func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 
 	}
 	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
+	return scene
+}
+
+func getThreeColorCircleMarchingSquares(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	// c1 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}}
+	c2 := samplers.CircleRadius{Center: primitives.Point{X: 1000, Y: 4000}}
+	c3 := samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}}
+	c4 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 4000}}
+	// c5 := samplers.CircleRadius{Center: primitives.Point{X: 7000, Y: 4000}}
+	sampler_cyan := samplers.AddSlice{
+		Samplers: []samplers.DataSource{
+			c2, c3, //c4,
+		},
+	}
+	sampler_magenta := samplers.AddSlice{
+		Samplers: []samplers.DataSource{
+			c2, c4, //c5,
+		},
+	}
+	sampler_yellow := samplers.AddSlice{
+		Samplers: []samplers.DataSource{
+			c3, c4, //c5,
+		},
+	}
+
+	marchingResolution := 250
+	spacing := 18
+	baseThreshold := 5000.0
+	var curves_cyan = []lines.LineLike{}
+	var curves_magenta = []lines.LineLike{}
+	var curves_yellow = []lines.LineLike{}
+	for i := range 50 {
+		curves_cyan = append(curves_cyan, curve.NewMarchingGrid(b, marchingResolution, sampler_cyan, baseThreshold+float64(spacing*i)).GenerateCurves()...)
+		curves_magenta = append(curves_magenta, curve.NewMarchingGrid(b, marchingResolution, sampler_magenta, baseThreshold+float64(spacing*i)).GenerateCurves()...)
+		curves_yellow = append(curves_yellow, curve.NewMarchingGrid(b, marchingResolution, sampler_yellow, baseThreshold+float64(spacing*i)).GenerateCurves()...)
+
+	}
+	scene = scene.AddLayer(NewLayer("curve-cyan").WithLineLike(curves_cyan).WithColor("cyan").WithWidth(10.0))
+	scene = scene.AddLayer(NewLayer("curve-magenta").WithLineLike(curves_magenta).WithColor("magenta").WithWidth(10.0))
+	scene = scene.AddLayer(NewLayer("curve-yellow").WithLineLike(curves_yellow).WithColor("yellow").WithWidth(10.0))
 	return scene
 }
 

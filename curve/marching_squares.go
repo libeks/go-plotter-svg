@@ -92,16 +92,14 @@ func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, thre
 
 func findInterpolatedTValue(a, b, threshold float64) float64 {
 	if a == b {
-		// fmt.Printf("a %.2f, b%.2f, thresh %.2f => 0.5\n", a, b, threshold)
+		// both endpoints are the same, default to 0.5 for consistency
 		return 0.5
 	}
 	if a < b {
 		width := b - a
-		// fmt.Printf("a %.2f, b%.2f, thresh %.2f => %.2f\n", a, b, threshold, (threshold-a)/width)
 		return (threshold - a) / width
 	} else {
 		width := a - b
-		// fmt.Printf("a %.2f, b%.2f, thresh %.2f => %.2f\n", a, b, threshold, (a-threshold)/width)
 		return (a - threshold) / width
 	}
 }
@@ -113,10 +111,8 @@ func checkTValue(a float64) {
 }
 
 func addWNConnection(cell *Cell, wT, nT float64) {
-	// TODO: Check that t-values are valid
 	checkTValue(wT)
 	checkTValue(nT)
-	// fmt.Printf("Adding WN from %.1f to %.1f\n", wT, nT)
 	cell.curves = append(
 		cell.curves,
 		&Curve{
@@ -136,10 +132,8 @@ func addWNConnection(cell *Cell, wT, nT float64) {
 }
 
 func addWSConnection(cell *Cell, wT, sT float64) {
-	// TODO: Check that t-values are valid
 	checkTValue(wT)
 	checkTValue(sT)
-	// fmt.Printf("Adding WS from %.1f to %.1f\n", wT, sT)
 	cell.curves = append(
 		cell.curves,
 		&Curve{
@@ -159,10 +153,8 @@ func addWSConnection(cell *Cell, wT, sT float64) {
 }
 
 func addENConnection(cell *Cell, eT, nT float64) {
-	// TODO: Check that t-values are valid
 	checkTValue(eT)
 	checkTValue(nT)
-	// fmt.Printf("Adding EN from %.1f to %.1f\n", eT, nT)
 	cell.curves = append(
 		cell.curves,
 		&Curve{
@@ -182,10 +174,8 @@ func addENConnection(cell *Cell, eT, nT float64) {
 }
 
 func addESConnection(cell *Cell, eT, sT float64) {
-	// TODO: Check that t-values are valid
 	checkTValue(eT)
 	checkTValue(sT)
-	// fmt.Printf("Adding ES from %.1f to %.1f\n", sT, sT)
 	cell.curves = append(
 		cell.curves,
 		&Curve{
@@ -205,10 +195,8 @@ func addESConnection(cell *Cell, eT, sT float64) {
 }
 
 func addWEConnection(cell *Cell, wT, eT float64) {
-	// TODO: Check that t-values are valid
 	checkTValue(wT)
 	checkTValue(eT)
-	// fmt.Printf("Adding WE from %.1f to %.1f\n", wT, eT)
 	cell.curves = append(
 		cell.curves,
 		&Curve{
@@ -230,8 +218,6 @@ func addWEConnection(cell *Cell, wT, eT float64) {
 func addNSConnection(cell *Cell, nT, sT float64) {
 	checkTValue(nT)
 	checkTValue(sT)
-	// TODO: Check that t-values are valid
-	// fmt.Printf("Adding NS from %.1f to %.1f\n", nT, sT)
 	cell.curves = append(
 		cell.curves,
 		&Curve{
@@ -274,63 +260,55 @@ func (g *marchingSquaresGrid) PopulateCellCurveFragments(cell *Cell) {
 
 	if (p00 == p01) && (p01 == p10) && (p10 == p11) {
 		// no curve fragments in this cell
-		// fmt.Printf("Noop\n")
 		return
 	}
-	// fmt.Printf("Cell (%d, %d), has %v %v %v %v\n", cell.x, cell.y, p00, p01, p10, p11)
-	// fmt.Printf("w-t (%.1f), n-t (%.1f), e-t (%.1f), s-t (%.1f)\n", wT, nT, eT, sT)
 	if (p00 && !p01 && !p10 && !p11) || (!p00 && p01 && p10 && p11) {
 		// only top left corner is lit
-		// fmt.Printf("Top left\n")
-		// fmt.Printf("v00 %.2f, v01 %.2f, %.2f\n", v00, v01, wT)
-		// wt := findInterpolatedTValue(v00, v01, g.threshold)
-		// fmt.Printf("Got %.2f\n", wt)
 		addWNConnection(cell, wT, nT)
-		// fmt.Printf("Added WN\n")
 		return
 	}
 	if (!p00 && p01 && !p10 && !p11) || (p00 && !p01 && p10 && p11) {
 		// only bottom left corner is lit
-		// fmt.Printf("Bottom left\n")
 		addWSConnection(cell, wT, sT)
-		// fmt.Printf("Added WS\n")
 		return
 	}
 	if (!p00 && !p01 && p10 && !p11) || (p00 && p01 && !p10 && p11) {
-		// fmt.Printf("Top right\n")
 		// only top right corner is lit
 		addENConnection(cell, eT, nT)
-		// fmt.Printf("Added EN\n")
 		return
 	}
 	if (!p00 && !p01 && !p10 && p11) || (p00 && p01 && p10 && !p11) {
 		// only bottom right corner is lit
-		// fmt.Printf("Bottom right\n")
 		addESConnection(cell, eT, sT)
-		// fmt.Printf("Added ES\n")
 		return
 	}
 	if (p00 == p01) && (p10 == p11) {
 		// the line is vertical
-		// fmt.Printf("Vertical\n")
 		addNSConnection(cell, nT, sT)
-		// fmt.Printf("Added WE\n")
 		return
 	}
 	if (p00 == p10) && (p01 == p11) {
 		// the line is horizontal
-		// fmt.Printf("Horizontal\n")
 		addWEConnection(cell, wT, eT)
-		// fmt.Printf("Added NS\n")
 		return
 	}
-	// the only remainder is the x-pattern, the saddle point option. ideally we should be checking the centerpoint
-	// but i'll skip that for now
-	// fmt.Printf("Saddle\n")
-	addWNConnection(cell, wT, nT)
-	// fmt.Printf("Added WN\n")
-	addESConnection(cell, eT, sT)
-	// fmt.Printf("Added ES\n")
+	// the only remainder is the x-pattern, the saddle point option. Check the centerpoint.
+	side := cell.Width()
+	diagonal := primitives.Vector{X: side * .5, Y: side * .5}
+	val := g.source.GetValue(cell.UpperLeft.Add(diagonal))
+	pCenter := val > g.threshold
+	// fmt.Printf("p00 %v, pCenter %v\n", p00, pCenter)
+	if pCenter == p00 {
+		// fmt.Printf("NE and SW\n")
+		// NE and SW
+		addWEConnection(cell, wT, eT)
+		addWSConnection(cell, wT, sT)
+	} else {
+		// NW and SE
+		addWNConnection(cell, wT, nT)
+		addESConnection(cell, eT, sT)
+	}
+
 }
 
 func (g *marchingSquaresGrid) GetControlPoints() []lines.LineLike {
