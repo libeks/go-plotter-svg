@@ -42,30 +42,30 @@ type marchingSquaresGrid struct {
 
 func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, threshold float64) marchingSquaresGrid {
 	boxes := primitives.PartitionIntoSquares(b, nx)
-	cells := make(map[cellCoord]*Cell, len(boxes))
+	cells := make(map[cellCoord]*Cell, len(boxes.BoxIterator()))
 	grid := marchingSquaresGrid{
 		source:     source,
 		threshold:  threshold,
 		gridValues: map[cellCoord]float64{},
 		gridStates: map[cellCoord]bool{},
 	}
-	if len(boxes) != nx*nx {
-		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
-	}
+	// if len(boxes) != nx*nx {
+	// 	panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
+	// }
 	grid.Grid = Grid{
-		nX:               nx,
-		nY:               nx,
+		nX:               boxes.NX,
+		nY:               boxes.NY,
 		cells:            cells,
 		edgePointMapping: &EndpointMapping4,
 		curveMapper:      MapStraightLines,
 	}
 
-	side := boxes[0].Width()
+	side := boxes.BoxWidth
 	vectX := primitives.Vector{X: side, Y: 0}
 	vectY := primitives.Vector{X: 0, Y: side}
-	for x := range nx + 1 {
+	for x := range boxes.NX + 1 {
 		xx := float64(x)
-		for y := range nx + 1 {
+		for y := range boxes.NY + 1 {
 			yy := float64(y)
 			coord := cellCoord{x, y}
 			val := source.GetValue(primitives.Origin.Add(vectX.Mult(xx)).Add(vectY.Mult(yy)))
@@ -74,7 +74,7 @@ func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, thre
 		}
 	}
 
-	for _, childBox := range boxes {
+	for _, childBox := range boxes.BoxIterator() {
 		cell := &Cell{
 			Grid: &grid.Grid,
 			BBox: childBox.BBox,
@@ -84,8 +84,8 @@ func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, thre
 		grid.PopulateCellCurveFragments(cell)
 		cells[cellCoord{childBox.I, childBox.J}] = cell
 	}
-	grid.nX = nx
-	grid.nY = nx
+	grid.nX = boxes.NX
+	grid.nY = boxes.NY
 	grid.cells = cells
 	return grid
 }

@@ -27,7 +27,7 @@ func (g Grid) GetEdgePoint(c *Cell, i int) float64 {
 }
 
 func (g Grid) At(x, y int) *Cell {
-	if x < 0 || x >= g.nY || y < 0 || y >= g.nX {
+	if x < 0 || x >= g.nX || y < 0 || y >= g.nY {
 		return nil
 	}
 	return g.cells[cellCoord{x, y}]
@@ -36,6 +36,7 @@ func (g Grid) At(x, y int) *Cell {
 func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike {
 	// first figure out whether this cell has a connection at this direction, and get its t-value, to get the initial point
 	edgeTValue := -1.0
+	// fmt.Printf("Cell %v\n", cell)
 	for _, curve := range cell.curves {
 		for _, endpoint := range curve.endpoints {
 			if endpoint.endpoint == direction {
@@ -50,7 +51,6 @@ func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike 
 	}
 	startPoint := cell.AtEdge(direction.NWSE, edgeTValue)
 	path := lines.NewPath(startPoint)
-	// fmt.Printf("Starting at %v\n", startPoint)
 	for {
 		// continue until all path chunks for this curve are exhausted
 		if !cell.IsDone() {
@@ -58,7 +58,6 @@ func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike 
 			if curve != nil {
 
 				xml := curve.XMLChunk(g.curveMapper, direction)
-				// fmt.Printf("From %v to %v\n", xml.Startpoint(), xml.Endpoint())
 				if !cell.PointInside(xml.Startpoint()) {
 					panic(fmt.Sprintf("Startpoint %v is not inside bounding box %v\n", xml.Startpoint(), cell.BBox))
 				}

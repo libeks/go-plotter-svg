@@ -163,16 +163,31 @@ func BBoxAroundPoints(pts ...Point) BBox {
 	return BBox{UpperLeft: Point{X: minX, Y: minY}, LowerRight: Point{X: maxX, Y: maxY}}
 }
 
+type BoxIndexer struct {
+	BoundingBox BBox
+	boxes       []IndexedBox
+	NX          int
+	NY          int
+	BoxWidth    float64
+	BoxHeight   float64
+}
+
+func (b BoxIndexer) BoxIterator() []IndexedBox {
+	return b.boxes
+}
+
 // Partition the box into squares, returning a total of nHorizontal x nHorizontal squares, centered in the box
-func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
+func PartitionIntoSquares(b BBox, nDimension int) BoxIndexer {
 	// TODO: Use PartitionIntoRectangles instead
-	b = b.Square()
-	squareSide := b.Width() / float64(nHorizontal)
+	// b = b.Square()
+	squareSide := max(b.Width()/float64(nDimension), b.Height()/float64(nDimension))
 	boxes := []IndexedBox{}
-	verticalIterations := nHorizontal
-	for v := range verticalIterations {
+	// verticalIterations := int(b.Height() / squareSide)
+	nX := int(b.Width() / squareSide)
+	nY := int(b.Height() / squareSide)
+	for v := range nY {
 		vv := float64(v)
-		for h := range nHorizontal {
+		for h := range nX {
 			hh := float64(h)
 			boxes = append(boxes, IndexedBox{
 				BBox: BBox{
@@ -184,9 +199,17 @@ func PartitionIntoSquares(b BBox, nHorizontal int) []IndexedBox {
 			})
 		}
 	}
-	return boxes
+	return BoxIndexer{
+		BoundingBox: b,
+		boxes:       boxes,
+		NX:          nX,
+		NY:          nY,
+		BoxWidth:    squareSide,
+		BoxHeight:   squareSide,
+	}
 }
 
+// partition the bounding box into rectangles, such that there are 'hor' horizontally and 'ver' vertically
 func PartitionIntoRectangles(b BBox, hor, ver int) []IndexedBox {
 	width := b.Width() / float64(hor)
 	height := b.Height() / float64(ver)

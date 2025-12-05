@@ -1,8 +1,6 @@
 package curve
 
 import (
-	"fmt"
-
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 )
@@ -26,13 +24,13 @@ var (
 
 func NewTruchetGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicker, edgeSource samplers.DataSource, curveMapper CurveMapper) *truchetGrid {
 	boxes := primitives.PartitionIntoSquares(b, nx)
-	cells := make(map[cellCoord]*Cell, len(boxes))
+	cells := make(map[cellCoord]*Cell, len(boxes.BoxIterator()))
 	grid := &truchetGrid{
 		TruchetTileSet: tileSet,
 	}
-	if len(boxes) != nx*nx {
-		panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
-	}
+	// if len(boxes) != nx*nx {
+	// 	panic(fmt.Errorf("not right, want %d, got %d", nx*nx, len(boxes)))
+	// }
 	horPoints := tileSet.EdgePointMapping.getHorizontal()
 	vertPoints := tileSet.EdgePointMapping.getVertical()
 
@@ -57,7 +55,7 @@ func NewTruchetGrid(b primitives.BBox, nx int, tileSet TruchetTileSet, tilePicke
 		edgePointMapping: &tileSet.EdgePointMapping,
 		curveMapper:      curveMapper,
 	}
-	for _, childBox := range boxes {
+	for _, childBox := range boxes.BoxIterator() {
 		cell := &Cell{
 			Grid: &grid.Grid,
 			BBox: childBox.BBox,

@@ -165,11 +165,11 @@ func testDensityScene(b primitives.BBox) Document {
 	boxes := lines.LinesFromBBox(b)
 
 	layers := []Layer{}
-	for i, quarter := range quarters {
+	for i, quarter := range quarters.BoxIterator() {
 		lineLikes := []lines.LineLike{}
 		quarterBox := quarter.WithPadding(50)
 		testBoxes := primitives.PartitionIntoSquares(quarterBox, 5)
-		for _, tbox := range testBoxes {
+		for _, tbox := range testBoxes.BoxIterator() {
 			jj := float64(tbox.J)
 			ii := float64(tbox.I)
 			var ls []lines.LineLike
@@ -318,7 +318,7 @@ func parallelBoxScene(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	segments := [][]lines.LineLike{}
 	boxes := primitives.PartitionIntoSquares(b, 10)
-	for _, minibox := range boxes {
+	for _, minibox := range boxes.BoxIterator() {
 		spacing := maths.RandInRange(minLineWidth, maxLineWidth)
 		angle := maths.RandInRange(minAngle, maxAngle)
 		lns := collections.LinearLineField(minibox.BBox, angle, spacing)
@@ -339,7 +339,7 @@ func radialBoxScene(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	segments := [][]lines.LineLike{}
 	boxes := primitives.PartitionIntoSquares(b, 10)
-	for _, minibox := range boxes {
+	for _, minibox := range boxes.BoxIterator() {
 		boxcenter := minibox.Center()
 		xwiggle := maths.RandRangeMinusPlusOne() * wiggle
 		ywiggle := maths.RandRangeMinusPlusOne() * wiggle
@@ -685,7 +685,7 @@ func getCirlceLineSegmentScene(b primitives.BBox) Document {
 
 	nx := 70
 	boxes := primitives.PartitionIntoSquares(b, nx)
-	for _, tbox := range boxes {
+	for _, tbox := range boxes.BoxIterator() {
 		relativeCenter := relativeMinusPlusOneCenter(tbox.BBox, b)
 		boxCircle := objects.CircleInsideBox(tbox.BBox)
 		if radiusBool.GetBool(relativeCenter) {
