@@ -138,13 +138,19 @@ func (c TurnAngleByRightAngle) GetValue(p primitives.Point) float64 {
 	return c.Center.Subtract(p).Perp().Atan()
 }
 
-type Add struct {
-	SamplerA DataSource
-	SamplerB DataSource
-}
+// type Add struct {
+// 	SamplerA DataSource
+// 	SamplerB DataSource
+// }
 
-func (s Add) GetValue(p primitives.Point) float64 {
-	return s.SamplerA.GetValue(p) + s.SamplerB.GetValue(p)
+// func (s Add) GetValue(p primitives.Point) float64 {
+// 	return s.SamplerA.GetValue(p) + s.SamplerB.GetValue(p)
+// }
+
+func Add(sources ...DataSource) DataSource {
+	return AddSlice{
+		Samplers: sources,
+	}
 }
 
 type AddSlice struct {

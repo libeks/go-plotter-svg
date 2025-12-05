@@ -22,25 +22,26 @@ import (
 var (
 	// BrushBackForthScene    = func(b primitives.BBox) Scene { return getBrushBackForthScene(b) }
 	// CurlyScene             = func(b primitives.BBox) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene    = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
-	LineFieldScene         = func(b primitives.BBox) Document { return getLineFieldInObjects(b) }
-	RadialBoxScene         = func(b primitives.BBox) Document { return radialBoxScene(b) }
-	ParallelBoxScene       = func(b primitives.BBox) Document { return parallelBoxScene(b) }
-	ParallelSineFieldScene = func(b primitives.BBox) Document { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene  = func(b primitives.BBox) Document { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene   = func(b primitives.BBox) Document { return circlesInSquareScene(b) }
-	TestDensityScene       = func(b primitives.BBox) Document { return testDensityScene(b) }
-	TruchetScene           = func(b primitives.BBox) Document { return getTruchetScene(b) }
-	SweepTruchetScene      = func(b primitives.BBox) Document { return getSweepTruchet(b) }
-	CircleMarchingScene    = getCircleMarchingSquares
-	CircleArtifactScene    = getCircleArtifactMarchingSquares
-	CircleTricolorScene    = getThreeColorCircleMarchingSquares
-	RisingSunScene         = func(b primitives.BBox) Document { return getRisingSun(b) }
-	CCircleLineSegments    = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
-	Font                   = fontScene
-	Text                   = textScene
-	RectanglePackingScene  = rectanglePackginScene
-	BoxFillScene           = testBoxFillScene
+	LinesInsideBoxScene       = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
+	LineFieldScene            = func(b primitives.BBox) Document { return getLineFieldInObjects(b) }
+	RadialBoxScene            = func(b primitives.BBox) Document { return radialBoxScene(b) }
+	ParallelBoxScene          = func(b primitives.BBox) Document { return parallelBoxScene(b) }
+	ParallelSineFieldScene    = func(b primitives.BBox) Document { return parallelSineFieldsScene(b) }
+	ParallelCoherentScene     = func(b primitives.BBox) Document { return parallelCoherentSineFieldsScene(b) }
+	CirclesInSquareScene      = func(b primitives.BBox) Document { return circlesInSquareScene(b) }
+	TestDensityScene          = func(b primitives.BBox) Document { return testDensityScene(b) }
+	TruchetScene              = func(b primitives.BBox) Document { return getTruchetScene(b) }
+	SweepTruchetScene         = func(b primitives.BBox) Document { return getSweepTruchet(b) }
+	CircleMarchingScene       = getCircleMarchingSquares
+	CircleArtifactScene       = getCircleArtifactMarchingSquares
+	CircleTricolorScene       = getThreeColorCircleMarchingSquares
+	PerlinMarchingSquareScene = getPerlinMarchingSquares
+	RisingSunScene            = func(b primitives.BBox) Document { return getRisingSun(b) }
+	CCircleLineSegments       = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
+	Font                      = fontScene
+	Text                      = textScene
+	RectanglePackingScene     = rectanglePackginScene
+	BoxFillScene              = testBoxFillScene
 
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
@@ -535,8 +536,8 @@ func getCircleMarchingSquares(b primitives.BBox) Document {
 func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	sampler := samplers.Add{
-		SamplerA: samplers.MinSlice{
+	sampler := samplers.Add(
+		samplers.MinSlice{
 			Samplers: []samplers.DataSource{
 				samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}},
 				samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 3500}},
@@ -545,18 +546,43 @@ func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 				samplers.CircleRadius{Center: primitives.Point{X: 5443, Y: 5300}},
 			},
 		},
-		SamplerB: samplers.Lambda{
+		samplers.Lambda{
 			Function: func(p primitives.Point) float64 {
 				return math.Sin(p.X*0.0125)*10 + math.Sin(p.Y*0.0125)*10
 				// return 0.0
 			},
 		},
-	}
+	)
 	marchingResolution := 250
 	spacing := 18
 	var curves = []lines.LineLike{}
 	for i := range 50 {
 		curves = append(curves, curve.NewMarchingGrid(b, marchingResolution, sampler, 1080+float64(spacing*i)).GenerateCurves()...)
+
+	}
+	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
+	return scene
+}
+
+func getPerlinMarchingSquares(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	offset := primitives.Vector{X: 10000, Y: 10000}
+	sampler := samplers.Add(
+		samplers.NewPerlinNoise(0.00001, offset),
+		samplers.NewPerlinNoise(0.00005, offset),
+		samplers.NewPerlinNoise(0.0001, offset),
+		samplers.NewPerlinNoise(0.0005, offset),
+	)
+	marchingResolution := 250
+	spacing := 0.02
+	baseThreshold := -.2
+	var curves = []lines.LineLike{}
+	for i := range 20 {
+		curves = append(
+			curves,
+			curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
+		)
 
 	}
 	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))

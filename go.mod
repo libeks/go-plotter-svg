@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/aquilax/go-perlin v1.1.0 // indirect
 	github.com/kelindar/simd v1.1.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 // indirect
