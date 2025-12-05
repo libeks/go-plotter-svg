@@ -138,26 +138,17 @@ func (c TurnAngleByRightAngle) GetValue(p primitives.Point) float64 {
 	return c.Center.Subtract(p).Perp().Atan()
 }
 
-// type Add struct {
-// 	SamplerA DataSource
-// 	SamplerB DataSource
-// }
-
-// func (s Add) GetValue(p primitives.Point) float64 {
-// 	return s.SamplerA.GetValue(p) + s.SamplerB.GetValue(p)
-// }
-
 func Add(sources ...DataSource) DataSource {
-	return AddSlice{
+	return addSlice{
 		Samplers: sources,
 	}
 }
 
-type AddSlice struct {
+type addSlice struct {
 	Samplers []DataSource
 }
 
-func (s AddSlice) GetValue(p primitives.Point) float64 {
+func (s addSlice) GetValue(p primitives.Point) float64 {
 	total := 0.0
 	for _, sampler := range s.Samplers {
 		total += sampler.GetValue(p)
@@ -165,20 +156,26 @@ func (s AddSlice) GetValue(p primitives.Point) float64 {
 	return total
 }
 
-type Min struct {
-	SamplerA DataSource
-	SamplerB DataSource
+// type Min struct {
+// 	SamplerA DataSource
+// 	SamplerB DataSource
+// }
+
+// func (s Min) GetValue(p primitives.Point) float64 {
+// 	return min(s.SamplerA.GetValue(p), s.SamplerB.GetValue(p))
+// }
+
+func MinSlice(samplers ...DataSource) minSlice {
+	return minSlice{
+		Samplers: samplers,
+	}
 }
 
-func (s Min) GetValue(p primitives.Point) float64 {
-	return min(s.SamplerA.GetValue(p), s.SamplerB.GetValue(p))
-}
-
-type MinSlice struct {
+type minSlice struct {
 	Samplers []DataSource
 }
 
-func (s MinSlice) GetValue(p primitives.Point) float64 {
+func (s minSlice) GetValue(p primitives.Point) float64 {
 	min := math.MaxFloat64
 	for _, sampler := range s.Samplers {
 		val := sampler.GetValue(p)
@@ -195,4 +192,20 @@ type Lambda struct {
 
 func (c Lambda) GetValue(p primitives.Point) float64 {
 	return c.Function(p)
+}
+
+func ScalarMultiple(sampler DataSource, scalar float64) scalarMultiple {
+	return scalarMultiple{
+		sampler: sampler,
+		scalar:  scalar,
+	}
+}
+
+type scalarMultiple struct {
+	sampler DataSource
+	scalar  float64
+}
+
+func (s scalarMultiple) GetValue(p primitives.Point) float64 {
+	return s.sampler.GetValue(p) * s.scalar
 }
