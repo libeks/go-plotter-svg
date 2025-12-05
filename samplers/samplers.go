@@ -165,7 +165,7 @@ func (s addSlice) GetValue(p primitives.Point) float64 {
 // 	return min(s.SamplerA.GetValue(p), s.SamplerB.GetValue(p))
 // }
 
-func MinSlice(samplers ...DataSource) minSlice {
+func Min(samplers ...DataSource) minSlice {
 	return minSlice{
 		Samplers: samplers,
 	}

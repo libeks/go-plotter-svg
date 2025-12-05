@@ -514,13 +514,11 @@ func getCircleMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	// sampler := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}
-	sampler := samplers.Min{
-		SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
-		SamplerB: samplers.Min{
-			SamplerA: samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
-			SamplerB: samplers.CircleRadius{Center: primitives.Point{X: 2500, Y: 5000}},
-		},
-	}
+	sampler := samplers.Min(
+		samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
+		samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
+		samplers.CircleRadius{Center: primitives.Point{X: 2500, Y: 5000}},
+	)
 	marchingResolution := 200
 	marchingGrid1 := curve.NewMarchingGrid(b, marchingResolution, sampler, 1103)
 	curves1 := marchingGrid1.GenerateCurves()
@@ -537,15 +535,13 @@ func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	sampler := samplers.Add(
-		samplers.MinSlice{
-			Samplers: []samplers.DataSource{
-				samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}},
-				samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 3500}},
-				samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 2000}},
-				samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 5300}},
-				samplers.CircleRadius{Center: primitives.Point{X: 5443, Y: 5300}},
-			},
-		},
+		samplers.Min(
+			samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}},
+			samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 3500}},
+			samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 2000}},
+			samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 5300}},
+			samplers.CircleRadius{Center: primitives.Point{X: 5443, Y: 5300}},
+		),
 		samplers.Lambda{
 			Function: func(p primitives.Point) float64 {
 				return math.Sin(p.X*0.0125)*10 + math.Sin(p.Y*0.0125)*10
@@ -597,21 +593,15 @@ func getThreeColorCircleMarchingSquares(b primitives.BBox) Document {
 	c3 := samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}}
 	c4 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 4000}}
 	// c5 := samplers.CircleRadius{Center: primitives.Point{X: 7000, Y: 4000}}
-	sampler_cyan := samplers.AddSlice{
-		Samplers: []samplers.DataSource{
-			c2, c3, //c4,
-		},
-	}
-	sampler_magenta := samplers.AddSlice{
-		Samplers: []samplers.DataSource{
-			c2, c4, //c5,
-		},
-	}
-	sampler_yellow := samplers.AddSlice{
-		Samplers: []samplers.DataSource{
-			c3, c4, //c5,
-		},
-	}
+	sampler_cyan := samplers.Add(
+		c2, c3, //c4,
+	)
+	sampler_magenta := samplers.Add(
+		c2, c4, //c5,
+	)
+	sampler_yellow := samplers.Add(
+		c3, c4, //c5,
+	)
 
 	marchingResolution := 250
 	spacing := 18
