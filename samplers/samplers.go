@@ -168,15 +168,6 @@ func (s addSlice) GetValue(p primitives.Point) float64 {
 	return total
 }
 
-// type Min struct {
-// 	SamplerA DataSource
-// 	SamplerB DataSource
-// }
-
-// func (s Min) GetValue(p primitives.Point) float64 {
-// 	return min(s.SamplerA.GetValue(p), s.SamplerB.GetValue(p))
-// }
-
 func Min(samplers ...DataSource) minSlice {
 	return minSlice{
 		Samplers: samplers,
@@ -224,4 +215,20 @@ type scalarMultiple struct {
 
 func (s scalarMultiple) GetValue(p primitives.Point) float64 {
 	return s.sampler.GetValue(p) * s.scalar
+}
+
+func Displace(sampler DataSource, v primitives.Vector) displace {
+	return displace{
+		sampler: sampler,
+		v:       v,
+	}
+}
+
+type displace struct {
+	sampler DataSource
+	v       primitives.Vector
+}
+
+func (d displace) GetValue(p primitives.Point) float64 {
+	return d.sampler.GetValue(p.Add(d.v))
 }

@@ -22,26 +22,27 @@ import (
 var (
 	// BrushBackForthScene    = func(b primitives.BBox) Scene { return getBrushBackForthScene(b) }
 	// CurlyScene             = func(b primitives.BBox) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene       = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
-	LineFieldScene            = func(b primitives.BBox) Document { return getLineFieldInObjects(b) }
-	RadialBoxScene            = func(b primitives.BBox) Document { return radialBoxScene(b) }
-	ParallelBoxScene          = func(b primitives.BBox) Document { return parallelBoxScene(b) }
-	ParallelSineFieldScene    = func(b primitives.BBox) Document { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene     = func(b primitives.BBox) Document { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene      = func(b primitives.BBox) Document { return circlesInSquareScene(b) }
-	TestDensityScene          = func(b primitives.BBox) Document { return testDensityScene(b) }
-	TruchetScene              = func(b primitives.BBox) Document { return getTruchetScene(b) }
-	SweepTruchetScene         = func(b primitives.BBox) Document { return getSweepTruchet(b) }
-	CircleMarchingScene       = getCircleMarchingSquares
-	CircleArtifactScene       = getCircleArtifactMarchingSquares
-	CircleTricolorScene       = getThreeColorCircleMarchingSquares
-	PerlinMarchingSquareScene = getPerlinMarchingSquares
-	RisingSunScene            = func(b primitives.BBox) Document { return getRisingSun(b) }
-	CCircleLineSegments       = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
-	Font                      = fontScene
-	Text                      = textScene
-	RectanglePackingScene     = rectanglePackginScene
-	BoxFillScene              = testBoxFillScene
+	LinesInsideBoxScene        = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
+	LineFieldScene             = func(b primitives.BBox) Document { return getLineFieldInObjects(b) }
+	RadialBoxScene             = func(b primitives.BBox) Document { return radialBoxScene(b) }
+	ParallelBoxScene           = func(b primitives.BBox) Document { return parallelBoxScene(b) }
+	ParallelSineFieldScene     = func(b primitives.BBox) Document { return parallelSineFieldsScene(b) }
+	ParallelCoherentScene      = func(b primitives.BBox) Document { return parallelCoherentSineFieldsScene(b) }
+	CirclesInSquareScene       = func(b primitives.BBox) Document { return circlesInSquareScene(b) }
+	TestDensityScene           = func(b primitives.BBox) Document { return testDensityScene(b) }
+	TruchetScene               = func(b primitives.BBox) Document { return getTruchetScene(b) }
+	SweepTruchetScene          = func(b primitives.BBox) Document { return getSweepTruchet(b) }
+	CircleMarchingScene        = getCircleMarchingSquares
+	CircleArtifactScene        = getCircleArtifactMarchingSquares
+	CircleTricolorScene        = getThreeColorCircleMarchingSquares
+	PerlinMarchingSquareScene  = getPerlinMarchingSquares
+	RandomMarchingSquaresScene = getRandomMarchingSquares
+	RisingSunScene             = func(b primitives.BBox) Document { return getRisingSun(b) }
+	CCircleLineSegments        = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
+	Font                       = fontScene
+	Text                       = textScene
+	RectanglePackingScene      = rectanglePackginScene
+	BoxFillScene               = testBoxFillScene
 
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
@@ -585,37 +586,60 @@ func getPerlinMarchingSquares(b primitives.BBox) Document {
 	return scene
 }
 
+func getRandomMarchingSquares(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	sampler := samplers.Add(
+		samplers.Lambda(func(p primitives.Point) float64 {
+			return math.Tan(p.X*0.001) + math.Tan(p.Y*0.001) + math.Sin(p.X*0.001) + math.Sin(p.Y*0.001)
+		}),
+	)
+	marchingResolution := 250
+	spacing := 0.02
+	baseThreshold := -.2
+	var curves = []lines.LineLike{}
+	for i := range 20 {
+		curves = append(
+			curves,
+			curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
+		)
+
+	}
+	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
+	return scene
+}
+
 func getThreeColorCircleMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	// c1 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}}
 	c2 := samplers.ScalarMultiple(
 		samplers.PointDistance(primitives.Point{X: 1000, Y: 4000}),
-		5.0,
+		1.0,
 	)
 	c3 := samplers.PointDistance(primitives.Point{X: 3000, Y: 4000})
 	c4 := samplers.PointDistance(primitives.Point{X: 5000, Y: 4000})
 	// c5 := samplers.CircleRadius{Center: primitives.Point{X: 7000, Y: 4000}}
-	sampler_cyan := samplers.Min(
-		c2, c3, //c4,
+	sampler_cyan := samplers.Add(
+		c2, samplers.ScalarMultiple(c3, -1.0), //c4,
 	)
-	sampler_magenta := samplers.Min(
-		c2, c4, //c5,
+	sampler_magenta := samplers.Add(
+		samplers.ScalarMultiple(c2, -1.0), c4, //c5,
 	)
-	sampler_yellow := samplers.Min(
-		c3, c4, //c5,
+	sampler_yellow := samplers.Add(
+		c3, samplers.ScalarMultiple(c4, -1.0), //c5,
 	)
 
-	marchingResolution := 250
-	spacing := 18
+	marchingResolution := 150
+	spacing := 18.0
 	baseThreshold := 1500.0
 	var curves_cyan = []lines.LineLike{}
 	var curves_magenta = []lines.LineLike{}
 	var curves_yellow = []lines.LineLike{}
 	for i := range 50 {
-		curves_cyan = append(curves_cyan, curve.NewMarchingGrid(b, marchingResolution, sampler_cyan, baseThreshold+float64(spacing*i)).GenerateCurves()...)
-		curves_magenta = append(curves_magenta, curve.NewMarchingGrid(b, marchingResolution, sampler_magenta, baseThreshold+float64(spacing*i)).GenerateCurves()...)
-		curves_yellow = append(curves_yellow, curve.NewMarchingGrid(b, marchingResolution, sampler_yellow, baseThreshold+float64(spacing*i)).GenerateCurves()...)
+		curves_cyan = append(curves_cyan, curve.NewMarchingGrid(b, marchingResolution, sampler_cyan, baseThreshold+spacing*float64(i)).GenerateCurves()...)
+		curves_magenta = append(curves_magenta, curve.NewMarchingGrid(b, marchingResolution, sampler_magenta, baseThreshold+spacing*float64(i)).GenerateCurves()...)
+		curves_yellow = append(curves_yellow, curve.NewMarchingGrid(b, marchingResolution, sampler_yellow, baseThreshold+spacing*float64(i)).GenerateCurves()...)
 
 	}
 	scene = scene.AddLayer(NewLayer("curve-cyan").WithLineLike(curves_cyan).WithColor("cyan").WithWidth(10.0))

@@ -25,7 +25,7 @@ func main() {
 	}
 	start := time.Now()
 	innerBox := outerBox.WithPadding(500) // enough to no hit the edges
-	fmt.Printf("InnerBox %v\n", innerBox)
+	// fmt.Printf("InnerBox %v\n", innerBox)
 	// scene := scenes.getCurlyScene(outerBox)
 	// scene := scenes.getLinesInsideScene(innerBox, 1000)
 	// scene := scenes.getLineFieldInObjects(innerBox)
@@ -39,7 +39,8 @@ func main() {
 	// scene := scenes.TruchetScene(innerBox)
 	// scene := scenes.CircleMarchingScene(innerBox)
 	// scene := scenes.CircleArtifactScene(innerBox)
-	scene := scenes.CircleTricolorScene(innerBox)
+	// scene := scenes.CircleTricolorScene(innerBox)
+	scene := scenes.RandomMarchingSquaresScene(innerBox)
 	// scene := scenes.PerlinMarchingSquareScene(innerBox)
 	// scene := scenes.SweepTruchetScene(innerBox)
 	// scene := scenes.RisingSunScene(innerBox)
