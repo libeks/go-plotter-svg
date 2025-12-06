@@ -586,33 +586,50 @@ func getPerlinMarchingSquares(b primitives.BBox) Document {
 	return scene
 }
 
-func getRandomMarchingSquares(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	scaleTan := 0.004
-	scaleSin := 0.5
-	sampler := samplers.Mult(
-		samplers.Displace(
-			samplers.Mult(
-				samplers.Add(
-					samplers.Lambda(func(p primitives.Point) float64 {
-						return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan) + math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
-					}),
-				),
-				samplers.HighCenterRelativeDataSource{.01}),
-			primitives.Vector{X: -5000, Y: -5000},
-		),
-	)
-	marchingResolution := 500
-	spacing := 0.1
-	baseThreshold := -.2
+func getSpacedTruchets(b primitives.BBox, marchingResolution int, sampler samplers.DataSource, centerThreshold, spacing float64, n int) []lines.LineLike {
+	// n/2 lines will be below centerThreshold, n/2 will be above
+	baseThreshold := centerThreshold - float64(n)/2*spacing
 	var curves = []lines.LineLike{}
-	for i := range 5 {
+	for i := range n {
 		curves = append(
 			curves,
 			curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
 		)
 	}
+	return curves
+}
+
+func getRandomMarchingSquares(b primitives.BBox) Document {
+	scene := Document{}.WithGuides()
+	fmt.Printf("b Width %.1f height %.1f\n", b.Width(), b.Height())
+	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
+	scaleTan := 0.001
+	scaleSin := 0.5
+	sampler := samplers.Displace(
+		samplers.Mult(
+			samplers.Lambda(func(p primitives.Point) float64 {
+				return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan)
+				// return math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
+			}),
+			samplers.Lambda(func(p primitives.Point) float64 {
+				// return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan) + math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
+				return math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
+			}),
+			samplers.HighCenterRelativeDataSource{Scale: .01}),
+		primitives.Vector{X: -6000, Y: -4000},
+	)
+
+	marchingResolution := 500
+	spacing := 0.05
+	// baseThreshold := -.2
+	curves := getSpacedTruchets(b, marchingResolution, sampler, 0.0, spacing, 15)
+	// var curves = []lines.LineLike{}
+	// for i := range 15 {
+	// 	curves = append(
+	// 		curves,
+	// 		curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
+	// 	)
+	// }
 	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
 	return scene
 }
