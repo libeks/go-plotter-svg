@@ -62,7 +62,7 @@ type ConcentricCircleBoolean struct {
 }
 
 func (b ConcentricCircleBoolean) GetBool(p primitives.Point) bool {
-	rad := CircleRadius{Center: b.Center}.GetValue(p)
+	rad := PointDistance(b.Center).GetValue(p)
 	inside := true
 	for _, radComp := range b.Radii {
 		if rad < radComp {

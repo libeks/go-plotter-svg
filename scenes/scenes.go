@@ -465,7 +465,7 @@ func getTruchetScene(b primitives.BBox) Document {
 	// 	Outside: samplers.ConstantDataSource{Val: 0.5},
 	// }
 	// edgeSource := samplers.RandomDataSource{}
-	edgeSource := samplers.ConstantDataSource{Val: .5} // 0.5 means we'll use default edge values
+	edgeSource := samplers.Constant(.5) // 0.5 means we'll use default edge values
 	// edgeSource := samplers.RandomChooser{Values: []float64{-.25, 1.25}}
 	// edgeSource := samplers.RandomChooser{Values: []float64{.3, .7}}
 	// edgeSource := samplers.RandomChooser{Values: []float64{0, 1}}
@@ -497,9 +497,9 @@ func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []line
 func getSweepTruchet(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	curves1 := curve.NewTruchetGrid(b, 3, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GenerateCurves()
-	curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GenerateCurves()
-	curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.ConstantDataSource{Val: 0.5}, curve.MapCircularCircleCurve).GenerateCurves()
+	curves1 := curve.NewTruchetGrid(b, 3, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()
+	curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()
+	curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()
 	distance := 20.0
 
 	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
@@ -515,9 +515,9 @@ func getCircleMarchingSquares(b primitives.BBox) Document {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	// sampler := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}
 	sampler := samplers.Min(
-		samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}},
-		samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}},
-		samplers.CircleRadius{Center: primitives.Point{X: 2500, Y: 5000}},
+		samplers.PointDistance(primitives.Point{X: 5000, Y: 5000}),
+		samplers.PointDistance(primitives.Point{X: 3000, Y: 4000}),
+		samplers.PointDistance(primitives.Point{X: 2500, Y: 5000}),
 	)
 	marchingResolution := 200
 	marchingGrid1 := curve.NewMarchingGrid(b, marchingResolution, sampler, 1103)
@@ -536,18 +536,18 @@ func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	sampler := samplers.Add(
 		samplers.Min(
-			samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}},
-			samplers.CircleRadius{Center: primitives.Point{X: 2000, Y: 3500}},
-			samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 2000}},
-			samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 5300}},
-			samplers.CircleRadius{Center: primitives.Point{X: 5443, Y: 5300}},
+			samplers.PointDistance(primitives.Point{X: 5000, Y: 3000}),
+			samplers.PointDistance(primitives.Point{X: 2000, Y: 3500}),
+			samplers.PointDistance(primitives.Point{X: 3000, Y: 2000}),
+			samplers.PointDistance(primitives.Point{X: 3000, Y: 5300}),
+			samplers.PointDistance(primitives.Point{X: 5443, Y: 5300}),
 		),
-		samplers.Lambda{
-			Function: func(p primitives.Point) float64 {
+		samplers.Lambda(
+			func(p primitives.Point) float64 {
 				return math.Sin(p.X*0.0125)*10 + math.Sin(p.Y*0.0125)*10
 				// return 0.0
 			},
-		},
+		),
 	)
 	marchingResolution := 250
 	spacing := 18
@@ -589,23 +589,26 @@ func getThreeColorCircleMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	// c1 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}}
-	c2 := samplers.CircleRadius{Center: primitives.Point{X: 1000, Y: 4000}}
-	c3 := samplers.CircleRadius{Center: primitives.Point{X: 3000, Y: 4000}}
-	c4 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 4000}}
+	c2 := samplers.ScalarMultiple(
+		samplers.PointDistance(primitives.Point{X: 1000, Y: 4000}),
+		5.0,
+	)
+	c3 := samplers.PointDistance(primitives.Point{X: 3000, Y: 4000})
+	c4 := samplers.PointDistance(primitives.Point{X: 5000, Y: 4000})
 	// c5 := samplers.CircleRadius{Center: primitives.Point{X: 7000, Y: 4000}}
-	sampler_cyan := samplers.Add(
+	sampler_cyan := samplers.Min(
 		c2, c3, //c4,
 	)
-	sampler_magenta := samplers.Add(
+	sampler_magenta := samplers.Min(
 		c2, c4, //c5,
 	)
-	sampler_yellow := samplers.Add(
+	sampler_yellow := samplers.Min(
 		c3, c4, //c5,
 	)
 
 	marchingResolution := 250
 	spacing := 18
-	baseThreshold := 5000.0
+	baseThreshold := 1500.0
 	var curves_cyan = []lines.LineLike{}
 	var curves_magenta = []lines.LineLike{}
 	var curves_yellow = []lines.LineLike{}

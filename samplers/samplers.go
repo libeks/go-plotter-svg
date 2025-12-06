@@ -11,12 +11,18 @@ type DataSource interface {
 	GetValue(p primitives.Point) float64
 }
 
-type ConstantDataSource struct {
-	Val float64
+func Constant(val float64) constant {
+	return constant{
+		val: val,
+	}
 }
 
-func (s ConstantDataSource) GetValue(p primitives.Point) float64 {
-	return s.Val
+type constant struct {
+	val float64
+}
+
+func (s constant) GetValue(p primitives.Point) float64 {
+	return s.val
 }
 
 type RandomDataSource struct {
@@ -100,13 +106,19 @@ func (s RandomChooser) GetValue(p primitives.Point) float64 {
 	return s.Values[rand.Intn(len(s.Values))]
 }
 
-type CircleRadius struct {
-	Center primitives.Point
+func PointDistance(p primitives.Point) pointDistance {
+	return pointDistance{
+		point: p,
+	}
+}
+
+type pointDistance struct {
+	point primitives.Point
 }
 
 // assumes that point will be from a point in the bounding box -1..1
-func (c CircleRadius) GetValue(p primitives.Point) float64 {
-	return p.Subtract(c.Center).Len()
+func (c pointDistance) GetValue(p primitives.Point) float64 {
+	return p.Subtract(c.point).Len()
 }
 
 type BooleanSwitcher struct {
@@ -186,12 +198,16 @@ func (s minSlice) GetValue(p primitives.Point) float64 {
 	return min
 }
 
-type Lambda struct {
-	Function func(p primitives.Point) float64
+func Lambda(f func(p primitives.Point) float64) lambdaFn {
+	return lambdaFn{function: f}
 }
 
-func (c Lambda) GetValue(p primitives.Point) float64 {
-	return c.Function(p)
+type lambdaFn struct {
+	function func(p primitives.Point) float64
+}
+
+func (c lambdaFn) GetValue(p primitives.Point) float64 {
+	return c.function(p)
 }
 
 func ScalarMultiple(sampler DataSource, scalar float64) scalarMultiple {
