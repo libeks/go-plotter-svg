@@ -589,21 +589,25 @@ func getPerlinMarchingSquares(b primitives.BBox) Document {
 func getRandomMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	sampler := samplers.Add(
-		samplers.Lambda(func(p primitives.Point) float64 {
-			return math.Tan(p.X*0.0001) + math.Tan(p.Y*0.0001) + math.Sin(p.X*0.001) + math.Sin(p.Y*0.001)
-		}),
+	scaleTan := 0.001
+	scaleSin := 0.5
+	sampler := samplers.Displace(
+		samplers.Add(
+			samplers.Lambda(func(p primitives.Point) float64 {
+				return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan) + math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
+			}),
+		),
+		primitives.Vector{X: -5000, Y: -5000},
 	)
-	marchingResolution := 250
-	spacing := 0.02
+	marchingResolution := 500
+	spacing := 0.1
 	baseThreshold := -.2
 	var curves = []lines.LineLike{}
-	for i := range 20 {
+	for i := range 5 {
 		curves = append(
 			curves,
 			curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
 		)
-
 	}
 	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
 	return scene
