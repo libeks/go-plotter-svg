@@ -589,15 +589,19 @@ func getPerlinMarchingSquares(b primitives.BBox) Document {
 func getRandomMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	scaleTan := 0.001
+	scaleTan := 0.004
 	scaleSin := 0.5
-	sampler := samplers.Displace(
-		samplers.Add(
-			samplers.Lambda(func(p primitives.Point) float64 {
-				return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan) + math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
-			}),
+	sampler := samplers.Mult(
+		samplers.Displace(
+			samplers.Mult(
+				samplers.Add(
+					samplers.Lambda(func(p primitives.Point) float64 {
+						return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan) + math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
+					}),
+				),
+				samplers.HighCenterRelativeDataSource{.01}),
+			primitives.Vector{X: -5000, Y: -5000},
 		),
-		primitives.Vector{X: -5000, Y: -5000},
 	)
 	marchingResolution := 500
 	spacing := 0.1

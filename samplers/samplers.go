@@ -150,7 +150,7 @@ func (c TurnAngleByRightAngle) GetValue(p primitives.Point) float64 {
 	return c.Center.Subtract(p).Perp().Atan()
 }
 
-func Add(sources ...DataSource) DataSource {
+func Add(sources ...DataSource) addSlice {
 	return addSlice{
 		Samplers: sources,
 	}
@@ -164,6 +164,24 @@ func (s addSlice) GetValue(p primitives.Point) float64 {
 	total := 0.0
 	for _, sampler := range s.Samplers {
 		total += sampler.GetValue(p)
+	}
+	return total
+}
+
+func Mult(sources ...DataSource) DataSource {
+	return multSlice{
+		Samplers: sources,
+	}
+}
+
+type multSlice struct {
+	Samplers []DataSource
+}
+
+func (s multSlice) GetValue(p primitives.Point) float64 {
+	total := 1.0
+	for _, sampler := range s.Samplers {
+		total *= sampler.GetValue(p)
 	}
 	return total
 }
