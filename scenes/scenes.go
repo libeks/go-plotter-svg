@@ -591,7 +591,7 @@ func getRandomMarchingSquares(b primitives.BBox) Document {
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	sampler := samplers.Add(
 		samplers.Lambda(func(p primitives.Point) float64 {
-			return math.Tan(p.X*0.001) + math.Tan(p.Y*0.001) + math.Sin(p.X*0.001) + math.Sin(p.Y*0.001)
+			return math.Tan(p.X*0.0001) + math.Tan(p.Y*0.0001) + math.Sin(p.X*0.001) + math.Sin(p.Y*0.001)
 		}),
 	)
 	marchingResolution := 250
