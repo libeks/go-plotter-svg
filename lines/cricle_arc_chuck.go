@@ -32,7 +32,6 @@ func (c circleArcChunk) String() string {
 
 func (c circleArcChunk) IsLong() bool {
 	angle := c.Angle()
-	// fmt.Printf("angle is %.1f\n", angle/math.Pi)
 	return angle > math.Pi || angle < -math.Pi
 }
 
@@ -83,6 +82,16 @@ func (c circleArcChunk) Startpoint() primitives.Point {
 func (c circleArcChunk) ControlLines() string {
 	end := c.Endpoint()
 	return fmt.Sprintf("L %.1f %.1f", end.X, end.Y)
+}
+
+func (c circleArcChunk) At(t float64) primitives.Point {
+	var angle float64
+	if c.isClockwise {
+		angle = maths.Interpolate(c.endRad, c.startRad, t)
+	} else {
+		angle = maths.Interpolate(c.startRad, c.endRad+math.Pi*2, t)
+	}
+	return c.center.Add(primitives.UnitRight.RotateCCW(angle).Mult(c.radius))
 }
 
 func (c circleArcChunk) OffsetLeft(distance float64) PathChunk {
@@ -137,82 +146,3 @@ func (c circleArcChunk) Bisect(t float64) (PathChunk, PathChunk) {
 			isClockwise: c.isClockwise,
 		}
 }
-
-// type CircleArcChunkLegacy struct {
-// 	// TODO: refactor to not require all of these fields
-// 	Radius      float64
-// 	Center      primitives.Point
-// 	Start       primitives.Point // could be replaced with startT
-// 	End         primitives.Point // could be replaced with endT
-// 	IsLong      bool             // could be removed altogether
-// 	IsClockwise bool             // could be removed altogether
-// }
-
-// func (c CircleArcChunkLegacy) String() string {
-// 	return fmt.Sprintf("CircleArcChunk: center %s, radius %.1f with start %s, end %s", c.Center, c.Radius, c.Start, c.End)
-// }
-
-// func (c CircleArcChunkLegacy) PathXML() string {
-// 	long := 0
-// 	if c.IsLong {
-// 		long = 1
-// 	}
-// 	clockwise := 0
-// 	if c.IsClockwise {
-// 		clockwise = 1
-// 	}
-// 	return fmt.Sprintf("A %.1f %.1f 0 %d %d %.1f %.1f", c.Radius, c.Radius, long, clockwise, c.End.X, c.End.Y)
-// }
-
-// func (c CircleArcChunkLegacy) Length(start primitives.Point) float64 {
-// 	dv := start.Subtract(c.End)
-// 	distance := dv.Len()
-// 	angle := math.Asin(distance / (2 * c.Radius))
-// 	if c.IsLong {
-// 		return 2 * (math.Pi - angle) * c.Radius
-// 	}
-// 	return 2 * angle * c.Radius
-// }
-
-// func (c CircleArcChunkLegacy) Endpoint() primitives.Point {
-// 	return c.End
-// }
-
-// func (c CircleArcChunkLegacy) Startpoint() primitives.Point {
-// 	return c.Start
-// }
-
-// func (c CircleArcChunkLegacy) ControlLines() string {
-// 	return fmt.Sprintf("L %.1f %.1f", c.End.X, c.End.Y)
-// }
-
-// func (c CircleArcChunkLegacy) OffsetLeft(distance float64) PathChunk {
-// 	fmt.Printf("offsetting left %s\n", c)
-// 	// left is counterClockwise
-// 	if c.IsClockwise {
-// 		distance *= -1
-// 	}
-// 	newRadius := c.Radius + distance
-// 	radiusRatio := newRadius / c.Radius
-// 	sv := c.Start.Subtract(c.Center).Mult(radiusRatio)
-// 	ev := c.End.Subtract(c.Center).Mult(radiusRatio)
-// 	return CircleArcChunkLegacy{
-// 		Radius:      newRadius,
-// 		Center:      c.Center,
-// 		Start:       c.Center.Add(sv),
-// 		End:         c.Center.Add(ev), // need to know the center here...
-// 		IsLong:      c.IsLong,
-// 		IsClockwise: c.IsClockwise,
-// 	}
-// }
-
-// func (c CircleArcChunkLegacy) Reverse() PathChunk {
-// 	return CircleArcChunkLegacy{
-// 		Radius:      c.Radius,
-// 		Center:      c.Center,
-// 		Start:       c.End,
-// 		End:         c.Start,
-// 		IsLong:      c.IsLong,
-// 		IsClockwise: !c.IsClockwise,
-// 	}
-// }

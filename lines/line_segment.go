@@ -62,6 +62,11 @@ func (l LineSegment) ControlLineXML(color, width string) xmlwriter.Elem {
 	return l.XML(color, width)
 }
 
+func (l LineSegment) At(t float64) primitives.Point {
+	v := l.P2.Subtract(l.P1)
+	return l.P1.Add(v.Mult(t))
+}
+
 func (l LineSegment) Len() float64 {
 	return l.P2.Subtract(l.P1).Len()
 }

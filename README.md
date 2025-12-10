@@ -30,6 +30,8 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
   * Allow connections between foldable objects, i.e. have a scene contain multiple foldables with interlinking
   * See what damage comes from mixing clockwise- and counter-clockwise faces
   * Voronoi - add some way to output the input parameters, when rendering around random points
+  * Add ability to add a skeleton cut-out for a face, with a textured face being glued over it later
+  * Add ability to sample texture from a separate line field
 * Rectangle-packing: Optimized coveraged-based filter to preserve 10% no matter what
 * Marching squares
   * Algo to smooth out the straight lines created from marching squares
@@ -39,4 +41,3 @@ See some resulting plots on [Insta](https://www.instagram.com/cube.gif/).
 
 * Halftone circles in different colors
 * Concentric circles around several points, all clipped to the respective Voronoi diagram
-* A plane tiled into polygons, glued together with flaps

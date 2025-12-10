@@ -83,6 +83,8 @@ func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, thre
 	return grid
 }
 
+// TODO: replace with maths.ReverseInterpolatedTValue
+// given an interval [a,b], find in relative terms where t lies on that range
 func findInterpolatedTValue(a, b, threshold float64) float64 {
 	if a == b {
 		// both endpoints are the same, default to 0.5 for consistency

@@ -6,6 +6,7 @@ import (
 
 	"github.com/shabbyrobe/xmlwriter"
 
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 )
 
@@ -34,6 +35,20 @@ func (p Path) Len() float64 {
 		total += chunk.Length()
 	}
 	return total
+}
+
+func (p Path) At(t float64) primitives.Point {
+	len := p.Len()
+	cumLen := 0.0
+	for _, chunk := range p.chunks {
+		cumLenBefore := cumLen
+		cumLen += chunk.Length()
+		if cumLen > len*t {
+			subT := maths.ReverseInterpolatedTValue(cumLenBefore/len, cumLen/len, t)
+			return chunk.At(subT)
+		}
+	}
+	return p.End()
 }
 
 // Return a list of all the control points of this path

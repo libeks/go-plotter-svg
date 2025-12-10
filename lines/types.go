@@ -19,6 +19,7 @@ type LineLike interface {
 	Reverse() LineLike
 	Translate(primitives.Vector) LineLike
 	Bisect(t float64) (Path, Path)
+	At(t float64) primitives.Point
 }
 
 // implemented by LineChunk, QuadraticBezierChunk, CubicBezierChunk, LineGapChunk
@@ -35,4 +36,5 @@ type PathChunk interface {
 	Translate(primitives.Vector) PathChunk
 	Reverse() PathChunk
 	Bisect(t float64) (PathChunk, PathChunk)
+	At(t float64) primitives.Point
 }
