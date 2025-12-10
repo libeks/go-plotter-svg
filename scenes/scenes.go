@@ -50,7 +50,9 @@ var (
 	FoldableVoronoi                   = foldableVoronoiScene
 
 	// Test cards, used to calibrate pens
-	TestDensityScene = testDensityScene
+	TestCardDensityV1Scene = densityTestCardV1Scene
+	TestCardDensityV2Scene = densityTestCardV2Scene
+	TestCardPenHeightScene = penHeightTestCardScene
 
 	// Test scenes, more of a proof-of-concept
 	PolygonBoxScene       = polygonScene
@@ -203,7 +205,7 @@ func testBoxFillScene(b primitives.BBox) Document {
 
 	lineLikes := make([][]lines.LineLike, len(pens))
 	testBoxes := primitives.PartitionIntoRectangles(b, len(pens), len(polygons))
-	for _, testBox := range testBoxes {
+	for _, testBox := range testBoxes.BoxIterator() {
 		bx := testBox.BBox.WithPadding(50)
 
 		penID := testBox.J

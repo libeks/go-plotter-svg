@@ -281,11 +281,15 @@ func RandomlyAllocateSegments(segments [][]lines.LineLike, threshold float64) ([
 	return layer1, layer2
 }
 
-func FillPolygonWithPen(p objects.Polygon, pen pen.Pen) []lines.LineLike {
-	outline := p.Grow(-pen.Spacing)
-	innerPoly := outline.Grow(-pen.Spacing / 2)
+func FillPolygonWithSpacing(p objects.Polygon, spacing, angle float64) []lines.LineLike {
+	outline := p.Grow(-spacing)
+	innerPoly := outline.Grow(-spacing / 2)
 	ret := []lines.LineLike{}
 	ret = append(ret, lines.SegmentsToLineLikes(outline.EdgeLines())...)
-	ret = append(ret, innerPoly.LineFill(0.5, pen.Spacing)...)
+	ret = append(ret, innerPoly.LineFill(angle, spacing)...)
 	return ret
+}
+
+func FillPolygonWithPen(p objects.Polygon, pen pen.Pen) []lines.LineLike {
+	return FillPolygonWithSpacing(p, pen.Spacing, 0.5)
 }

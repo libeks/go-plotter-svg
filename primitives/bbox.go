@@ -210,7 +210,7 @@ func PartitionIntoSquares(b BBox, nDimension int) BoxIndexer {
 }
 
 // partition the bounding box into rectangles, such that there are 'hor' horizontally and 'ver' vertically
-func PartitionIntoRectangles(b BBox, hor, ver int) []IndexedBox {
+func PartitionIntoRectangles(b BBox, hor, ver int) BoxIndexer {
 	width := b.Width() / float64(hor)
 	height := b.Height() / float64(ver)
 	boxes := []IndexedBox{}
@@ -229,7 +229,14 @@ func PartitionIntoRectangles(b BBox, hor, ver int) []IndexedBox {
 			})
 		}
 	}
-	return boxes
+	return BoxIndexer{
+		BoundingBox: b,
+		boxes:       boxes,
+		NX:          hor,
+		NY:          ver,
+		BoxWidth:    width,
+		BoxHeight:   height,
+	}
 }
 
 type IndexedBox struct {
