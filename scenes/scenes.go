@@ -6,8 +6,6 @@ import (
 	"math/rand"
 
 	"github.com/libeks/go-plotter-svg/collections"
-	"github.com/libeks/go-plotter-svg/curve"
-	"github.com/libeks/go-plotter-svg/foldable"
 	"github.com/libeks/go-plotter-svg/fonts"
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
@@ -20,30 +18,29 @@ import (
 )
 
 var (
-	// BrushBackForthScene    = func(b primitives.BBox) Scene { return getBrushBackForthScene(b) }
-	// CurlyScene             = func(b primitives.BBox) Scene { return getCurlyScene(b) }
-	LinesInsideBoxScene        = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
-	LineFieldScene             = func(b primitives.BBox) Document { return getLineFieldInObjects(b) }
-	RadialBoxScene             = func(b primitives.BBox) Document { return radialBoxScene(b) }
-	ParallelBoxScene           = func(b primitives.BBox) Document { return parallelBoxScene(b) }
-	ParallelSineFieldScene     = func(b primitives.BBox) Document { return parallelSineFieldsScene(b) }
-	ParallelCoherentScene      = func(b primitives.BBox) Document { return parallelCoherentSineFieldsScene(b) }
-	CirclesInSquareScene       = func(b primitives.BBox) Document { return circlesInSquareScene(b) }
-	TestDensityScene           = func(b primitives.BBox) Document { return testDensityScene(b) }
-	TruchetScene               = func(b primitives.BBox) Document { return getTruchetScene(b) }
-	SweepTruchetScene          = func(b primitives.BBox) Document { return getSweepTruchet(b) }
+	LinesInsideBoxScene    = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
+	LineFieldScene         = getLineFieldInObjects
+	RadialBoxScene         = radialBoxScene
+	ParallelBoxScene       = parallelBoxScene
+	ParallelSineFieldScene = parallelSineFieldsScene
+	ParallelCoherentScene  = parallelCoherentSineFieldsScene
+	CirclesInSquareScene   = circlesInSquareScene
+	RisingSunScene         = getRisingSun
+	CCircleLineSegments    = getCirlceLineSegmentScene
+	MazeScene              = mazeScene
+
+	// Truchet
+	TruchetScene      = getTruchetScene
+	SweepTruchetScene = getSweepTruchet
+
+	// Marching Squares
 	CircleMarchingScene        = getCircleMarchingSquares
 	CircleArtifactScene        = getCircleArtifactMarchingSquares
 	CircleTricolorScene        = getThreeColorCircleMarchingSquares
 	PerlinMarchingSquareScene  = getPerlinMarchingSquares
 	RandomMarchingSquaresScene = getRandomMarchingSquares
-	RisingSunScene             = func(b primitives.BBox) Document { return getRisingSun(b) }
-	CCircleLineSegments        = func(b primitives.BBox) Document { return getCirlceLineSegmentScene(b) }
-	Font                       = fontScene
-	Text                       = textScene
-	RectanglePackingScene      = rectanglePackginScene
-	BoxFillScene               = testBoxFillScene
 
+	// Foldables
 	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
 	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
 	FoldableRhombiSansCorner          = foldableRhombicuboctahedronSansCornersScene
@@ -52,8 +49,15 @@ var (
 	FoldableCutCubeScene              = foldableCutCornerScene
 	FoldableVoronoi                   = foldableVoronoiScene
 
-	MazeScene       = mazeScene
-	PolygonBoxScene = polygonScene
+	// Test cards, used to calibrate pens
+	TestDensityScene = testDensityScene
+
+	// Test scenes, more of a proof-of-concept
+	PolygonBoxScene       = polygonScene
+	BoxFillScene          = testBoxFillScene
+	Font                  = fontScene
+	Text                  = textScene
+	RectanglePackingScene = rectanglePackginScene
 )
 
 func getLineFieldInObjects(b primitives.BBox) Document {
@@ -151,60 +155,6 @@ func circlesInSquareScene(b primitives.BBox) Document {
 	)
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	scene = scene.AddLayer(NewLayer("content").WithLineLike(layer1).WithOffset(0, 0).WithColor("red"))
-	return scene
-}
-
-func testDensityScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	quarters := primitives.PartitionIntoSquares(b, 2)
-	colors := []string{
-		"red",
-		"green",
-		"blue",
-		"orange",
-	}
-	boxes := lines.LinesFromBBox(b)
-
-	layers := []Layer{}
-	for i, quarter := range quarters.BoxIterator() {
-		lineLikes := []lines.LineLike{}
-		quarterBox := quarter.WithPadding(50)
-		testBoxes := primitives.PartitionIntoSquares(quarterBox, 5)
-		for _, tbox := range testBoxes.BoxIterator() {
-			jj := float64(tbox.J)
-			ii := float64(tbox.I)
-			var ls []lines.LineLike
-			tboxx := tbox.WithPadding(50)
-			boxes = append(boxes, lines.LinesFromBBox(tboxx)...)
-			spacing := (jj + 1) * 10
-			if tbox.I < 4 {
-				ls = lines.SegmentsToLineLikes(
-					collections.LimitLinesToShape(
-						collections.LinearLineField(
-							tboxx, ii*math.Pi/4, spacing,
-						),
-						objects.PolygonFromBBox(tboxx),
-					),
-				)
-			} else {
-				ls = collections.LimitCirclesToShape(
-					collections.ConcentricCircles(
-						tboxx, tboxx.Center(), spacing,
-					),
-					objects.PolygonFromBBox(tboxx),
-				)
-			}
-			lineLikes = append(lineLikes, ls...)
-		}
-		layerName := fmt.Sprintf("pen %d", i)
-		layers = append(layers, NewLayer(layerName).WithLineLike(lineLikes).WithOffset(0, 0).WithColor(colors[i]))
-
-	}
-	// ensure that the frame layer is rendered first, to make sure it isn't added to guides
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(boxes).WithOffset(0, 0).WithColor("grey"))
-	for _, layer := range layers {
-		scene = scene.AddLayer(layer)
-	}
 	return scene
 }
 
@@ -395,93 +345,6 @@ func radialBoxWithCircleExclusion(container objects.Object, center primitives.Po
 	return segments
 }
 
-// func getBrushBackForthScene(b primitives.BBox) Scene {
-// 	horizontalColumns := &collections.StripImage{
-// 		Box:     b,
-// 		NGroups: 1,
-// 		NLines:  30,
-// 		Direction: collections.Direction{
-// 			CardinalDirection: collections.Horizontal,
-// 			StrokeDirection:   collections.AwayToHome,
-// 			OrderDirection:    collections.AwayToHome,
-// 			Connection:        collections.SameDirection,
-// 		},
-// 	}
-// 	verticalColumns := &collections.StripImage{
-// 		Box:     b,
-// 		NGroups: 1,
-// 		NLines:  30,
-// 		Direction: collections.Direction{
-// 			CardinalDirection: collections.Vertical,
-// 			StrokeDirection:   collections.AwayToHome,
-// 			OrderDirection:    collections.AwayToHome,
-// 			Connection:        collections.AlternatingDirection,
-// 		},
-// 	}
-// 	scene := Scene{}
-// 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
-// 	for i, linelikes := range horizontalColumns.GetLineLikes() {
-// 		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Horizontal %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
-// 	}
-
-// 	for i, linelikes := range verticalColumns.GetLineLikes() {
-// 		scene = scene.AddLayer(NewLayer(fmt.Sprintf("Vertical %d", i)).WithLineLike(linelikes).WithOffset(0, 0))
-// 	}
-// 	return scene
-// }
-
-// func getCurlyScene(b primitives.BBox) Scene {
-// 	scene := Scene{}.WithGuides()
-// 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(b.Lines()).WithOffset(0, 0))
-// 	curlyBrush := getCurlyBrush(b, 400.0, math.Pi/4)
-// 	scene = scene.AddLayer(NewLayer("Curly1").WithLineLike(curlyBrush).WithColor("red").WithWidth(10).WithOffset(-2, 40))
-// 	curlyBrush2 := getCurlyBrush(b, 300.0, math.Pi/3)
-// 	scene = scene.AddLayer(NewLayer("Curly2").WithLineLike(curlyBrush2).WithColor("blue").WithWidth(10).WithOffset(2, -30))
-// 	return scene
-// }
-
-// func getCurlyBrush(b primitives.BBox, width, angle float64) []lines.LineLike {
-// 	brushWidth := width
-// 	path := collections.CurlyFill{
-// 		Box:     b.WithPadding(brushWidth),
-// 		Angle:   angle,
-// 		Spacing: float64(brushWidth),
-// 	}
-// 	return []lines.LineLike{path.GetPath()}
-// }
-
-func getTruchetScene(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	tileSource := samplers.RandomDataSource{}
-	// tileSource := samplers.ConstantDataSource{0}
-	// tileSource := samplers.InsideCircleSubDataSource{
-	// 	Radius:  0.5,
-	// 	Inside:  samplers.RandomChooser{Values: []float64{0, 1}},
-	// 	Outside: samplers.ConstantDataSource{Val: 0.5},
-	// }
-	// tileSource := samplers.InsideCircleSubDataSource{
-	// 	Radius:  0.5,
-	// 	Inside:  samplers.RandomChooser{Values: []float64{0, 1}},
-	// 	Outside: samplers.ConstantDataSource{Val: 0.5},
-	// }
-	// edgeSource := samplers.RandomDataSource{}
-	edgeSource := samplers.Constant(.5) // 0.5 means we'll use default edge values
-	// edgeSource := samplers.RandomChooser{Values: []float64{-.25, 1.25}}
-	// edgeSource := samplers.RandomChooser{Values: []float64{.3, .7}}
-	// edgeSource := samplers.RandomChooser{Values: []float64{0, 1}}
-	// truch := curve.Truchet4NonCrossing
-	// truch := curve.Truchet4Crossing
-	truch := curve.Truchet6NonCrossingSide
-	grid := curve.NewTruchetGrid(b, 30, truch, tileSource, edgeSource, curve.MapCircularCurve)
-	curves := grid.GenerateCurves()
-	// scene = scene.AddLayer(NewLayer("truchet").WithControlLines(curves).WithColor("blue").WithWidth(10))
-	scene = scene.AddLayer(NewLayer("truchet").WithLineLike(curves).WithColor("red").WithWidth(10))
-	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
-
-	return scene
-}
-
 func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []lines.LineLike {
 	outlineCurves := []lines.LineLike{}
 	fmt.Printf("curves %v\n", curves)
@@ -493,184 +356,6 @@ func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []line
 		}
 	}
 	return outlineCurves
-}
-
-func getSweepTruchet(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	curves1 := curve.NewTruchetGrid(b, 3, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()
-	curves2 := curve.NewTruchetGrid(b, 6, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()
-	curves3 := curve.NewTruchetGrid(b, 12, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()
-	distance := 20.0
-
-	// scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithControlLines(curves1).WithColor("gray").WithWidth(distance))
-	scene = scene.AddLayer(NewLayer("truchet_offsets_1").WithLineLike(getOffsetForCurves(curves1, distance, 10)).WithColor("red").WithWidth(distance))
-	scene = scene.AddLayer(NewLayer("truchet_offsets_2").WithLineLike(getOffsetForCurves(curves2, distance, 7)).WithColor("green").WithWidth(distance))
-	scene = scene.AddLayer(NewLayer("truchet_offsets_3").WithLineLike(getOffsetForCurves(curves3, distance, 5)).WithColor("blue").WithWidth(distance))
-	// scene = scene.AddLayer(NewLayer("gridlines").WithLineLike(grid.GetGridLines()).WithColor("black").WithWidth(10))
-	return scene
-}
-
-func getCircleMarchingSquares(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	// sampler := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}
-	sampler := samplers.Min(
-		samplers.PointDistance(primitives.Point{X: 5000, Y: 5000}),
-		samplers.PointDistance(primitives.Point{X: 3000, Y: 4000}),
-		samplers.PointDistance(primitives.Point{X: 2500, Y: 5000}),
-	)
-	marchingResolution := 200
-	marchingGrid1 := curve.NewMarchingGrid(b, marchingResolution, sampler, 1103)
-	curves1 := marchingGrid1.GenerateCurves()
-	// control1 := marchingGrid1.GetControlPoints()
-	marchingGrid2 := curve.NewMarchingGrid(b, marchingResolution, sampler, 1115)
-	curves2 := marchingGrid2.GenerateCurves()
-
-	scene = scene.AddLayer(NewLayer("curve1").WithLineLike(curves1).WithColor("red").WithWidth(10.0))
-	scene = scene.AddLayer(NewLayer("curve2").WithLineLike(curves2).WithColor("green").WithWidth(10.0))
-	return scene
-}
-
-func getCircleArtifactMarchingSquares(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	sampler := samplers.Add(
-		samplers.Min(
-			samplers.PointDistance(primitives.Point{X: 5000, Y: 3000}),
-			samplers.PointDistance(primitives.Point{X: 2000, Y: 3500}),
-			samplers.PointDistance(primitives.Point{X: 3000, Y: 2000}),
-			samplers.PointDistance(primitives.Point{X: 3000, Y: 5300}),
-			samplers.PointDistance(primitives.Point{X: 5443, Y: 5300}),
-		),
-		samplers.Lambda(
-			func(p primitives.Point) float64 {
-				return math.Sin(p.X*0.0125)*10 + math.Sin(p.Y*0.0125)*10
-				// return 0.0
-			},
-		),
-	)
-	marchingResolution := 250
-	spacing := 18
-	var curves = []lines.LineLike{}
-	for i := range 50 {
-		curves = append(curves, curve.NewMarchingGrid(b, marchingResolution, sampler, 1080+float64(spacing*i)).GenerateCurves()...)
-
-	}
-	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
-	return scene
-}
-
-func getPerlinMarchingSquares(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	offset := primitives.Vector{X: 10000, Y: 10000}
-	sampler := samplers.Add(
-		samplers.NewPerlinNoise(0.00001, offset),
-		samplers.NewPerlinNoise(0.00005, offset),
-		samplers.NewPerlinNoise(0.0001, offset),
-		samplers.NewPerlinNoise(0.0005, offset),
-	)
-	marchingResolution := 250
-	spacing := 0.02
-	baseThreshold := -.2
-	var curves = []lines.LineLike{}
-	for i := range 20 {
-		curves = append(
-			curves,
-			curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
-		)
-
-	}
-	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
-	return scene
-}
-
-func getSpacedTruchets(b primitives.BBox, marchingResolution int, sampler samplers.DataSource, centerThreshold, spacing float64, n int) []lines.LineLike {
-	// n/2 lines will be below centerThreshold, n/2 will be above
-	baseThreshold := centerThreshold - float64(n)/2*spacing
-	var curves = []lines.LineLike{}
-	for i := range n {
-		curves = append(
-			curves,
-			curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
-		)
-	}
-	return curves
-}
-
-func getRandomMarchingSquares(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	fmt.Printf("b Width %.1f height %.1f\n", b.Width(), b.Height())
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	scaleTan := 0.001
-	scaleSin := 0.5
-	sampler := samplers.Displace(
-		samplers.Mult(
-			samplers.Lambda(func(p primitives.Point) float64 {
-				return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan)
-				// return math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
-			}),
-			samplers.Lambda(func(p primitives.Point) float64 {
-				// return math.Tan(p.X*scaleTan) + math.Tan(p.Y*scaleTan) + math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
-				return math.Sin(p.X*scaleSin) + math.Cos(p.Y*scaleSin)
-			}),
-			samplers.HighCenterRelativeDataSource{Scale: .01}),
-		primitives.Vector{X: -6000, Y: -4000},
-	)
-
-	marchingResolution := 500
-	spacing := 0.05
-	// baseThreshold := -.2
-	curves := getSpacedTruchets(b, marchingResolution, sampler, 0.0, spacing, 15)
-	// var curves = []lines.LineLike{}
-	// for i := range 15 {
-	// 	curves = append(
-	// 		curves,
-	// 		curve.NewMarchingGrid(b, marchingResolution, sampler, baseThreshold+spacing*float64(i)).GenerateCurves()...,
-	// 	)
-	// }
-	scene = scene.AddLayer(NewLayer("curve").WithLineLike(curves).WithColor("black").WithWidth(10.0))
-	return scene
-}
-
-func getThreeColorCircleMarchingSquares(b primitives.BBox) Document {
-	scene := Document{}.WithGuides()
-	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-	// c1 := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 3000}}
-	c2 := samplers.ScalarMultiple(
-		samplers.PointDistance(primitives.Point{X: 1000, Y: 4000}),
-		1.0,
-	)
-	c3 := samplers.PointDistance(primitives.Point{X: 3000, Y: 4000})
-	c4 := samplers.PointDistance(primitives.Point{X: 5000, Y: 4000})
-	// c5 := samplers.CircleRadius{Center: primitives.Point{X: 7000, Y: 4000}}
-	sampler_cyan := samplers.Add(
-		c2, samplers.ScalarMultiple(c3, -1.0), //c4,
-	)
-	sampler_magenta := samplers.Add(
-		samplers.ScalarMultiple(c2, -1.0), c4, //c5,
-	)
-	sampler_yellow := samplers.Add(
-		c3, samplers.ScalarMultiple(c4, -1.0), //c5,
-	)
-
-	marchingResolution := 150
-	spacing := 18.0
-	baseThreshold := 1500.0
-	var curves_cyan = []lines.LineLike{}
-	var curves_magenta = []lines.LineLike{}
-	var curves_yellow = []lines.LineLike{}
-	for i := range 50 {
-		curves_cyan = append(curves_cyan, curve.NewMarchingGrid(b, marchingResolution, sampler_cyan, baseThreshold+spacing*float64(i)).GenerateCurves()...)
-		curves_magenta = append(curves_magenta, curve.NewMarchingGrid(b, marchingResolution, sampler_magenta, baseThreshold+spacing*float64(i)).GenerateCurves()...)
-		curves_yellow = append(curves_yellow, curve.NewMarchingGrid(b, marchingResolution, sampler_yellow, baseThreshold+spacing*float64(i)).GenerateCurves()...)
-
-	}
-	scene = scene.AddLayer(NewLayer("curve-cyan").WithLineLike(curves_cyan).WithColor("cyan").WithWidth(10.0))
-	scene = scene.AddLayer(NewLayer("curve-magenta").WithLineLike(curves_magenta).WithColor("magenta").WithWidth(10.0))
-	scene = scene.AddLayer(NewLayer("curve-yellow").WithLineLike(curves_yellow).WithColor("yellow").WithWidth(10.0))
-	return scene
 }
 
 func getRisingSun(b primitives.BBox) Document {
@@ -939,48 +624,6 @@ func polygonScene(b primitives.BBox) Document {
 	return scene
 }
 
-func foldableCubeIDScene(b primitives.BBox) Document {
-	foldableBase := 1500.0
-	patterns := foldable.Cube(b, foldableBase)
-	scene := FromFoldableLayers(patterns, b)
-	return scene
-}
-
-func foldableRhombicuboctahedronIDScene(b primitives.BBox) Document {
-	foldableBase := 1500.0
-	patterns := foldable.Rhombicuboctahedron(b, foldableBase)
-	scene := FromFoldableLayers(patterns, b)
-	return scene
-}
-
-func foldableRhombicuboctahedronSansCornersScene(b primitives.BBox) Document {
-	foldableBase := 1500.0
-	patterns := foldable.RhombicuboctahedronWithoutCorners(b, foldableBase)
-	scene := FromFoldableLayers(patterns, b)
-	return scene
-}
-
-func foldableRhombicuboctahedronSansCornersTricolorScene(b primitives.BBox) Document {
-	foldableBase := 1500.0
-	patterns := foldable.RhombicuboctahedronWithoutCornersTricolor(b, foldableBase)
-	scene := FromFoldableLayers(patterns, b)
-	return scene
-}
-
-func foldableRightTrianglePrismIDScene(b primitives.BBox) Document {
-	foldableBase := 1500.0
-	patterns := foldable.RightTrianglePrism(b, foldableBase, foldableBase, foldableBase)
-	scene := FromFoldableLayers(patterns, b)
-	return scene
-}
-
-func foldableCutCornerScene(b primitives.BBox) Document {
-	foldableBase := 1500.0
-	patterns := foldable.CutCube(b, foldableBase, 0.5)
-	scene := FromFoldableLayers(patterns, b)
-	return scene
-}
-
 func mazeScene(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
@@ -990,18 +633,6 @@ func mazeScene(b primitives.BBox) Document {
 
 	scene = scene.AddLayer(NewLayer("path").WithLineLike(mazeLines.Path).WithColor("red").WithWidth(20).MinimizePath(true))
 	scene = scene.AddLayer(NewLayer("walls").WithLineLike(mazeLines.Walls).WithColor("black").WithWidth(20).MinimizePath(true))
-	return scene
-}
-
-func foldableVoronoiScene(b primitives.BBox) Document {
-	// scene := Document{}.WithGuides()
-	// scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
-
-	// maze := maze.NewMaze(30)
-	// mazeLines := maze.Render(b)
-
-	patterns := foldable.VoronoiFoldable(b)
-	scene := FromFoldableLayers(patterns, b)
 	return scene
 }
 
