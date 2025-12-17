@@ -17,50 +17,54 @@ import (
 	"github.com/libeks/go-plotter-svg/samplers"
 )
 
-var (
-	LinesInsideBoxScene    = func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) }
-	LineFieldScene         = getLineFieldInObjects
-	RadialBoxScene         = radialBoxScene
-	ParallelBoxScene       = parallelBoxScene
-	ParallelSineFieldScene = parallelSineFieldsScene
-	ParallelCoherentScene  = parallelCoherentSineFieldsScene
-	CirclesInSquareScene   = circlesInSquareScene
-	RisingSunScene         = getRisingSun
-	CCircleLineSegments    = getCirlceLineSegmentScene
-	MazeScene              = mazeScene
+func GatherScenes() sceneLibrary {
+	library := SceneLibrary()
+
+	library.Add("lines-inside-box", func(b primitives.BBox) Document { return getLinesInsideScene(b, 1000) })
+	library.Add("line-field", getLineFieldInObjects)
+	library.Add("radial-box", radialBoxScene)
+	library.Add("parallel-box", parallelBoxScene)
+	library.Add("parallel-sine-field", parallelSineFieldsScene)
+	library.Add("parallel-coherent", parallelCoherentSineFieldsScene)
+	library.Add("circles-in-square", circlesInSquareScene)
+	library.Add("rising-sun", getRisingSun)
+	library.Add("circle-line-segments", getCirlceLineSegmentScene)
+	library.Add("maze", mazeScene)
 
 	// Truchet
-	TruchetScene      = getTruchetScene
-	SweepTruchetScene = getSweepTruchet
+	library.Add("truchet", getTruchetScene)
+	library.Add("sweep-truchet", getSweepTruchet)
 
 	// Marching Squares
-	CircleMarchingScene        = getCircleMarchingSquares
-	CircleArtifactScene        = getCircleArtifactMarchingSquares
-	CircleTricolorScene        = getThreeColorCircleMarchingSquares
-	PerlinMarchingSquareScene  = getPerlinMarchingSquares
-	RandomMarchingSquaresScene = getRandomMarchingSquares
+	library.Add("circle-marching-square", getCircleMarchingSquares)
+	library.Add("circle-marching-square-artifact", getCircleArtifactMarchingSquares)
+	library.Add("circle-tricolor-marching-square", getThreeColorCircleMarchingSquares)
+	library.Add("perlin-marching-square", getPerlinMarchingSquares)
+	library.Add("random-marching-square", getRandomMarchingSquares)
 
 	// Foldables
-	FoldableRhombicuboctahedronID     = foldableRhombicuboctahedronIDScene
-	FoldableRightTrianglePrismIDScene = foldableRightTrianglePrismIDScene
-	FoldableRhombiSansCorner          = foldableRhombicuboctahedronSansCornersScene
-	FoldableRhombiSansCornerTricolor  = foldableRhombicuboctahedronSansCornersTricolorScene
-	FoldableCubeIDScene               = foldableCubeIDScene
-	FoldableCutCubeScene              = foldableCutCornerScene
-	FoldableVoronoi                   = foldableVoronoiScene
+	library.Add("foldable-rhombi", foldableRhombicuboctahedronIDScene)
+	library.Add("foldable-triangle-prism", foldableRightTrianglePrismIDScene)
+	library.Add("foldable-rhombi-sans-corner", foldableRhombicuboctahedronSansCornersScene)
+	library.Add("foldable-rhombi-sans-corner-tricolor", foldableRhombicuboctahedronSansCornersTricolorScene)
+	library.Add("foldable-cube", foldableCubeIDScene)
+	library.Add("foldable-cut-cube", foldableCutCornerScene)
+	library.Add("foldable-voronoi", foldableVoronoiScene)
 
 	// Test cards, used to calibrate pens
-	TestCardDensityV1Scene = densityTestCardV1Scene
-	TestCardDensityV2Scene = densityTestCardV2Scene
-	TestCardPenHeightScene = penHeightTestCardScene
+	library.Add("test-density-v1", densityTestCardV1Scene)
+	library.Add("test-density-v2", densityTestCardV2Scene)
+	library.Add("test-pen-height", penHeightTestCardScene)
 
 	// Test scenes, more of a proof-of-concept
-	PolygonBoxScene       = polygonScene
-	BoxFillScene          = testBoxFillScene
-	Font                  = fontScene
-	Text                  = textScene
-	RectanglePackingScene = rectanglePackginScene
-)
+	library.Add("polygon-box", polygonScene)
+	library.Add("box-fill", testBoxFillScene)
+	library.Add("font", fontScene)
+	library.Add("text", textScene)
+	library.Add("rectangle-packing-test", rectanglePackginScene)
+
+	return library
+}
 
 func getLineFieldInObjects(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()

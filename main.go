@@ -14,9 +14,14 @@ func main() {
 	args := os.Args[1:]
 	fname := "gallery/test.svg"
 	sizePx := 10000.0
+	sceneName := "test-density-v2"
 
 	if len(args) > 0 {
 		fname = args[0]
+		args = args[1:]
+	}
+	if len(args) > 0 {
+		sceneName = args[0]
 	}
 
 	outerBox := primitives.BBox{
@@ -25,44 +30,12 @@ func main() {
 	}
 	start := time.Now()
 	innerBox := outerBox.WithPadding(500) // enough to no hit the edges
-	// fmt.Printf("InnerBox %v\n", innerBox)
-	// scene := scenes.getCurlyScene(outerBox)
-	// scene := scenes.getLinesInsideScene(innerBox, 1000)
-	// scene := scenes.getLineFieldInObjects(innerBox)
-	// scene := scenes.radialBoxScene(innerBox)
-	// scene := scenes.parallelBoxScene(innerBox)
-	// scene := scenes.parallelSineFieldsScene(innerBox)
-	// scene := scenes.ParallelCoherentScene(innerBox)
-	// scene := scenes.CirclesInSquareScene(innerBox)
-
-	// scene := scenes.TestCardDensityV1Scene(innerBox)
-	scene := scenes.TestCardDensityV2Scene(innerBox)
-	// scene := scenes.TestCardPenHeightScene(innerBox)
-
-	// scene := scenes.BoxFillScene(innerBox)
-	// scene := scenes.TruchetScene(innerBox)
-	// scene := scenes.CircleMarchingScene(innerBox)
-	// scene := scenes.CircleArtifactScene(innerBox)
-	// scene := scenes.CircleTricolorScene(innerBox)
-	// scene := scenes.RandomMarchingSquaresScene(innerBox)
-	// scene := scenes.PerlinMarchingSquareScene(innerBox)
-	// scene := scenes.SweepTruchetScene(innerBox)
-	// scene := scenes.RisingSunScene(innerBox)
-	// scene := scenes.CCircleLineSegments(innerBox)
-	// scene := scenes.Font(innerBox)
-	// scene := scenes.Text(innerBox)
-	// scene := scenes.PolygonBoxScene(innerBox)
-	// scene := scenes.FoldableCubeIDScene(innerBox)
-	// scene := scenes.FoldableRhombicuboctahedronID(innerBox)
-	// scene := scenes.FoldableRhombiSansCorner(innerBox)
-	// scene := scenes.FoldableRhombiSansCornerTricolor(innerBox)
-	// scene := scenes.FoldableVoronoi(innerBox)
-	// scene := scenes.FoldableRightTrianglePrismScene(innerBox)
-	// scene := scenes.FoldableRightTrianglePrismIDScene(innerBox)
-	// scene := scenes.FoldableCutCubeScene(innerBox)
-	// scene := scenes.FoldableRhombiSansCorner(innerBox)
-	// scene := scenes.MazeScene(innerBox)
-	// scene := scenes.RectanglePackingScene(innerBox)
+	library := scenes.GatherScenes()
+	sceneFn, err := library.Get(sceneName)
+	if err != nil {
+		panic(err)
+	}
+	scene := sceneFn(innerBox)
 
 	scene.CalculateStatistics()
 	svg.SVG{
