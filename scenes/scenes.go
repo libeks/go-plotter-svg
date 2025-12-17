@@ -68,6 +68,7 @@ func GatherScenes() sceneLibrary {
 }
 
 func getLineFieldInObjects(b primitives.BBox) Document {
+	b = b.Square()
 	scene := Document{}.WithGuides()
 
 	poly1 := objects.Polygon{
@@ -102,7 +103,7 @@ func getLineFieldInObjects(b primitives.BBox) Document {
 			{X: 3000, Y: 7000},
 		},
 	}
-	radial := collections.CircularLineField(3, primitives.Point{X: 5000, Y: 5000})
+	radial := collections.CircularLineField(100, primitives.Point{X: 5000, Y: 5000})
 	fmt.Printf("radial : %s\n", radial)
 	lines1 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly1))
 	fmt.Printf("linelikes: %s\n", lines1)
@@ -269,6 +270,7 @@ func parallelSineFieldsScene(b primitives.BBox) Document {
 }
 
 func parallelBoxScene(b primitives.BBox) Document {
+	b = b.Square()
 	minLineWidth := 20.0
 	maxLineWidth := 100.0
 	minAngle := 0.0
@@ -291,6 +293,7 @@ func parallelBoxScene(b primitives.BBox) Document {
 }
 
 func radialBoxScene(b primitives.BBox) Document {
+	b = b.Square()
 	nSegments := 15
 	exclusionRadius := 100.0
 	wiggle := 200.0
@@ -399,6 +402,7 @@ func relativeMinusPlusOneCenter(b, parentBox primitives.BBox) primitives.Point {
 }
 
 func getCirlceLineSegmentScene(b primitives.BBox) Document {
+	b = b.Square()
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
@@ -637,6 +641,7 @@ func polygonScene(b primitives.BBox) Document {
 }
 
 func mazeScene(b primitives.BBox) Document {
+	b = b.Square()
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 

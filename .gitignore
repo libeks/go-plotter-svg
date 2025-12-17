@@ -25,3 +25,6 @@ go.work
 
 # GoLand/JetBrains cache
 .idea
+
+# debug output in gallery
+/gallery/debug/
