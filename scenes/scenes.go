@@ -62,6 +62,7 @@ func GatherScenes() sceneLibrary {
 	library.Add("box-fill", testBoxFillScene)
 	library.Add("font", fontScene)
 	library.Add("text", textScene)
+	// The rectangle packing test is computationally expensive, excluding to keep --render-all short
 	// library.Add("rectangle-packing-test", rectanglePackginScene)
 
 	return library
