@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"runtime"
 
 	"github.com/libeks/go-plotter-svg/collections"
 	"github.com/libeks/go-plotter-svg/fonts"
@@ -61,7 +62,7 @@ func GatherScenes() sceneLibrary {
 	library.Add("box-fill", testBoxFillScene)
 	library.Add("font", fontScene)
 	library.Add("text", textScene)
-	library.Add("rectangle-packing-test", rectanglePackginScene)
+	// library.Add("rectangle-packing-test", rectanglePackginScene)
 
 	return library
 }
@@ -460,9 +461,14 @@ func fontScene(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 
-	fname := "C:/Windows/Fonts/bahnschrift.ttf"
-	// fname:= "C:/Windows/Fonts/BIZ-UDMinchoM.ttc"
-	font, err := fonts.LoadFont(fname)
+	var fontFile string
+	if runtime.GOOS == "windows" {
+		fontFile = "C:/Windows/Fonts/bahnschrift.ttf"
+	} else {
+		// MacOS
+		fontFile = "/System/Library/Fonts/Palatino.ttc"
+	}
+	font, err := fonts.LoadFont(fontFile)
 	if err != nil {
 		panic(err)
 	}

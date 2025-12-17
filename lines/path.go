@@ -151,12 +151,10 @@ func (p Path) ControlLineXML(color, width string) xmlwriter.Elem {
 }
 
 func (p Path) OffsetLeft(distance float64) LineLike {
-	fmt.Printf("offsetting left %s\n", p)
 	chunks := make([]PathChunk, len(p.chunks))
 	for i, chunk := range p.chunks {
 		chunks[i] = chunk.OffsetLeft(distance)
 	}
-	fmt.Printf("new chunks %v\n", chunks)
 	return Path{
 		start:  chunks[0].Startpoint(),
 		chunks: chunks,

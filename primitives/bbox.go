@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"slices"
+
+	"github.com/libeks/go-plotter-svg/maths"
 )
 
 type BBox struct {
@@ -35,9 +37,18 @@ func (b BBox) String() string {
 	return fmt.Sprintf("BBox{UpperLeft: %v, LowerRight: %v}", b.UpperLeft, b.LowerRight)
 }
 
+// valueBetweenWithThreshold is true if the value appears inside (a-threshold,b+threshold)
+// the threshold should account for floating point arithmetic quirks
+func valueBetweenWithThreshold(a, val, b float64) bool {
+	return val >= a-maths.PrecisionThreshold && val <= b+maths.PrecisionThreshold
+}
+
 // PointInside returns true if the point is inside the bounding box
 func (b BBox) PointInside(p Point) bool {
-	return p.X >= b.UpperLeft.X && p.X <= b.LowerRight.X && p.Y >= b.UpperLeft.Y && p.Y <= b.LowerRight.Y
+	// have to use threshold computation for this, since floating point math can cause the point to be slightly outside, by
+	// about 1e-13 or so
+	return valueBetweenWithThreshold(b.UpperLeft.X, p.X, b.LowerRight.X) && valueBetweenWithThreshold(b.UpperLeft.Y, p.Y, b.LowerRight.Y)
+	// return p.X >= b.UpperLeft.X && p.X <= b.LowerRight.X && p.Y >= b.UpperLeft.Y && p.Y <= b.LowerRight.Y
 }
 
 func (b BBox) Width() float64 {

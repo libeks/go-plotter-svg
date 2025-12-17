@@ -8,6 +8,7 @@ import (
 )
 
 func getTruchetScene(b primitives.BBox) Document {
+	b = b.Square()
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	tileSource := samplers.RandomDataSource{}
@@ -40,6 +41,7 @@ func getTruchetScene(b primitives.BBox) Document {
 }
 
 func getSweepTruchet(b primitives.BBox) Document {
+	b = b.Square()
 	scene := Document{}.WithGuides()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	curves1 := curve.NewTruchetGrid(b, 3, curve.Truchet4NonCrossing, samplers.RandomDataSource{}, samplers.Constant(0.5), curve.MapCircularCircleCurve).GenerateCurves()

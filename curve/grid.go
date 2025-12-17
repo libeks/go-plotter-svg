@@ -36,6 +36,9 @@ func (g Grid) At(x, y int) *Cell {
 func (g Grid) GenerateCurve(cell *Cell, direction connectionEnd) lines.LineLike {
 	// first figure out whether this cell has a connection at this direction, and get its t-value, to get the initial point
 	edgeTValue := -1.0
+	if cell == nil {
+		panic("cell is nil")
+	}
 	for _, curve := range cell.curves {
 		for _, endpoint := range curve.endpoints {
 			if endpoint.endpoint == direction {

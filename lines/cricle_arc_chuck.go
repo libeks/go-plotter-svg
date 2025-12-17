@@ -95,7 +95,6 @@ func (c circleArcChunk) At(t float64) primitives.Point {
 }
 
 func (c circleArcChunk) OffsetLeft(distance float64) PathChunk {
-	fmt.Printf("offsetting left %s\n", c)
 	// left is counterClockwise
 	if c.isClockwise {
 		distance *= -1

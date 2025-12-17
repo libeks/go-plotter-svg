@@ -115,7 +115,13 @@ func (c *Curve) XMLChunk(curveMapper CurveMapper, from connectionEnd) lines.Path
 	tFrom := *mFrom
 	tTo := *mTo
 	startPoint := c.Cell.AtEdge(from.NWSE, tFrom)
+	if !c.Cell.PointInside(startPoint) {
+		panic("startpoint not inside cell")
+	}
 	endPoint := c.Cell.AtEdge(to.NWSE, tTo)
+	if !c.Cell.PointInside(endPoint) {
+		panic("startpoint not inside cell")
+	}
 	curveType := GetCurveType(from.NWSE, to.NWSE, tFrom, tTo)
 
 	return curveMapper.GetPathChunk(c, curveType, tFrom, tTo, startPoint, endPoint)
