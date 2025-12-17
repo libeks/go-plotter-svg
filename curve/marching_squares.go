@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/libeks/go-plotter-svg/lines"
+	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"
 	"github.com/libeks/go-plotter-svg/samplers"
 )
@@ -81,22 +82,6 @@ func NewMarchingGrid(b primitives.BBox, nx int, source samplers.DataSource, thre
 	grid.nY = boxes.NY
 	grid.cells = cells
 	return grid
-}
-
-// TODO: replace with maths.ReverseInterpolatedTValue
-// given an interval [a,b], find in relative terms where t lies on that range
-func findInterpolatedTValue(a, b, threshold float64) float64 {
-	if a == b {
-		// both endpoints are the same, default to 0.5 for consistency
-		return 0.5
-	}
-	if a < b {
-		width := b - a
-		return (threshold - a) / width
-	} else {
-		width := a - b
-		return (a - threshold) / width
-	}
 }
 
 func checkTValue(a float64) {
@@ -248,10 +233,10 @@ func (g *marchingSquaresGrid) PopulateCellCurveFragments(cell *Cell) {
 	v10 := g.gridValues[c10]
 	v11 := g.gridValues[c11]
 	cell.curves = make([]*Curve, 0)
-	wT := findInterpolatedTValue(v00, v01, g.threshold)
-	nT := findInterpolatedTValue(v00, v10, g.threshold)
-	eT := findInterpolatedTValue(v10, v11, g.threshold)
-	sT := findInterpolatedTValue(v01, v11, g.threshold)
+	wT := maths.ReverseInterpolatedTValue(v00, v01, g.threshold)
+	nT := maths.ReverseInterpolatedTValue(v00, v10, g.threshold)
+	eT := maths.ReverseInterpolatedTValue(v10, v11, g.threshold)
+	sT := maths.ReverseInterpolatedTValue(v01, v11, g.threshold)
 
 	if (p00 == p01) && (p01 == p10) && (p10 == p11) {
 		// no curve fragments in this cell

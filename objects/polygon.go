@@ -3,6 +3,7 @@ package objects
 import (
 	"fmt"
 	"math"
+	"slices"
 
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"
@@ -103,7 +104,9 @@ func (p Polygon) IntersectTs(line lines.Line) []float64 {
 			ts = append(ts, *t)
 		}
 	}
-	return deduplicate(ts)
+	ts = deduplicate(ts)
+	slices.Sort(ts)
+	return ts
 }
 
 // Midpoint returns the average of all vertices of a polygon. This is helpful sometimes, but not other times.

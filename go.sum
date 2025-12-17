@@ -18,10 +18,10 @@ github.com/klauspost/cpuid/v2 v2.2.4 h1:acbojRNwl3o09bUq+yDCtZFc1aiwaAAxtcn8YkZX
 github.com/klauspost/cpuid/v2 v2.2.4/go.mod h1:RVVoqg1df56z8g3pUjL/3lE5UfnlrJX8tyFgg4nqhuY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/shabbyrobe/xmlwriter v0.0.0-20230525083848-85336ec334fa h1:qSlczoKLzv10e3zbEqwwDvjhai++MGDuns4ZoOKaE+U=
-github.com/shabbyrobe/xmlwriter v0.0.0-20230525083848-85336ec334fa/go.mod h1:tKYSeHyJGYz7eoZMlzrRDQSfdYPYt0UduMr8b97Mmaw=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+go.shabbyrobe.org/xmlwriter v0.0.0-20251128025558-e56d198cad73 h1:mHnA2l6FLnHPOjqkVsUyUWOM80k8H2oot75JTioIEsg=
+go.shabbyrobe.org/xmlwriter v0.0.0-20251128025558-e56d198cad73/go.mod h1:1G9oyCvE5XVgGqijOTTunw111cB2RYXwkd2iLQK0Dik=
 golang.org/x/exp v0.0.0-20251017212417-90e834f514db h1:by6IehL4BH5k3e3SJmcoNbOobMey2SLpAF79iPOEBvw=
 golang.org/x/exp v0.0.0-20251017212417-90e834f514db/go.mod h1:j/pmGrbnkbPtQfxEe5D0VQhZC6qKbfKifgD0oM7sR70=
 golang.org/x/image v0.22.0 h1:UtK5yLUzilVrkjMAZAZ34DXGpASN8i8pj8g+O+yd10g=

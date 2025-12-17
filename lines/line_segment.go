@@ -3,7 +3,7 @@ package lines
 import (
 	"fmt"
 
-	"github.com/shabbyrobe/xmlwriter"
+	"go.shabbyrobe.org/xmlwriter"
 
 	"github.com/libeks/go-plotter-svg/maths"
 	"github.com/libeks/go-plotter-svg/primitives"

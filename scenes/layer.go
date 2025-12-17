@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/shabbyrobe/xmlwriter"
+	"go.shabbyrobe.org/xmlwriter"
 
 	"github.com/libeks/go-plotter-svg/lines"
 	"github.com/libeks/go-plotter-svg/maths"

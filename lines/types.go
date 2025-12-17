@@ -1,7 +1,7 @@
 package lines
 
 import (
-	"github.com/shabbyrobe/xmlwriter"
+	"go.shabbyrobe.org/xmlwriter"
 
 	"github.com/libeks/go-plotter-svg/primitives"
 )

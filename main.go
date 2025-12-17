@@ -36,8 +36,8 @@ func main() {
 	// scene := scenes.CirclesInSquareScene(innerBox)
 
 	// scene := scenes.TestCardDensityV1Scene(innerBox)
-	// scene := scenes.TestCardDensityV2Scene(innerBox)
-	scene := scenes.TestCardPenHeightScene(innerBox)
+	scene := scenes.TestCardDensityV2Scene(innerBox)
+	// scene := scenes.TestCardPenHeightScene(innerBox)
 
 	// scene := scenes.BoxFillScene(innerBox)
 	// scene := scenes.TruchetScene(innerBox)

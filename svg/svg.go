@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/shabbyrobe/xmlwriter"
+	"go.shabbyrobe.org/xmlwriter"
 
 	"github.com/libeks/go-plotter-svg/scenes"
 )
@@ -42,7 +42,7 @@ func (s SVG) WritePage(fname string, scene scenes.Page) {
 				{Name: "viewBox", Value: "0 0 13333 10000"}, // ensure the viewbox fits the page size
 				{Name: "version", Value: "1.1"},
 				{Name: "id", Value: "svg6"},
-				{Name: "sodipodi:docname", Value: "test_inkscape.svg"},
+				{Name: "sodipodi:docname", Value: fname},
 				{Name: "inkscape:version", Value: "1.3.2 (091e20e, 2023-11-25, custom)"},
 				{Name: "xmlns:inkscape", Value: "http://www.inkscape.org/namespaces/inkscape"},
 				{Name: "xmlns:sodipodi", Value: "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"},
