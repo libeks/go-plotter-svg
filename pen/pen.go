@@ -28,5 +28,7 @@ var (
 	BicIntensityFineTip  = Pen{"Bic Intensity Fine Tip", 15, -5, 25}  // displacement can vary
 	BicIntensityBrushTip = Pen{"Bic Intensity Brush Tip", 30, 0, -45} // displacement can vary
 
+	ZebraSarasaPen = Pen{"Zebra SARASA", 13, 30, -5}
+
 	CrayolaSuperTips = Pen{"Crayola SuperTips", 25, -15, -5}
 )
