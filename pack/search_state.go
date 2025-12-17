@@ -214,11 +214,3 @@ func (s searchState) ProcessedAreaSum() float64 {
 	}
 	return total
 }
-
-func (s searchState) unprocessedArea() float64 {
-	total := 0.0
-	s.unprocessables.Range(func(id uint32) {
-		total += s.boxes[id].Area()
-	})
-	return total
-}

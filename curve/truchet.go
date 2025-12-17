@@ -74,7 +74,6 @@ type truchetGrid struct {
 	columnEdges map[cellCoord]Edge
 	rowEdges    map[cellCoord]Edge
 	TruchetTileSet
-	endpointWiggle samplers.DataSource
 }
 
 // PopulateCurves decides which Truchet tile to use, and populates the curve fragments that fall inside of this cell
