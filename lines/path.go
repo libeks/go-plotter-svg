@@ -44,7 +44,7 @@ func (p Path) At(t float64) primitives.Point {
 		cumLenBefore := cumLen
 		cumLen += chunk.Length()
 		if cumLen > len*t {
-			subT := maths.ReverseInterpolatedTValue(cumLenBefore/len, cumLen/len, t)
+			subT := maths.ReverseInterpolatedTValueFailure(cumLenBefore/len, cumLen/len, t)
 			return chunk.At(subT)
 		}
 	}

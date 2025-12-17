@@ -1,6 +1,7 @@
 package maths
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 )
@@ -62,9 +63,6 @@ func Interpolate(a, b, t float64) float64 {
 // It is assumed that a <= t <= b.
 // if tPrime := ReverseInterpolatedTValue(a,b,t), then t == Interpolate(a,b tPrime)
 func ReverseInterpolatedTValue(a, b, threshold float64) float64 {
-	if threshold < a || threshold > b {
-		panic("Reverse Interpolation with incorrect threshold")
-	}
 	if a == b {
 		// both endpoints are the same, default to 0.5 for consistency
 		return 0.5
@@ -76,6 +74,16 @@ func ReverseInterpolatedTValue(a, b, threshold float64) float64 {
 		width := a - b
 		return (a - threshold) / width
 	}
+}
+
+// given an interval [a,b], find in relative terms where t lies on that range
+// It is assumed that a <= t <= b.
+// if tPrime := ReverseInterpolatedTValue(a,b,t), then t == Interpolate(a,b tPrime)
+func ReverseInterpolatedTValueFailure(a, b, threshold float64) float64 {
+	if threshold < a || threshold > b {
+		panic(fmt.Sprintf("Reverse Interpolation with incorrect threshold ( must have %.1f <= %.1f <= %.1f)", a, threshold, b))
+	}
+	return ReverseInterpolatedTValue(a, b, threshold)
 }
 
 // https://stackoverflow.com/a/59299881

@@ -84,6 +84,7 @@ func getThreeColorCircleMarchingSquares(b primitives.BBox) Document {
 
 func getCircleMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
+	b = b.Square()
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	// sampler := samplers.CircleRadius{Center: primitives.Point{X: 5000, Y: 5000}}
 	sampler := samplers.Min(

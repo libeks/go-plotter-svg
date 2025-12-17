@@ -12,9 +12,10 @@ import (
 )
 
 type Config struct {
-	fname     string
-	sceneName string
-	debug     bool
+	fname          string
+	sceneName      string
+	showSceneNames bool
+	renderAll      bool
 }
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 	start := time.Now()
 	innerBox := outerBox.WithPadding(500) // enough to no hit the edges
 	library := scenes.GatherScenes()
-	if config.debug {
+	if config.showSceneNames {
 		sceneNames := library.GetNames()
 		fmt.Printf("These scenes are available:\n")
 		for _, name := range sceneNames {
@@ -42,6 +43,23 @@ func main() {
 		return
 	}
 
+	if config.renderAll {
+		for _, name := range library.GetNames() {
+			if sceneFn, err := library.Get(name); err != nil {
+				panic(err)
+			} else {
+				fmt.Printf("Rendering scene %s...\n", name)
+				scene := sceneFn(innerBox)
+				svg.SVG{
+					Fname:    fmt.Sprintf("gallery/debug/%s.svg", name),
+					Width:    "12in",
+					Height:   "9in",
+					Document: scene,
+				}.WriteSVG()
+			}
+		}
+		return
+	}
 	sceneFn, err := library.Get(config.sceneName)
 	if err != nil {
 		panic(err)
@@ -81,7 +99,10 @@ func parseFlags(args []string) (Config, error) {
 			continue
 		}
 		if arg == "--list-scenes" {
-			return Config{debug: true}, nil
+			return Config{showSceneNames: true}, nil
+		}
+		if arg == "--render-all" {
+			return Config{renderAll: true}, nil
 		}
 		if arg == "--help" {
 			//TODO: write a help doc ehre

@@ -39,5 +39,7 @@ func (l *sceneLibrary) Get(name string) (func(b primitives.BBox) Document, error
 }
 
 func (l *sceneLibrary) GetNames() []string {
-	return slices.Collect(maps.Keys(l.scenes))
+	names := slices.Collect(maps.Keys(l.scenes))
+	slices.Sort(names)
+	return names
 }
