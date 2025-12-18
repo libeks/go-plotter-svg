@@ -82,7 +82,7 @@ func parseFlags(args []string) (Config, error) {
 	// n := len(args)
 	for len(args) > 0 {
 		arg := args[0]
-		if arg == "--fname" {
+		if arg == "--fname" || arg == "--file" || arg == "--filename" {
 			if len(args) < 2 {
 				return Config{}, errors.New("Parameter '--fname' must be followed by a filename")
 			}
