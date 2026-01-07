@@ -617,6 +617,7 @@ func CutCube(b primitives.BBox, side float64, cutRatio float64) []FoldablePatter
 }
 
 func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
+	printPoints := false
 	bbox := primitives.BBox{UpperLeft: primitives.Origin, LowerRight: primitives.Point{X: 5000, Y: 5000}}
 	edgeWidth := 400.0
 	// points := []primitives.Point{
@@ -679,15 +680,21 @@ func VoronoiFoldable(b primitives.BBox) []FoldablePattern {
 	// }
 	nPoints := 7
 	points := make([]primitives.Point, nPoints)
-	fmt.Printf("points := []primitives.Point{\n")
+	if printPoints {
+		fmt.Printf("points := []primitives.Point{\n")
+	}
 	for i := range nPoints {
 		points[i] = primitives.Point{
 			X: rand.Float64()*4000 + 500.0,
 			Y: rand.Float64()*4000 + 500.0,
 		}
-		fmt.Printf("    {%.1f, %.1f},\n", points[i].X, points[i].Y)
+		if printPoints {
+			fmt.Printf("    {%.1f, %.1f},\n", points[i].X, points[i].Y)
+		}
 	}
-	fmt.Printf("}\n")
+	if printPoints {
+		fmt.Printf("}\n")
+	}
 
 	vor := voronoi.ComputeVoronoiConnections(bbox, points)
 	faces := []FaceID{}

@@ -106,12 +106,10 @@ func (g *Grid) CellCenterInBox(b primitives.BBox, x, y int) primitives.Point {
 func NewMaze(size int) *Maze {
 	grid := NewGrid(size)
 	start := grid.At(0, 0)
-	fmt.Printf("start %v\n", start)
 	start.visited = true
 	stack := []*Cell{start}
 	// perform a depth-first search until end
 	for len(stack) > 0 {
-		// fmt.Printf("stack size %d\n", len(stack))
 		current := stack[0]
 		possibilities := []Direction{}
 		for _, direction := range AllDirections {
@@ -122,7 +120,6 @@ func NewMaze(size int) *Maze {
 				possibilities = append(possibilities, direction)
 			}
 		}
-		// fmt.Printf("possibilities at %d %d: %v\n", current.X, current.Y, possibilities)
 		if len(possibilities) == 0 {
 			stack = stack[1:] // pop first item
 		} else {

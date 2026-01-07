@@ -58,6 +58,7 @@ func main() {
 				}.WriteSVG()
 			}
 		}
+		fmt.Printf("Rendering all took %s.\n", time.Since(start))
 		return
 	}
 	sceneFn, err := library.Get(config.sceneName)

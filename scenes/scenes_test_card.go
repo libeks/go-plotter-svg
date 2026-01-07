@@ -90,7 +90,6 @@ func densityTestCardV2Scene(b primitives.BBox) Document {
 		quarterBox := strip.WithPadding(50)
 		if i == 0 {
 			for _, tbox := range primitives.PartitionIntoRectangles(quarterBox, 1, 10).BoxIterator() {
-				fmt.Printf("i %d j %d\n", tbox.I, tbox.J)
 				ii := float64(tbox.I)
 				spacing := (ii + 1) * 5
 				lineLikes = append(lineLikes, fonts.RenderText(tbox.BBox, fmt.Sprintf("%.0f", spacing), fonts.WithSize(200)).CharCurves...)

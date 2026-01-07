@@ -1,7 +1,6 @@
 package scenes
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/curve"
@@ -12,7 +11,6 @@ import (
 
 func getRandomMarchingSquares(b primitives.BBox) Document {
 	scene := Document{}.WithGuides()
-	fmt.Printf("b Width %.1f height %.1f\n", b.Width(), b.Height())
 	scene = scene.AddLayer(NewLayer("frame").WithLineLike(lines.LinesFromBBox(b)).WithOffset(0, 0))
 	scaleTan := 0.0004
 	scaleSin := 0.5

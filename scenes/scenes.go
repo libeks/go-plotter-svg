@@ -105,9 +105,9 @@ func getLineFieldInObjects(b primitives.BBox) Document {
 		},
 	}
 	radial := collections.CircularLineField(100, primitives.Point{X: 5000, Y: 5000})
-	fmt.Printf("radial : %s\n", radial)
+	// fmt.Printf("radial : %s\n", radial)
 	lines1 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly1))
-	fmt.Printf("linelikes: %s\n", lines1)
+	// fmt.Printf("linelikes: %s\n", lines1)
 	lines2 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly2))
 	lines3 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly3))
 	lines4 := lines.SegmentsToLineLikes(collections.LimitLinesToShape(radial, poly4))
@@ -358,7 +358,6 @@ func radialBoxWithCircleExclusion(container objects.Object, center primitives.Po
 
 func getOffsetForCurves(curves []lines.LineLike, distance float64, n int) []lines.LineLike {
 	outlineCurves := []lines.LineLike{}
-	fmt.Printf("curves %v\n", curves)
 	for _, curve := range curves {
 		if !curve.IsEmpty() {
 			for i := -n; i <= n; i += 1 {
@@ -665,9 +664,6 @@ func rectanglePackginScene(b primitives.BBox) Document {
 				Y: 1500 + rand.Float64()*4000,
 			}),
 		})
-	}
-	for _, rect := range rectangles {
-		fmt.Printf("%v\n", rect)
 	}
 	blacks := map[int][]lines.LineLike{}
 	reds := map[int][]lines.LineLike{}

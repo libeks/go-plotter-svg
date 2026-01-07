@@ -105,7 +105,6 @@ func LinearDensityLineField(b primitives.BBox, angle float64, densityFn func(flo
 	for i < maxI+1 {
 		ls = append(ls, lines.Line{P: w.Mult(float64(i)).Point(), V: v})
 		densityVal := densityFn((i - minI) / (maxI - minI))
-		fmt.Printf("Densityval at %.1f %.1f \n", (i-minI)/(maxI-minI), densityVal)
 		i += densityVal
 	}
 	return ls
