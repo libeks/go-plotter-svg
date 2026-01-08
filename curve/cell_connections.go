@@ -20,7 +20,8 @@ type connectionPair struct {
 func (p connectionPair) Has(q int) bool {
 	if p.a.endpoint == q {
 		return true
-	} else if p.b.endpoint == q {
+	}
+	if p.b.endpoint == q {
 		return true
 	}
 	return false
@@ -29,7 +30,8 @@ func (p connectionPair) Has(q int) bool {
 func (p connectionPair) Other(q int) connectionEnd {
 	if p.a.endpoint == q {
 		return p.b
-	} else if p.b.endpoint == q {
+	}
+	if p.b.endpoint == q {
 		return p.a
 	}
 	return connectionEnd{}

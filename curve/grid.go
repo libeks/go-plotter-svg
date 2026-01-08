@@ -6,7 +6,34 @@ import (
 	"github.com/libeks/go-plotter-svg/lines"
 )
 
+// TODO: Add non-square grids
+// This includes a triangle grid, and a hexagon grid
+// each cell would be expressed with (x,y) coordinates, but the "direction" will have less or more than the NWSE model, so this needs to be generalized
+// For reference, here is an overview of coordinate systems for:
+// * Hexes: https://www.redblobgames.com/grids/hexagons/
+// * Triangles: https://simblob.blogspot.com/2007/06/distances-on-triangular-grid.html
+//   * Consider a modification of (a,b) = (x, y+z). This converts it to a 2D grid, and each (a,b) value exists uniquely on the grid
+//   * Categorize triangles into UP and DOWN. Let (0,0) be an UP triangle. Then even a+b is UP, odd is down.
+//   * For UP triangles, there are three adjoining triangles:
+//     * up-right direction changes coordinate by 	+(0, -1)
+//     * up-left direction changes coordinate by	+(-1, 0)
+//     * down direction changes coordinate by 		+(0, +1)
+//   * For DOWN triangles, there are three adjoining triangles:
+//     * down-left direction chanages coordinate by		+(0, +1)
+//     * down-right direction changes coordinate by		+(+1, 0)
+//     * up direction changes coordinate by				+(0, -1)
+//   * The question is whether it is trivial to move from (a,b) coordinates to (x, y, z), since it seems that information gets lost, no?
+//     * No, since the (x,y,z) contains coordinates that do not exist on the grid, such as (1,1,1). But what is the formula
+//       for (x,y,z) coordinates that don't exist?
+// This generalization can be applied to both Truchet grids, as well as Marching Squares
+
+// Ideas for generalization:
+// * Return gridlines
+// * Return the perimeter edges
+// * Compute all grid points (to get the Marching Squares points)
+
 type Grid struct {
+	// TODO: generalize nX, nY for triangle, hex grids
 	nX    int
 	nY    int
 	cells map[cellCoord]*Cell
@@ -27,6 +54,7 @@ func (g Grid) GetEdgePoint(c *Cell, i int) float64 {
 }
 
 func (g Grid) At(x, y int) *Cell {
+	// TODO: generalize for triangle and hex grids
 	if x < 0 || x >= g.nX || y < 0 || y >= g.nY {
 		return nil
 	}

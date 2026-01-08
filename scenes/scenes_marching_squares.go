@@ -141,7 +141,7 @@ func getPerlinMarchingSquares(b primitives.BBox) Document {
 		samplers.NewPerlinNoise(0.0001, offset),
 		samplers.NewPerlinNoise(0.0005, offset),
 	)
-	marchingResolution := 250
+	marchingResolution := 500
 	spacing := 0.02
 	baseThreshold := -.2
 	var curves = []lines.LineLike{}
