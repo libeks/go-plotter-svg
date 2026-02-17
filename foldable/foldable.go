@@ -1,6 +1,7 @@
 package foldable
 
 import (
+	"maps"
 	"math"
 
 	"github.com/libeks/go-plotter-svg/lines"
@@ -162,12 +163,8 @@ func (f Face) Render(start primitives.Point, angle float64) RenderBundle {
 				newStartpoint := start.Add(diff.RotateCCW(newAngle).Mult(-1))
 				// fmt.Printf("Attaching face at angle %f and at %v\n", newAngle, newStartpoint)
 				faceBundle := nextFace.Render(newStartpoint, newAngle)
-				for key, faceConfig := range faceBundle.FaceConfigs {
-					faceConfigs[key] = faceConfig
-				}
-				for key, facePolygon := range faceBundle.FacePolygons {
-					facePolygons[key] = facePolygon
-				}
+				maps.Copy(faceConfigs, faceBundle.FaceConfigs)
+				maps.Copy(facePolygons, faceBundle.FacePolygons)
 				flapPolygons = append(flapPolygons, faceBundle.FlapPolygons...)
 				lns = append(lns, faceBundle.Lines...)
 				drawEdge = false // don't draw this edge, the render of nextFace will draw it
