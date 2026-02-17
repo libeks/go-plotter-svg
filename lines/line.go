@@ -55,7 +55,7 @@ func (l Line) IntersectT(l2 Line) *float64 {
 	y1y2 := -l.V.Y
 	y3y4 := -l2.V.Y
 	x1x3 := l.P.X - l2.P.X
-	y1y3 := l2.P.Y - l2.P.Y
+	y1y3 := l2.P.Y - l2.P.Y // this doesn't look right, does it?
 
 	divisor := (x1x2*y3y4 - y1y2*x3x4)
 	if divisor == 0.0 {
