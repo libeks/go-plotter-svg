@@ -119,6 +119,34 @@ func optimizeContour(pts []truetype.Point) []truetype.Point {
 	return append(pts[idx:], pts[:idx]...)
 }
 
+type PointOnLine struct {
+	pt     primitives.Point
+	onLine bool
+}
+
+func (p *PointOnLine) Str() string {
+	return fmt.Sprintf("[%f, %f, %v]", p.pt.X, p.pt.Y, p.onLine)
+}
+
+func (g Glyph) GetPointRepr() [][]PointOnLine {
+	contours := [][]PointOnLine{}
+	for _, contour := range g.Contours() {
+		points := []PointOnLine{}
+		contour := optimizeContour(contour)
+		if len(contour) == 0 {
+			fmt.Printf("Encountered empty contour!")
+			continue
+		}
+		for _, pt := range contour {
+			nPt := convertStaticPoint(pt, 1.0)
+			pointOnLine := isPointOnLine(pt)
+			points = append(points, PointOnLine{nPt, pointOnLine})
+		}
+		contours = append(contours, points)
+	}
+	return contours
+}
+
 func (g Glyph) GetHeightCurves(h float64) Char {
 	r := h / fontHeight
 	lns := []lines.LineLike{}
